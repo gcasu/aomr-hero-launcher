@@ -1,0 +1,37 @@
+<app-page-container>
+  <app-page-header 
+    [title]="'BUILD_ORDERS.TITLE' | translate"
+    [description]="'BUILD_ORDERS.DESCRIPTION' | translate">
+  </app-page-header>
+
+  <app-loading-state *ngIf="isLoading"></app-loading-state>
+
+  <div *ngIf="!isLoading" class="build-orders-content">
+    <!-- Major God Selection -->
+    <div class="god-selection-section">
+      <h3 class="section-title">{{ 'BUILD_ORDERS.SELECT_MAJOR_GOD' | translate }}</h3>
+      <div class="gods-container">
+        <div class="god-item" 
+             *ngFor="let god of majorGods; trackBy: trackByGod"
+             [class.selected]="isGodSelected(god.id)"
+             (click)="onGodSelect(god)"
+             [attr.data-god-id]="god.id">
+          <img 
+            [src]="god.imagePath" 
+            [alt]="god.name"
+            [title]="god.name"
+            (error)="onImageError($event)"
+            loading="lazy">
+          <span class="god-name">{{ god.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state when no build orders are available -->
+    <app-empty-state 
+      [title]="'BUILD_ORDERS.EMPTY_STATE_TITLE' | translate"
+      [description]="'BUILD_ORDERS.EMPTY_STATE_DESCRIPTION' | translate"
+      icon="fas fa-scroll">
+    </app-empty-state>
+  </div>
+</app-page-container>

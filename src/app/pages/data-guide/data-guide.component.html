@@ -1,0 +1,288 @@
+<app-page-container containerClass="with-side-padding">
+  <app-page-header 
+    [title]="'DATA_GUIDE.TITLE' | translate"
+    [description]="'DATA_GUIDE.DESCRIPTION' | translate">
+  </app-page-header>
+
+  <!-- Info Section -->
+  <div class="info-section text-center mb-4">
+    <div class="info-card">
+      <i class="fas fa-info-circle text-info me-2"></i>
+      <span class="info-text text-light">
+        {{ 'DATA_GUIDE.DATA_SOURCE_INFO' | translate }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Search Filter -->
+  <app-search-filter
+    [(ngModel)]="filterText"
+    (filterChange)="onFilterChange()"
+    placeholder="DATA_GUIDE.SEARCH_PLACEHOLDER"
+    inputId="dataGuideSearchInput">
+  </app-search-filter>
+
+  <!-- Loading State -->
+  <app-loading-state *ngIf="isLoading"></app-loading-state>
+
+  <!-- Empty State -->
+  <app-empty-state 
+    *ngIf="!isLoading && (!coreData || sections.length === 0)"
+    [title]="'DATA_GUIDE.EMPTY.TITLE' | translate"
+    [description]="'DATA_GUIDE.EMPTY.DESCRIPTION' | translate"
+    icon="fas fa-database">
+  </app-empty-state>
+
+  <!-- No Search Results -->
+  <app-empty-state 
+    *ngIf="!isLoading && sections.length > 0 && filteredSections.length === 0"
+    [title]="'DATA_GUIDE.NO_RESULTS.TITLE' | translate"
+    [description]="'DATA_GUIDE.NO_RESULTS.DESCRIPTION' | translate"
+    icon="fas fa-search">
+  </app-empty-state>
+
+  <!-- Controls -->
+  <div *ngIf="!isLoading && filteredSections.length > 0" class="data-controls mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="data-stats">
+        <span class="badge bg-primary me-2">
+          {{ 'DATA_GUIDE.SECTIONS_COUNT' | translate: {count: filteredSections.length} }}
+        </span>
+        <span class="text-light small">
+          {{ 'DATA_GUIDE.TOTAL_ENTRIES' | translate: {count: getTotalEntriesCount()} }}
+        </span>
+      </div>
+      
+      <div class="expand-controls">
+        <!-- Deprecated Toggle -->
+        <div class="form-check form-switch me-3">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            role="switch" 
+            id="deprecatedToggle"
+            [(ngModel)]="showDeprecatedEntries"
+            (change)="onDeprecatedToggle()"
+            [attr.aria-label]="'DATA_GUIDE.SHOW_DEPRECATED_LABEL' | translate">
+          <label 
+            class="form-check-label text-light small" 
+            for="deprecatedToggle"
+            [attr.data-bs-toggle]="'tooltip'"
+            [attr.data-bs-placement]="'top'"
+            [attr.data-bs-title]="'DATA_GUIDE.SHOW_DEPRECATED_TOOLTIP' | translate"
+            [title]="'DATA_GUIDE.SHOW_DEPRECATED_TOOLTIP' | translate">
+            {{ 'DATA_GUIDE.SHOW_DEPRECATED_LABEL' | translate }}
+          </label>
+        </div>
+        
+        <button 
+          type="button" 
+          class="btn btn-outline-light btn-sm me-2" 
+          (click)="expandAll()">
+          <i class="fas fa-expand-arrows-alt me-1"></i>
+          {{ 'DATA_GUIDE.EXPAND_ALL' | translate }}
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-light btn-sm me-2" 
+          (click)="collapseAll()">
+          <i class="fas fa-compress-arrows-alt me-1"></i>
+          {{ 'DATA_GUIDE.COLLAPSE_ALL' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Content -->
+  <div *ngIf="!isLoading && filteredSections.length > 0" class="data-content">
+    <div *ngFor="let section of filteredSections; trackBy: trackBySection" class="data-section mb-4">
+      <!-- Section Header -->
+      <div class="section-header" (click)="toggleSection(getSectionKey(section))">
+        <div class="section-info">
+          <h3 class="section-title">
+            <i class="fas fa-chevron-right section-toggle" 
+               [class.expanded]="isSectionExpanded(getSectionKey(section))"></i>
+            {{ section.type }}
+          </h3>
+          <span class="section-type badge bg-secondary">{{ section.name }}</span>
+          <span class="section-count text-light ms-2">
+            ({{ section.entries.length }} {{ 'DATA_GUIDE.ENTRIES' | translate }})
+          </span>
+        </div>
+      </div>
+
+      <!-- Section Content -->
+      <div *ngIf="isSectionExpanded(getSectionKey(section))" class="section-content">
+        <div *ngFor="let entry of section.entries; let i = index; trackBy: trackByEntry" 
+             class="data-entry">
+          
+          <!-- Entry Header -->
+          <div class="entry-header" (click)="toggleEntry(getEntryKey(section, entry, i))">
+            <div class="entry-info">
+              <h4 class="entry-name">
+                <i class="fas fa-chevron-right entry-toggle" 
+                   [class.expanded]="isEntryExpanded(getEntryKey(section, entry, i))"></i>
+                <code class="entry-code">{{ entry.name }}</code>
+                <i *ngIf="isBookmarked(section.type, section.name, entry.name)" 
+                   class="fas fa-star bookmark-indicator ms-2"
+                   [attr.data-bs-toggle]="'tooltip'"
+                   [attr.data-bs-placement]="'top'"
+                   [attr.data-bs-title]="'DATA_GUIDE.BOOKMARKED_ENTRY' | translate"
+                   [title]="'DATA_GUIDE.BOOKMARKED_ENTRY' | translate"></i>
+                <i *ngIf="hasEntryNote(section.type, section.name, entry.name)" 
+                   class="fas fa-sticky-note notes-indicator ms-2"
+                   [attr.data-bs-toggle]="'tooltip'"
+                   [attr.data-bs-placement]="'top'"
+                   [attr.data-bs-title]="'DATA_GUIDE.HAS_NOTES' | translate"
+                   [title]="'DATA_GUIDE.HAS_NOTES' | translate"></i>
+                <span *ngIf="entry.deprecated" 
+                      class="badge bg-warning text-dark ms-2"
+                      [attr.data-bs-toggle]="'tooltip'"
+                      [attr.data-bs-placement]="'top'"
+                      [attr.data-bs-title]="'DATA_GUIDE.DEPRECATED_TOOLTIP' | translate"
+                      [title]="'DATA_GUIDE.DEPRECATED_TOOLTIP' | translate">
+                  <i class="fas fa-exclamation-triangle me-1"></i>
+                  {{ 'DATA_GUIDE.DEPRECATED' | translate }}
+                </span>
+              </h4>
+              <span *ngIf="entry.parameters && entry.parameters.length > 0" class="parameter-count badge bg-info ms-2">
+                {{ entry.parameters.length }} {{ 'DATA_GUIDE.PARAMETERS' | translate }}
+              </span>
+            </div>
+            <div class="entry-actions">
+              <button type="button" 
+                      class="btn btn-outline-light btn-sm bookmark-entry-btn me-2"
+                      [class.bookmarked]="isBookmarked(section.type, section.name, entry.name)"
+                      (click)="$event.stopPropagation(); toggleBookmark(section.type, section.name, entry.name)"
+                      [attr.data-bs-toggle]="'tooltip'"
+                      [attr.data-bs-placement]="'top'"
+                      [attr.data-bs-title]="isBookmarked(section.type, section.name, entry.name) ? ('DATA_GUIDE.REMOVE_BOOKMARK' | translate) : ('DATA_GUIDE.ADD_BOOKMARK' | translate)"
+                      [title]="isBookmarked(section.type, section.name, entry.name) ? ('DATA_GUIDE.REMOVE_BOOKMARK' | translate) : ('DATA_GUIDE.ADD_BOOKMARK' | translate)">
+                <i [class]="isBookmarked(section.type, section.name, entry.name) ? 'fas fa-star' : 'far fa-star'"></i>
+              </button>
+              <button type="button" 
+                      class="btn btn-outline-light btn-sm copy-entry-btn"
+                      (click)="$event.stopPropagation(); copyEntryToClipboard(entry)"
+                      [attr.data-bs-toggle]="'tooltip'"
+                      [attr.data-bs-placement]="'top'"
+                      [attr.data-bs-title]="'DATA_GUIDE.COPY_ENTRY' | translate"
+                      [title]="'DATA_GUIDE.COPY_ENTRY' | translate">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Entry Content -->
+          <div *ngIf="isEntryExpanded(getEntryKey(section, entry, i))" class="entry-content">
+            <!-- Description -->
+            <div *ngIf="entry.description" class="entry-description">
+              <h5 class="content-label">{{ 'DATA_GUIDE.ENTRY_DESCRIPTION' | translate }}</h5>
+              <p class="description-text" [innerHTML]="highlightSearchTerm(entry.description)"></p>
+            </div>
+
+            <!-- Syntax -->
+            <div *ngIf="entry.syntax" class="entry-syntax">
+              <h5 class="content-label">{{ 'DATA_GUIDE.SYNTAX' | translate }}</h5>
+              <div class="syntax-container">
+                <pre class="syntax-code"><code [innerHTML]="formatXmlSyntax(entry.syntax)"></code></pre>
+                <button type="button" 
+                        class="btn btn-outline-light btn-sm copy-syntax-btn"
+                        (click)="copySyntaxToClipboard(entry.syntax)"
+                        [attr.data-bs-toggle]="'tooltip'"
+                        [attr.data-bs-placement]="'top'"
+                        [attr.data-bs-title]="'DATA_GUIDE.COPY_SYNTAX' | translate"
+                        [title]="'DATA_GUIDE.COPY_SYNTAX' | translate">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Parameters -->
+            <div *ngIf="entry.parameters && entry.parameters.length > 0" class="entry-parameters">
+              <h5 class="content-label">{{ 'DATA_GUIDE.PARAMETERS' | translate }}</h5>
+              <div class="parameters-list">
+                <ng-container 
+                  *ngTemplateOutlet="parameterTemplate; context: {
+                    parameters: entry.parameters,
+                    parentKey: getEntryKey(section, entry, i),
+                    level: 0
+                  }">
+                </ng-container>
+              </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="entry-notes">
+              <h5 class="content-label">{{ 'DATA_GUIDE.NOTES' | translate }}</h5>
+              <div class="notes-container">
+                <textarea 
+                  class="form-control notes-textarea"
+                  [placeholder]="'DATA_GUIDE.NOTES_PLACEHOLDER' | translate"
+                  [value]="getEntryNote(section.type, section.name, entry.name)"
+                  (input)="onNoteChange(section.type, section.name, entry.name, $any($event.target).value)"
+                  rows="4">
+                </textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-page-container>
+
+<!-- Recursive Parameter Template -->
+<ng-template #parameterTemplate let-parameters="parameters" let-parentKey="parentKey" let-level="level">
+  <div *ngFor="let param of parameters; let i = index" 
+       class="parameter-item" 
+       [class]="'parameter-level-' + level">
+    
+    <div class="parameter-header">
+      <span class="parameter-name">
+        <code>{{ param.name }}</code>
+        <span *ngIf="param.deprecated" 
+              class="badge bg-warning text-dark ms-2"
+              [attr.data-bs-toggle]="'tooltip'"
+              [attr.data-bs-placement]="'top'"
+              [attr.data-bs-title]="'DATA_GUIDE.DEPRECATED_TOOLTIP' | translate"
+              [title]="'DATA_GUIDE.DEPRECATED_TOOLTIP' | translate">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          {{ 'DATA_GUIDE.DEPRECATED' | translate }}
+        </span>
+      </span>
+      <span *ngIf="param.parameters && param.parameters.length > 0" class="nested-count text-light ms-2">
+        ({{ param.parameters.length }} {{ 'DATA_GUIDE.NESTED' | translate }})
+      </span>
+    </div>
+
+    <div *ngIf="param.description" class="parameter-description" [innerHTML]="highlightSearchTerm(param.description)">
+    </div>
+
+    <div *ngIf="param.syntax" class="parameter-syntax">
+      <h5 class="content-label">{{ 'DATA_GUIDE.SYNTAX' | translate }}</h5>
+      <div class="syntax-container">
+        <pre class="syntax-code"><code [innerHTML]="formatXmlSyntax(param.syntax)"></code></pre>
+        <button type="button" 
+                class="btn btn-outline-light btn-sm copy-syntax-btn"
+                (click)="copySyntaxToClipboard(param.syntax)"
+                [attr.data-bs-toggle]="'tooltip'"
+                [attr.data-bs-placement]="'top'"
+                [attr.data-bs-title]="'DATA_GUIDE.COPY_SYNTAX' | translate"
+                [title]="'DATA_GUIDE.COPY_SYNTAX' | translate">
+          <i class="fas fa-copy"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Nested Parameters -->
+    <div *ngIf="param.parameters && param.parameters.length > 0 && level < 2" class="nested-parameters mt-2">
+      <ng-container 
+        *ngTemplateOutlet="parameterTemplate; context: {
+          parameters: param.parameters,
+          parentKey: getParameterKey(parentKey, param, i),
+          level: level + 1
+        }">
+      </ng-container>
+    </div>
+  </div>
+</ng-template>

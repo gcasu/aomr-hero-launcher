@@ -1,0 +1,98 @@
+<app-page-container>
+  <!-- Page Header -->
+  <app-page-header 
+    title="RESOURCES.TITLE" 
+    description="RESOURCES.DESCRIPTION">
+  </app-page-header>
+
+  <!-- Search Filter -->
+  <app-search-filter
+    [(ngModel)]="filterText"
+    (filterChange)="onFilterChange()"
+    placeholder="RESOURCES.FILTER_PLACEHOLDER"
+    inputId="filterInput">
+  </app-search-filter>
+
+  <!-- Loading State -->
+  <app-loading-state 
+    *ngIf="isLoading"
+    message="RESOURCES.LOADING">
+  </app-loading-state>
+
+    <!-- Resources grid -->
+    <div *ngIf="!isLoading && resourcesConfig" class="resources-grid">
+      <div class="row g-4" *ngFor="let row of getResourceRows()">
+        <div 
+          class="col-lg-4 col-md-6" 
+          *ngFor="let resource of row">
+          <div 
+            class="resource-card h-100"
+            [class.has-image]="resource.bgImage"
+            [ngStyle]="getCardBackgroundStyle(resource.bgImage)"
+            (click)="onCardClick(resource)"
+            [attr.data-type]="resource.type"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="resource.title + ' - ' + resource.description">
+            
+            <div class="card-overlay" *ngIf="resource.bgImage"></div>
+            
+            <div class="card-content">
+              <div class="card-header">
+                <h3 class="card-title">{{ resource.title }}</h3>
+                <div class="resource-type-badge">
+                  <app-badge
+                    *ngIf="resource.badge"
+                    [iconClass]="getBadgeIcon(resource.badge)"
+                    [variant]="getBadgeVariant(resource.badge)"
+                    [text]="getBadgeText(resource.badge)">
+                  </app-badge>
+                </div>
+              </div>
+              
+              <div class="card-body">
+                <p class="card-description">{{ resource.description }}</p>
+              </div>
+              
+              <div class="card-footer">
+                <div class="action-button">
+                  <i class="fas" [ngClass]="getActionIcon(resource.type)"></i>
+                  <span>{{ getActionText(resource.type) | translate }}</span>
+                </div>
+                <div class="author-info" *ngIf="resource.author">
+                  <i class="fas fa-user"></i>
+                  <span>{{ resource.author }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- No filtered results state -->
+  <app-empty-state 
+    *ngIf="!isLoading && resourcesConfig && resourcesConfig.resources.length > 0 && filteredResources.length === 0"
+    title="RESOURCES.NO_RESULTS.TITLE" 
+    description="RESOURCES.NO_RESULTS.DESCRIPTION"
+    iconClass="fas fa-search">
+  </app-empty-state>
+
+  <!-- Empty state -->
+  <app-empty-state 
+    *ngIf="!isLoading && resourcesConfig && resourcesConfig.resources.length === 0"
+    title="RESOURCES.EMPTY.TITLE" 
+    description="RESOURCES.EMPTY.DESCRIPTION"
+    iconClass="fas fa-folder-open">
+  </app-empty-state>
+
+  <!-- Error state -->
+  <app-empty-state 
+    *ngIf="!isLoading && !resourcesConfig"
+    title="RESOURCES.ERROR.TITLE" 
+    description="RESOURCES.ERROR.DESCRIPTION"
+    iconClass="fas fa-exclamation-triangle"
+    actionText="RESOURCES.ERROR.RETRY"
+    (actionClick)="loadResourcesConfig()">
+  </app-empty-state>
+</app-page-container>

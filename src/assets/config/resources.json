@@ -1,0 +1,134 @@
+{
+  "resources": [    
+    {
+      "id": "crybar-editor",
+      "title": "CryBarEditor",
+      "description": "AoM Retold resource manager, BAR editor, modding tool.",
+      "source": "https://github.com/CryShana/CryBarEditor",
+      "type": "web",
+      "badge": "github",
+      "bgImage": "assets/images/resources/eg_1.jpg",
+      "author": "CryShana"
+    },
+    {
+      "id": "retold-functions",
+      "title": "Retold Functions",
+      "description": "AoM Retold Functions Code Reference.",
+      "source": "https://jehathor.github.io/AoM-Retold/RetoldFunctions.html",
+      "type": "web",
+      "badge": "github",
+      "bgImage": "assets/images/resources/no_1.jpg",
+      "author": "JeHathor"
+    },
+    {
+      "id": "scripting-server-discord",
+      "title": "AoM:R Scripting Server",
+      "description": "AoM Retold Scripting Server.",
+      "source": "https://discord.gg/th6UB4ZRhs",
+      "type": "web",
+      "badge": "discord",
+      "bgImage": "assets/images/resources/gr_1.jpg",
+      "author": "Forgotten Empires"
+    },
+    {
+      "id": "beginners-guide-steam",
+      "title": "Modding AoMR for beginners",
+      "description": "This is a beginners guide for modding AoM Retold. This only includes the bare basics to start modding AoMR, so it is not a detailed guide for more advanced modding.",
+      "source": "https://steamcommunity.com/sharedfiles/filedetails/?id=3332716391",
+      "type": "web",
+      "badge": "web",
+      "bgImage": "assets/images/resources/at_1.jpg",
+      "author": "Stavrozium"
+    },
+    {
+      "id": "AoMR-TutorialCampaign",
+      "title": "AoMR-TutorialCampaign",
+      "description": "Recreation of the original AoM Tutorial for AoM Retold. While also being a Tutorial on creating a campaign and including templates and instructions for creating your own campaign.",
+      "source": "https://github.com/Skrylas/AoMR-TutorialCampaign",
+      "type": "web",
+      "badge": "github",
+      "bgImage": "assets/images/resources/ch_1.jpg",
+      "author": "Skrylas"
+    },
+    {
+      "id": "Yeebaagooon",
+      "title": "AOM Retold Triggers",
+      "description": "A collection of AoM Retold video tutorials on triggers creation.",
+      "source": "https://www.youtube.com/@Yeebaagooon",
+      "type": "web",
+      "badge": "youtube",
+      "bgImage": "assets/images/resources/ja_1.jpg",
+      "author": "Yeebaagooon"
+    },
+    {
+      "id": "nottud",
+      "title": "Advanced Trigger Tutorials",
+      "description": "A collection of AoM Retold video tutorials on advanced triggers creation.",
+      "source": "https://www.youtube.com/@nottud",
+      "type": "web",
+      "badge": "youtube",
+      "bgImage": "assets/images/resources/ja_2.jpg",
+      "author": "nottud"
+    },
+    {
+      "id": "modding-aom",
+      "title": "Modding AOM",
+      "description": "A collection of AoM Retold video tutorials by the author of the Aztecs mod for Age of Mythology EE.",
+      "source": "https://www.youtube.com/@moddingaom5622",
+      "type": "web",
+      "badge": "youtube",
+      "bgImage": "assets/images/resources/eg_2.jpg",
+      "author": "ModdingAOM"
+    },
+    {
+      "id": "aom-replay-tool",
+      "title": "AoM:R Replay Tool",
+      "description": "Age of Mythology: Retold replay tool for analyzing and editing replays.",
+      "source": "https://github.com/ViRb3/aom-replay-tool",
+      "type": "web",
+      "badge": "github",
+      "bgImage": "assets/images/resources/no_2.jpg",
+      "author": "ViRb3"
+    },
+    {
+      "id": "replay-parser",
+      "title": "AoM:R Replay Parser",
+      "description": "Age of Mythology: Retold replay parser, restoring inscrutiable binary to human readable formats.",
+      "source": "https://github.com/jerkeeler/restoration",
+      "type": "web",
+      "badge": "github",
+      "bgImage": "assets/images/resources/gr_2.jpg",
+      "author": "jerkeeler"
+    },
+    {
+      "id": "TMMViewer",
+      "title": "TMMViewer",
+      "description": "Viewer and Converter for Age of Mythology Retold TMM format.",
+      "source": "https://github.com/MissionLemur128/TMMViewer",
+      "type": "web",
+      "badge": "github",
+      "bgImage": "assets/images/resources/at_2.jpg",
+      "author": "MissionLemur128"
+    },
+    {
+      "id": "Modding-Scripts",
+      "title": "Modding Scripts",
+      "description": "A collection of files used for importing/exporting Age of Mythology Retold models and animations.",
+      "source": "https://github.com/robert-d-schultz/Age-Of-Mythology-Retold-Modding-Scripts",
+      "type": "web",
+      "badge": "github",
+      "bgImage": "assets/images/resources/ch_2.jpg",
+      "author": "robert-d-schultz"
+    },
+    {
+      "id": "AoMR-ModManager",
+      "title": "AoMR-ModManager",
+      "description": "A Tool to manage Mods for Age of Mythology Retold.",
+      "source": "https://github.com/andr9528/AoMR-ModManager",
+      "type": "web",
+      "badge": "github",
+      "bgImage": "assets/images/resources/ja_2.jpg",
+      "author": "andr9528"
+    }
+  ]
+}

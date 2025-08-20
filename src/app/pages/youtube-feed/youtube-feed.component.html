@@ -1,0 +1,143 @@
+<app-page-container containerClass="with-side-padding">
+  <app-page-header 
+    [title]="'YOUTUBE_FEED.TITLE' | translate"
+    [description]="'YOUTUBE_FEED.DESCRIPTION' | translate">
+  </app-page-header>
+
+  <!-- Search Filter -->
+  <app-search-filter
+    [(ngModel)]="filterText"
+    (filterChange)="onFilterChange()"
+    placeholder="YOUTUBE_FEED.SEARCH_PLACEHOLDER"
+    inputId="channelSearchInput">
+  </app-search-filter>
+
+  <!-- Loading State -->
+  <app-loading-state *ngIf="isLoading"></app-loading-state>
+
+  <!-- Empty State -->
+  <app-empty-state 
+    *ngIf="!isLoading && filteredChannels.length === 0 && channels.length === 0 && !hasError"
+    [title]="'YOUTUBE_FEED.EMPTY.TITLE' | translate"
+    [description]="'YOUTUBE_FEED.EMPTY.DESCRIPTION' | translate"
+    icon="fab fa-youtube">
+  </app-empty-state>
+
+  <!-- Error State with Retry -->
+  <app-empty-state 
+    *ngIf="!isLoading && hasError"
+    [title]="'YOUTUBE_FEED.ERROR.TITLE' | translate"
+    [description]="'YOUTUBE_FEED.ERROR.DESCRIPTION' | translate"
+    icon="fas fa-exclamation-triangle">
+    <button 
+      type="button" 
+      class="btn btn-primary mt-3" 
+      (click)="retryLoading()">
+      <i class="fas fa-redo me-2"></i>
+      {{ 'YOUTUBE_FEED.RETRY' | translate }}
+    </button>
+  </app-empty-state>
+
+  <!-- No Search Results -->
+  <app-empty-state 
+    *ngIf="!isLoading && filteredChannels.length === 0 && channels.length > 0"
+    [title]="'YOUTUBE_FEED.NO_RESULTS.TITLE' | translate"
+    [description]="'YOUTUBE_FEED.NO_RESULTS.DESCRIPTION' | translate"
+    icon="fas fa-search">
+  </app-empty-state>
+
+  <!-- YouTube Feed Content -->
+  <div *ngIf="!isLoading && filteredChannels.length > 0" class="youtube-feed-content">
+    <!-- Channel Feed Rows -->
+    <div *ngFor="let channel of filteredChannels; trackBy: trackByChannel" class="channel-section mb-5">
+      <!-- Channel Header -->
+      <div class="channel-header d-flex align-items-center mb-3">
+        <div class="channel-info">
+          <h3 class="channel-title">
+            <i class="fab fa-youtube me-2 text-danger"></i>
+            <a [href]="channel.channelUrl" target="_blank" class="text-decoration-none">
+              {{ channel.channelTitle }}
+            </a>
+          </h3>
+        </div>
+      </div>
+
+      <!-- Videos Carousel -->
+      <div *ngIf="channel.videos.length > 0" class="videos-carousel">
+        <div class="carousel-container">
+          <div class="videos-row d-flex gap-3 overflow-auto pb-3">
+            <div 
+              *ngFor="let video of channel.videos; trackBy: trackByVideo" 
+              class="video-card flex-shrink-0"
+              (click)="onVideoClick(video)">
+              
+              <!-- Video Thumbnail -->
+              <div class="video-thumbnail-container">
+                <img 
+                  [src]="video.thumbnailUrl" 
+                  [alt]="video.title"
+                  class="video-thumbnail"
+                  loading="lazy">
+                <div class="play-overlay">
+                  <i class="fas fa-play"></i>
+                </div>
+              </div>
+
+              <!-- Video Info -->
+              <div class="video-info">
+                <h5 class="video-title" [title]="video.title">{{ video.title }}</h5>
+                <p class="video-date text-light">{{ formatDate(video.publishedAt) }}</p>
+                <p class="video-description" [title]="video.description">
+                  {{ video.description | slice:0:100 }}{{ video.description.length > 100 ? '...' : '' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Videos Message -->
+      <div *ngIf="channel.videos.length === 0" class="no-videos-message text-center py-4">
+        <i class="fas fa-video-slash text-light mb-2" style="font-size: 2rem;"></i>
+        <p class="text-light">{{ 'YOUTUBE_FEED.NO_VIDEOS' | translate }}</p>
+      </div>
+    </div>
+  </div>
+</app-page-container>
+
+<!-- Video Modal -->
+<div 
+  *ngIf="showVideoModal && selectedVideo" 
+  class="video-modal-backdrop" 
+  (click)="closeVideoModal()">
+  <div class="video-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header d-flex justify-content-between align-items-center">
+      <h4 class="modal-title">{{ selectedVideo.title }}</h4>
+      <button type="button" class="btn-close" (click)="closeVideoModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="video-container">
+        <iframe 
+          [src]="selectedVideoEmbedUrl" 
+          frameborder="0" 
+          allowfullscreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          title="YouTube video player">
+        </iframe>
+      </div>
+      <div class="video-details mt-3">
+        <p class="video-channel">
+          <i class="fab fa-youtube me-2 text-danger"></i>
+          {{ selectedVideo.channelTitle }}
+        </p>
+        <p class="video-published text-light">
+          {{ 'YOUTUBE_FEED.PUBLISHED' | translate }}: {{ selectedVideo.publishedAt | date:'medium' }}
+        </p>
+        <p class="video-description">{{ selectedVideo.description }}</p>
+      </div>
+    </div>
+  </div>
+</div>

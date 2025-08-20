@@ -1,0 +1,101 @@
+/* Shared Form Styles */
+@use 'typography' as *;
+
+/* Form Labels */
+.form-label-glass {
+  color: #ffffff;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  @include maiola-font;
+  
+  i {
+    color: #CDA351;
+  }
+}
+
+/* Form Controls */
+.form-control-glass {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  
+  &:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #CDA351;
+    box-shadow: 0 0 0 0.2rem rgba(205, 163, 81, 0.25);
+    color: #ffffff;
+  }
+  
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Button Styles */
+.btn-glass-outline {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #ffffff;
+    color: #ffffff;
+  }
+}
+
+// Shared Gold Gradient Button - Used across multiple components
+.btn-gold-gradient {
+  background: linear-gradient(135deg, #E6B969 0%, #A67C3A 100%);
+  border: none;
+  color: #263144;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  @include maiola-font;
+  font-weight: normal;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #F2C876 0%, #CDA351 100%);
+    color: #1e2938;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(205, 163, 81, 0.4);
+  }
+  
+  &:disabled {
+    background: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Form Text */
+.form-text-glass {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  @include noto-font;
+}
+
+/* Alert Styles */
+.alert-glass {
+  border: none;
+  border-radius: 8px;
+  @include noto-font;
+  
+  &.alert-danger {
+    background: rgba(220, 53, 69, 0.2);
+    color: #f8d7da;
+  }
+  
+  &.alert-success {
+    background: rgba(25, 135, 84, 0.2);
+    color: #d1e7dd;
+  }
+  
+  &.alert-warning {
+    background: rgba(255, 193, 7, 0.2);
+    color: #fff3cd;
+  }
+}

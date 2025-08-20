@@ -1,0 +1,114 @@
+{
+  "mods": [
+    {
+      "Title": "Enhanced Graphics Pack",
+      "Description": "High-resolution textures and improved visual effects for a stunning gaming experience",
+      "Author": "VisualMaster",
+      "Priority": 1,
+      "Enabled": true,
+      "Path": "local\\enhanced-graphics-pack",
+      "WorkshopID": 0,
+      "LastUpdate": "1734567890",
+      "InstallTime": "1734567800"
+    },
+    {
+      "Title": "Balance Overhaul 2.0",
+      "Description": "Complete rebalancing of all civilizations and units for competitive gameplay",
+      "Author": "BalanceGuru",
+      "Priority": 2,
+      "Enabled": true,
+      "Path": "workshop\\balance-overhaul-20",
+      "WorkshopID": 123456789,
+      "LastUpdate": "1734500000",
+      "InstallTime": "1734400000"
+    },
+    {
+      "Title": "Mythical Creatures Extended",
+      "Description": "Adds 15 new mythical units with unique abilities and animations",
+      "Author": "MythCreator",
+      "Priority": 3,
+      "Enabled": false,
+      "Path": "local\\mythical-creatures-extended",
+      "WorkshopID": 0,
+      "LastUpdate": "1734450000",
+      "InstallTime": "1734350000"
+    },
+    {
+      "Title": "Classic Campaign Redux",
+      "Description": "Remastered single-player campaigns with new dialogue and cinematics",
+      "Author": "CampaignMaster",
+      "Priority": 4,
+      "Enabled": true,
+      "Path": "workshop\\classic-campaign-redux",
+      "WorkshopID": 987654321,
+      "LastUpdate": "1734300000",
+      "InstallTime": "1734200000"
+    },
+    {
+      "Title": "AI Improvement Pack",
+      "Description": "Smarter AI opponents with advanced strategies and better resource management",
+      "Author": "AIExpert",
+      "Priority": 5,
+      "Enabled": true,
+      "Path": "local\\ai-improvement-pack",
+      "WorkshopID": 0,
+      "LastUpdate": "1734100000",
+      "InstallTime": "1734000000"
+    },
+    {
+      "Title": "Extended Tech Trees",
+      "Description": "New technologies and upgrade paths for deeper strategic gameplay",
+      "Author": "TechTreePro",
+      "Priority": 6,
+      "Enabled": false,
+      "Path": "workshop\\extended-tech-trees",
+      "WorkshopID": 555444333,
+      "LastUpdate": "1733900000",
+      "InstallTime": "1733800000"
+    },
+    {
+      "Title": "Sound Enhancement Suite",
+      "Description": "Immersive audio overhaul with 3D positional sounds and new music tracks",
+      "Author": "AudioWizard",
+      "Priority": 7,
+      "Enabled": true,
+      "Path": "local\\sound-enhancement-suite",
+      "WorkshopID": 0,
+      "LastUpdate": "1733700000",
+      "InstallTime": "1733600000"
+    },
+    {
+      "Title": "Multiplayer Map Pack",
+      "Description": "Collection of 20 new competitive maps designed for ranked play",
+      "Author": "MapDesigner",
+      "Priority": 8,
+      "Enabled": true,
+      "Path": "workshop\\multiplayer-map-pack",
+      "WorkshopID": 777888999,
+      "LastUpdate": "1733500000",
+      "InstallTime": "1733400000"
+    },
+    {
+      "Title": "Quality of Life Improvements",
+      "Description": "UI enhancements, hotkey customization, and convenience features",
+      "Author": "UIExpert",
+      "Priority": 9,
+      "Enabled": false,
+      "Path": "local\\quality-of-life-improvements",
+      "WorkshopID": 0,
+      "LastUpdate": "1733300000",
+      "InstallTime": "1733200000"
+    },
+    {
+      "Title": "Historical Accuracy Mod",
+      "Description": "Authentic historical units, buildings, and civilizations based on real mythology",
+      "Author": "HistorianGamer",
+      "Priority": 10,
+      "Enabled": true,
+      "Path": "workshop\\historical-accuracy-mod",
+      "WorkshopID": 111222333,
+      "LastUpdate": "1733100000",
+      "InstallTime": "1733000000"
+    }
+  ]
+}

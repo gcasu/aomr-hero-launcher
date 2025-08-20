@@ -1,0 +1,224 @@
+<app-page-container containerClass="with-side-padding">
+  <app-page-header 
+    [title]="'LEADERBOARD.TITLE' | translate"
+    [description]="'LEADERBOARD.DESCRIPTION' | translate">
+  </app-page-header>
+
+  <div class="leaderboard-content">
+    <!-- Search Filter -->
+    <app-search-filter
+      [(ngModel)]="filterText"
+      (filterChange)="onFilterChange()"
+      placeholder="LEADERBOARD.SEARCH_PLACEHOLDER"
+      inputId="playerSearchInput">
+    </app-search-filter>
+
+    <!-- Loading State -->
+    <app-loading-state *ngIf="isLoading"></app-loading-state>
+
+    <!-- Leaderboard Table -->
+    <div *ngIf="!isLoading" class="leaderboard-table-container">
+      <!-- Last Updated Info -->
+      <div *ngIf="lastUpdated" class="last-updated mb-3">
+        <small class="text-light">
+          {{ 'LEADERBOARD.LAST_UPDATED' | translate }}: {{ lastUpdated | date:'medium' }}
+        </small>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="players.length === 0">
+        <app-empty-state 
+          [title]="'LEADERBOARD.EMPTY_STATE_TITLE' | translate"
+          [description]="'LEADERBOARD.EMPTY_STATE_DESCRIPTION' | translate"
+          icon="fas fa-trophy">
+        </app-empty-state>
+      </div>
+
+      <!-- Players Table -->
+      <div *ngIf="players.length > 0" class="table-responsive">
+        <table class="table table-dark table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th scope="col" class="text-center sortable-header" 
+                  (click)="onSort('rank')"
+                  [class.sorted]="isSortedBy('rank')">
+                {{ 'LEADERBOARD.TABLE.RANK' | translate }}
+                <i [class]="getSortIcon('rank')" class="ms-1"></i>
+              </th>
+              <th scope="col" class="text-center sortable-header" 
+                  (click)="onSort('eloHighest')"
+                  [class.sorted]="isSortedBy('eloHighest')">
+                {{ 'LEADERBOARD.TABLE.HIGHEST_ELO' | translate }}
+                <i [class]="getSortIcon('eloHighest')" class="ms-1"></i>
+              </th>
+              <th scope="col" class="text-center sortable-header" 
+                  (click)="onSort('elo')"
+                  [class.sorted]="isSortedBy('elo')">
+                {{ 'LEADERBOARD.TABLE.ELO' | translate }}
+                <i [class]="getSortIcon('elo')" class="ms-1"></i>
+              </th>
+              <th scope="col" class="sortable-header" 
+                  (click)="onSort('leader')"
+                  [class.sorted]="isSortedBy('leader')">
+                {{ 'LEADERBOARD.TABLE.LEADER' | translate }}
+                <i [class]="getSortIcon('leader')" class="ms-1"></i>
+              </th>
+              <th scope="col" class="text-center sortable-header" 
+                  (click)="onSort('winRate')"
+                  [class.sorted]="isSortedBy('winRate')">
+                {{ 'LEADERBOARD.TABLE.WIN_RATE' | translate }}
+                <i [class]="getSortIcon('winRate')" class="ms-1"></i>
+              </th>
+              <th scope="col" class="text-center sortable-header" 
+                  (click)="onSort('wins')"
+                  [class.sorted]="isSortedBy('wins')">
+                {{ 'LEADERBOARD.TABLE.WINS' | translate }}
+                <i [class]="getSortIcon('wins')" class="ms-1"></i>
+              </th>
+              <th scope="col" class="text-center sortable-header" 
+                  (click)="onSort('losses')"
+                  [class.sorted]="isSortedBy('losses')">
+                {{ 'LEADERBOARD.TABLE.LOSSES' | translate }}
+                <i [class]="getSortIcon('losses')" class="ms-1"></i>
+              </th>
+              <th scope="col" class="text-center sortable-header" 
+                  (click)="onSort('totalGames')"
+                  [class.sorted]="isSortedBy('totalGames')">
+                {{ 'LEADERBOARD.TABLE.TOTAL_GAMES' | translate }}
+                <i [class]="getSortIcon('totalGames')" class="ms-1"></i>
+              </th>
+              <th scope="col" class="text-center sortable-header" 
+                  (click)="onSort('streak')"
+                  [class.sorted]="isSortedBy('streak')">
+                {{ 'LEADERBOARD.TABLE.STREAK' | translate }}
+                <i [class]="getSortIcon('streak')" class="ms-1"></i>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let player of players; trackBy: trackByPlayer" class="player-row">
+              <!-- Rank -->
+              <td class="text-center rank-cell">
+                <span class="rank-number" [ngClass]="getRankClass(player.rank)">{{ player.rank }}</span>
+              </td>
+              
+              <!-- Highest ELO -->
+              <td class="text-center elo-cell">
+                <span class="elo-highest">{{ player.eloHighest }}</span>
+              </td>
+              
+              <!-- Current ELO -->
+              <td class="text-center elo-cell">
+                <span class="elo-current">{{ player.elo }}</span>
+              </td>
+              
+              <!-- Leader (Avatar + Name) -->
+              <td class="leader-cell">
+                <div class="leader-info">
+                  <img 
+                    [src]="player.avatarUrl" 
+                    [alt]="player.userName"
+                    class="player-avatar"
+                    (error)="onImageError($event)"
+                    loading="lazy">
+                  <span class="player-name">{{ player.userName }}</span>
+                </div>
+              </td>
+              
+              <!-- Win Rate -->
+              <td class="text-center win-rate-cell">
+                <span class="win-rate">{{ player.winPercent | number:'1.1-1' }}%</span>
+              </td>
+              
+              <!-- Wins -->
+              <td class="text-center wins-cell">
+                <span class="wins">{{ player.wins }}</span>
+              </td>
+              
+              <!-- Losses -->
+              <td class="text-center losses-cell">
+                <span class="losses">{{ player.losses }}</span>
+              </td>
+              
+              <!-- Total Games -->
+              <td class="text-center total-games-cell">
+                <span class="total-games">{{ player.totalGames }}</span>
+              </td>
+              
+              <!-- Streak -->
+              <td class="text-center streak-cell">
+                <span class="streak" [class.positive-streak]="player.winStreak > 0" [class.negative-streak]="player.winStreak < 0">
+                  <i *ngIf="player.winStreak > 0" class="fas fa-arrow-up me-1"></i>
+                  <i *ngIf="player.winStreak < 0" class="fas fa-arrow-down me-1"></i>
+                  {{ player.winStreak < 0 ? Math.abs(player.winStreak) : player.winStreak }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</app-page-container>
+
+<!-- Dedicated Fixed Pagination Footer -->
+<div *ngIf="totalPlayers > playersPerPage" class="pagination-footer">
+  <div class="pagination-wrapper d-flex justify-content-center align-items-center">
+    <!-- First/Previous Buttons -->
+    <button 
+      class="btn btn-outline-light btn-sm"
+      (click)="goToFirstPage()"
+      [disabled]="!canGoPrevious"
+      title="First Page">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
+    
+    <button 
+      class="btn btn-outline-light btn-sm me-3"
+      (click)="goToPreviousPage()"
+      [disabled]="!canGoPrevious"
+      title="Previous Page">
+      <i class="fas fa-angle-left"></i>
+    </button>
+
+    <!-- Page Jump Input -->
+    <div class="page-jump-input d-flex align-items-center">
+      <span class="text-light me-2">{{ 'COMMON.PAGE' | translate }}:</span>
+      <input 
+        type="text" 
+        class="form-control page-input"
+        [value]="currentPage"
+        (keyup.enter)="onPageInputChange($any($event.target).value)"
+        (blur)="onPageInputChange($any($event.target).value)"
+        [placeholder]="currentPage.toString()">
+      <span class="text-light ms-2 me-3">{{ 'LEADERBOARD.OF' | translate }} {{ totalPages }}</span>
+    </div>
+
+    <!-- Next/Last Buttons -->
+    <button 
+      class="btn btn-outline-light btn-sm"
+      (click)="goToNextPage()"
+      [disabled]="!canGoNext"
+      title="Next Page">
+      <i class="fas fa-angle-right"></i>
+    </button>
+    
+    <button 
+      class="btn btn-outline-light btn-sm"
+      (click)="goToLastPage()"
+      [disabled]="!canGoNext"
+      title="Last Page">
+      <i class="fas fa-angle-double-right"></i>
+    </button>
+  </div>
+  
+  <!-- Clean Pagination Info -->
+  <div class="pagination-info text-center mt-2">
+    <span class="text-light">
+      {{ 'LEADERBOARD.SHOWING' | translate }} 
+      {{ startItemNumber }} - {{ endItemNumber }} 
+      {{ 'LEADERBOARD.OF' | translate }} {{ totalPlayers }} 
+      {{ 'LEADERBOARD.PLAYERS' | translate }}
+    </span>
+  </div>
+</div>

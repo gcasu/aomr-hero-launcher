@@ -1,0 +1,45 @@
+/* Typography Mixins and Utilities */
+
+// Font Family Mixins
+@mixin maiola-font {
+  font-family: 'Maiola', sans-serif;
+}
+
+@mixin noto-font {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+// Typography Utility Classes
+.text-maiola {
+  @include maiola-font;
+}
+
+.text-noto {
+  @include noto-font;
+}
+
+// Common Typography Patterns
+.page-title {
+  @include maiola-font;
+  font-weight: normal;
+  color: #ffffff;
+}
+
+.page-description {
+  @include noto-font;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.section-title {
+  @include maiola-font;
+  color: #ffffff;
+  
+  i {
+    color: #CDA351;
+  }
+}
+
+.body-text {
+  @include noto-font;
+  color: rgba(255, 255, 255, 0.9);
+}

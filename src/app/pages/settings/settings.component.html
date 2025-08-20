@@ -1,0 +1,146 @@
+<app-page-container>
+  <app-page-header 
+    title="SETTINGS.TITLE" 
+    description="SETTINGS.DESCRIPTION">
+  </app-page-header>
+
+  <div class="container-fluid">
+    <!-- Game Paths Section -->
+    <div class="row justify-content-center settings-spacing">
+      <div class="col-lg-8">
+        <app-glass-card cardClass="padded">
+          <div class="mb-4">
+            <h3 class="h4 text-white mb-3 section-title">
+              <i class="fas fa-folder-open me-2"></i>
+              {{ 'SETTINGS.GAME_PATHS.TITLE' | translate }}
+            </h3>
+            <p class="text-light mb-3 body-text">{{ 'SETTINGS.GAME_PATHS.DESCRIPTION' | translate }}</p>
+          </div>            
+          
+          <!-- Game Executable Path -->
+          <app-path-input
+            label="SETTINGS.FORM.GAME_PATH.LABEL"
+            [value]="gameExePath"
+            placeholder="SETTINGS.FORM.GAME_PATH.PLACEHOLDER"
+            browseText="SETTINGS.FORM.GAME_PATH.BROWSE"
+            helpText="SETTINGS.FORM.GAME_PATH.HELP"
+            validMessage="SETTINGS.FORM.GAME_PATH_VALID"
+            [error]="gameExePathError"
+            iconClass="fas fa-gamepad"
+            inputId="gameExePath"
+            (browseClick)="selectGameExePath()">
+          </app-path-input>
+
+          <!-- Local Mods Path -->
+          <app-path-input
+            label="SETTINGS.FORM.MODS_PATH.LABEL"
+            [value]="localModsPath"
+            placeholder="SETTINGS.FORM.MODS_PATH.PLACEHOLDER"
+            browseText="SETTINGS.FORM.MODS_PATH.BROWSE"
+            helpText="SETTINGS.FORM.MODS_PATH.HELP"
+            validMessage="SETTINGS.FORM.MODS_PATH_VALID"
+            [error]="localModsPathError"
+            iconClass="fas fa-puzzle-piece"
+            inputId="localModsPath"
+            (browseClick)="selectLocalModsPath()">
+          </app-path-input>
+
+            <!-- Save Button -->
+            <div class="text-center">
+              <button 
+                type="button" 
+                class="btn btn-gold-gradient btn-lg"
+                (click)="saveSettings()"
+                [disabled]="!isFormValid()">
+                <i class="fas fa-save me-2"></i>
+                {{ 'SETTINGS.FORM.SAVE' | translate }}
+              </button>
+            </div>
+        </app-glass-card>
+      </div>
+    </div>
+
+    <!-- User Configuration Manager Section -->
+    <div *ngIf="isUserConfigSectionEnabled()" class="row justify-content-center settings-spacing">
+      <div class="col-lg-8">
+        <app-glass-card cardClass="padded">
+          <div class="mb-4">
+            <h3 class="h4 text-white mb-3 section-title">
+              <i class="fas fa-cogs me-2"></i>
+              {{ 'SETTINGS.USER_CONFIG.TITLE' | translate }}
+            </h3>
+            <p class="text-light mb-3 body-text">{{ 'SETTINGS.USER_CONFIG.DESCRIPTION' | translate }}</p>
+          </div>
+
+            <!-- User Config Table -->
+            <div class="table-responsive">
+              <table class="table table-dark table-striped table-hover glass-table">
+                <thead class="table-dark">
+                  <tr>
+                    <th scope="col" class="text-center" style="width: 15%">{{ 'SETTINGS.USER_CONFIG.TABLE.ENABLED' | translate }}</th>
+                    <th scope="col" style="width: 30%">{{ 'SETTINGS.USER_CONFIG.TABLE.CONFIG' | translate }}</th>
+                    <th scope="col" style="width: 55%">{{ 'SETTINGS.USER_CONFIG.TABLE.DESCRIPTION' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let config of userConfigs" class="table-row">
+                    <!-- Enabled Toggle -->
+                    <td class="text-center">
+                      <div class="form-check form-switch d-flex justify-content-center">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          [id]="'config-' + config.key"
+                          [checked]="config.enabled"
+                          (change)="onConfigToggle(config)"
+                          [attr.aria-label]="'Toggle ' + config.key">
+                        <label 
+                          [for]="'config-' + config.key" 
+                          class="visually-hidden">
+                          {{ 'Toggle ' + config.key }}
+                        </label>
+                      </div>
+                    </td>
+                    
+                    <!-- Config Name -->
+                    <td>
+                      <code class="config-name text-info">{{ config.key }}</code>
+                    </td>
+                    
+                    <!-- Description -->
+                    <td>
+                      <span class="config-description">{{ config.description }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+        </app-glass-card>
+      </div>
+    </div>
+
+    <!-- Application Cache Section -->
+    <div class="row justify-content-center settings-spacing">
+      <div class="col-lg-8">
+        <app-glass-card cardClass="padded">
+          <div class="mb-4">
+            <h3 class="h4 text-white mb-3 section-title">
+              <i class="fas fa-database me-2"></i>
+              {{ 'SETTINGS.CACHE.TITLE' | translate }}
+            </h3>
+            <p class="text-light mb-3 body-text">{{ 'SETTINGS.CACHE.DESCRIPTION' | translate }}</p>
+          </div>
+          <button 
+            type="button" 
+            class="btn btn-outline-light"
+            (click)="clearApplicationCache()"
+            [disabled]="isClearingCache">
+            <i class="fas fa-trash-alt me-2" *ngIf="!isClearingCache"></i>
+            <i class="fas fa-spinner fa-spin me-2" *ngIf="isClearingCache"></i>
+            {{ (isClearingCache ? 'SETTINGS.CACHE.CLEARING' : 'SETTINGS.CACHE.CLEAR_BUTTON') | translate }}
+          </button>
+        </app-glass-card>
+      </div>
+    </div>
+  </div>
+</app-page-container>

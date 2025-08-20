@@ -1,0 +1,258 @@
+@use '../../shared/styles/typography' as *;
+@use '../../shared/styles/forms' as *;
+
+.page-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url('../../../assets/images/home/age-of-mythology-1920x1080-17145.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 4rem 0;
+  
+  // Use 4K background for high resolution screens
+  @media (min-width: 2560px) {
+    background: 
+      linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+      url('../../../assets/images/home/age-of-mythology-3840x2160-17145.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}
+
+.features-section {
+  background: linear-gradient(135deg, rgba(38, 49, 68, 0.4) 0%, rgba(38, 49, 68, 0.6) 50%, rgba(38, 49, 68, 0.8) 100%);
+  padding: 1rem 0;
+}
+
+.carousel {
+  position: relative;
+  margin: 0 1rem;
+  
+  .carousel-inner {
+    overflow: hidden; // Hide slides that are off-screen
+    padding: 2rem; 
+    
+    .carousel-item {
+      transition: transform 0.6s ease-in-out;
+      
+      &:not(.active) {
+        display: block;
+        transform: translateX(110%);
+      }
+      
+      &.active {
+        transform: translateX(0);
+      }
+      
+      .row {
+        margin: 0 -0.5rem; // Slight negative margin for better card spacing
+        
+        .col-md-4 {
+          padding: 0 0.5rem; // Reduced padding between cards
+          margin-bottom: 1rem;
+        }
+      }
+    }
+  }
+  
+  .carousel-indicators {
+    button {
+      background-color: rgba(255, 255, 255, 0.5);
+      border: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin: 0 5px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      
+      &.active {
+        background-color: #ffffff;
+        transform: scale(1.2);
+      }
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+    }
+  }
+  
+  .carousel-control-prev,
+  .carousel-control-next {
+    width: 2.5rem; // Smaller fixed width
+    height: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      background-size: 18px;
+      transition: all 0.3s ease;
+    }
+    
+    &:hover {
+      .carousel-control-prev-icon,
+      .carousel-control-next-icon {
+        background-color: rgba(255, 255, 255, 0.6);
+        transform: scale(1.1);
+      }
+    }
+  }
+  
+  .carousel-control-prev {
+    left: -2.5rem; // Position just outside the carousel
+  }
+  
+  .carousel-control-next {
+    right: -2.5rem; // Position just outside the carousel
+  }
+}
+
+.feature-card {
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+    
+    &:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+  }
+  
+  &.coming-soon-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    cursor: default;
+    
+    i {
+      opacity: 0.4;
+    }
+    
+    h3, p {
+      opacity: 0.6;
+    }
+    
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+.feature-card i {
+  color: #ffffff;
+  opacity: 0.8;
+}
+
+.feature-card h3 {
+  color: #ffffff;
+  margin-bottom: 1rem;
+  @include maiola-font;
+  font-weight: normal;
+}
+
+.feature-card p {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0;
+  @include noto-font;
+}
+
+.btn {
+  min-width: 220px;
+}
+
+// Home-specific button modifications only
+.btn-outline-light {
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  color: #ffffff;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  @include maiola-font;
+  font-weight: normal;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #ffffff;
+    transform: translateY(-2px);
+  }
+}
+
+.feedback-footer {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  
+  .feedback-text {
+    @include noto-font;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .badge-wrapper {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    display: inline-flex;
+    
+    &:hover {
+      transform: translateY(-1px);
+    }
+    
+    app-badge {
+      display: inline-block;
+      font-size: initial !important;
+      
+      .badge {
+        font-size: 0.75rem !important;
+        padding: 0.4rem 0.8rem !important;
+      }
+    }
+  }
+}

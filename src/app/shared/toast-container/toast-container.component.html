@@ -1,0 +1,26 @@
+<div class="toast-container">
+  <div
+    *ngFor="let toast of toasts"
+    class="toast show"
+    [class.toast-success]="toast.type === 'success'"
+    [class.toast-danger]="toast.type === 'danger'"
+    [class.toast-warning]="toast.type === 'warning'"
+    [class.toast-info]="toast.type === 'info'"
+    role="alert"
+    aria-live="polite">
+    <div class="toast-header d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <i class="fas me-2"
+           [class.fa-check-circle]="toast.type === 'success'"
+           [class.fa-exclamation-triangle]="toast.type === 'warning'"
+           [class.fa-times-circle]="toast.type === 'danger'"
+           [class.fa-info-circle]="toast.type === 'info'"></i>
+        <strong>{{ getToastTitle(toast.type) }}</strong>
+      </div>
+      <button type="button" class="btn-close" aria-label="Close" (click)="removeToast(toast.id)"></button>
+    </div>
+    <div class="toast-body">
+      {{ toast.message }}
+    </div>
+  </div>
+</div>

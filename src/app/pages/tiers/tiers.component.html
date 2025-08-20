@@ -1,0 +1,148 @@
+<app-page-container>
+  <!-- Page Header -->
+  <app-page-header 
+    title="TIERS.TITLE" 
+    description="TIERS.DESCRIPTION">
+  </app-page-header>
+
+  <!-- Tier List Selection -->
+  <div class="filter-section mb-4">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <label for="tierListDropdown" class="visually-hidden">
+          {{ 'TIERS.SELECT_TIER_LIST' | translate }}
+        </label>
+        <div class="input-group">
+          <div class="dropdown flex-grow-1" ngbDropdown>
+            <button 
+              class="btn btn-outline-light dropdown-toggle w-100 text-start"
+              type="button"
+              id="tierListDropdown"
+              ngbDropdownToggle
+              [disabled]="isLoading"
+            >
+              {{ selectedTierList || ('TIERS.SELECT_PLACEHOLDER' | translate) }}
+            </button>
+            <div class="dropdown-menu w-100" ngbDropdownMenu aria-labelledby="tierListDropdown">
+              <button 
+                *ngFor="let tierList of availableTierLists" 
+                class="dropdown-item"
+                type="button"
+                (click)="selectedTierList = tierList.name; onTierListChange()"
+                [class.active]="selectedTierList === tierList.name"
+              >
+                {{ tierList.name }}
+              </button>
+              <div *ngIf="availableTierLists.length === 0" class="dropdown-item-text text-muted">
+                {{ 'TIERS.NO_TIER_LISTS' | translate }}
+              </div>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            class="btn btn-outline-light"
+            (click)="resetTierList()"
+            [disabled]="isLoading || !selectedTierList"
+            ngbTooltip="{{ 'TIERS.RESET_TOOLTIP' | translate }}"
+            placement="top"
+          >
+            <i class="fas fa-undo-alt me-1"></i>
+            {{ 'TIERS.RESET_BUTTON' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <app-loading-state 
+    *ngIf="isLoading"
+    message="TIERS.LOADING_MESSAGE"
+    containerClass="py-5">
+  </app-loading-state>
+
+        <!-- Tier List Interface -->
+        <div *ngIf="!isLoading && selectedTierList" class="tier-maker">
+          <!-- Tier Rows -->
+          <div class="tier-rows mb-4">
+            <div 
+              *ngFor="let tierRow of tierRows; let i = index; trackBy: trackByTier"
+              class="tier-row mb-2"
+              [style.background-color]="tierRow.color"
+            >
+              <div class="tier-label">
+                {{ tierRow.tier }}
+              </div>
+              <div 
+                class="tier-items"
+                cdkDropList
+                [id]="'tier-' + i"
+                [cdkDropListData]="tierRow.items"
+                (cdkDropListDropped)="onDrop($event)"
+                [cdkDropListConnectedTo]="getConnectedDropLists()"
+                [cdkDropListSortPredicate]="sortPredicate"
+              >
+                <div 
+                  *ngFor="let item of tierRow.items; trackBy: trackByItem"
+                  class="tier-item"
+                  cdkDrag
+                  (cdkDragStarted)="onDragStarted(item)"
+                  (cdkDragEnded)="onDragEnded()"
+                  [ngbTooltip]="item.name | titleCase"
+                  placement="top"
+                >
+                  <img 
+                    [src]="item.imagePath" 
+                    [alt]="'Tier item: ' + item.name"
+                    [title]="item.name | titleCase"
+                    class="tier-item-image"
+                    (error)="onImageError($event)"
+                  />
+                  <div class="tier-item-placeholder" cdkDragPlaceholder></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unassigned Items Pool -->
+          <div class="unassigned-pool">
+            <div 
+              class="unassigned-items"
+              cdkDropList
+              id="unassigned"
+              [cdkDropListData]="unassignedItems"
+              (cdkDropListDropped)="onDrop($event)"
+              [cdkDropListConnectedTo]="getConnectedDropLists()"
+              [cdkDropListSortPredicate]="sortPredicate"
+            >
+              <div 
+                *ngFor="let item of unassignedItems; trackBy: trackByItem"
+                class="tier-item"
+                cdkDrag
+                (cdkDragStarted)="onDragStarted(item)"
+                (cdkDragEnded)="onDragEnded()"
+                [ngbTooltip]="item.name | titleCase"
+                placement="top"
+              >
+                <img 
+                  [src]="item.imagePath" 
+                  [alt]="'Unassigned item: ' + item.name"
+                  [title]="item.name | titleCase"
+                  class="tier-item-image"
+                  (error)="onImageError($event)"
+                />
+                <div class="tier-item-placeholder" cdkDragPlaceholder></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+  <!-- Empty State -->
+  <app-empty-state 
+    *ngIf="!isLoading && !selectedTierList"
+    title="TIERS.EMPTY_STATE.TITLE" 
+    description="TIERS.EMPTY_STATE.MESSAGE"
+    iconClass="bi bi-list-stars"
+    containerClass="py-5">
+  </app-empty-state>
+</app-page-container>

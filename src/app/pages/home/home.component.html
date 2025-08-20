@@ -1,0 +1,110 @@
+<div class="page-container">
+  <div class="hero-section">
+    <div class="container">
+      <div class="row justify-content-center text-center">
+        <div class="col-lg-8">
+          <h1 class="display-4 mb-4">{{ 'HOME.WELCOME' | translate }}</h1>
+          <p class="lead mb-5">{{ 'HOME.DESCRIPTION' | translate }}</p>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <button 
+              type="button" 
+              class="btn btn-gold-gradient btn-lg me-md-2" 
+              (click)="launchGame()"
+              [disabled]="isLaunchingGame">
+              <i class="fas fa-play me-2"></i>
+              {{ 'HOME.PLAY_NOW' | translate }}
+            </button>
+            <button type="button" class="btn btn-outline-light btn-lg" (click)="buyMeCoffee()">
+              <i class="fas fa-mug-hot me-2"></i>
+              {{ 'HOME.BUY_ME_COFFEE' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features-section">
+    <div class="container">
+      <div id="featuresCarousel" class="carousel slide" *ngIf="carouselConfig">
+        <div class="carousel-indicators">
+          <button 
+            type="button" 
+            *ngFor="let slide of carouselConfig.slides; let i = index"
+            [class.active]="currentSlide === i"
+            (click)="goToSlide(i)"
+            [attr.aria-current]="currentSlide === i ? 'true' : null"
+            [attr.aria-label]="'Slide ' + (i + 1)"
+            [attr.title]="'Go to slide ' + (i + 1)">
+            <span class="visually-hidden">
+              {{ 'HOME.FEATURES.GO_TO_SLIDE' | translate:{slide: (i + 1)} }}
+            </span>
+          </button>
+        </div>
+        
+        <div class="carousel-inner">
+          <div 
+            class="carousel-item" 
+            *ngFor="let slide of carouselConfig.slides; let i = index"
+            [class.active]="currentSlide === i">
+            <div class="row" [class.justify-content-center]="slide.cards.length < 3">
+              <div 
+                class="col-md-4 text-center mb-4"
+                *ngFor="let card of slide.cards">
+                <div 
+                  class="feature-card"
+                  [class.coming-soon-card]="card.isComingSoon"
+                  [class.clickable]="!card.isComingSoon && card.route"
+                  tabindex="0"
+                  role="button"
+                  (click)="!card.isComingSoon && navigateToCard(card)"
+                  (keyup)="!card.isComingSoon && ( $event.key === 'Enter' || $event.key === ' ' ) && navigateToCard(card)">
+                  <i [class]="card.icon + ' fa-3x mb-3'"></i>
+                  <h3>{{ card.titleKey | translate }}</h3>
+                  <p>{{ card.descriptionKey | translate }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button class="carousel-control-prev" type="button" (click)="prevSlide()">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" (click)="nextSlide()">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Footer -->
+  <div class="feedback-footer">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-12 text-center">
+          <p class="feedback-text">
+            <span [innerHTML]="'HOME.FEEDBACK.TEXT_START' | translate"></span>
+            <span class="badge-wrapper" (click)="openDiscord()">
+              <app-badge
+                iconClass="fab fa-discord"
+                variant="primary"
+                text="Discord">
+              </app-badge>
+            </span>
+            {{ 'HOME.FEEDBACK.TEXT_MIDDLE' | translate }}
+            <span class="badge-wrapper" (click)="openGitHub()">
+              <app-badge
+                iconClass="fab fa-github"
+                variant="dark"
+                text="GitHub">
+              </app-badge>
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

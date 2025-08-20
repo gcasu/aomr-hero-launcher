@@ -1,0 +1,370 @@
+{
+  "COMMON": {
+    "LOADING": "Loading...",
+    "SAVE": "Save",
+    "CANCEL": "Cancel",
+    "SUCCESS": "Success",
+    "ERROR": "Error",
+    "WARNING": "Warning",
+    "INFO": "Information",
+    "SEARCH_PLACEHOLDER": "Search...",
+    "PAGE": "Page"
+  },
+  "NAVIGATION": {
+    "HOME": "Home",
+    "MODDING": "Modding",
+    "MY_MODS": "My Mods",
+    "RESOURCES": "Resources",
+    "CORE_DATA_GUIDE": "Data Guide",
+    "COMPETITIVE": "Competitive",
+    "LEADERBOARD": "Leaderboard",
+    "BUILD_ORDERS": "Build Orders",
+    "TIERS": "Tier Lists",
+    "YOUTUBE_FEED": "YouTube Feed",
+    "SETTINGS": "Settings"
+  },
+  "HOME": {
+    "WELCOME": "Welcome to AoM:R Hero Launcher",
+    "DESCRIPTION": "Your gateway to Age of Mythology: Retold gaming experience",
+    "PLAY_NOW": "Play Now",
+    "BUY_ME_COFFEE": "Buy me a coffee",
+    "LAUNCH": {
+      "GAME_PATH_NOT_SET": "Game path not configured. Please go to Settings to set the game executable path.",
+      "LAUNCH_ERROR": "Failed to launch the game",
+      "LAUNCHING": "Launching Age of Mythology: Retold...",
+      "LAUNCH_SUCCESS": "Game launched successfully!",
+      "ELECTRON_ONLY": "Game launching is only available in the Electron app"
+    },
+    "MESSAGES": {
+      "COFFEE_OPENING": "Opening Buy Me a Coffee page...",
+      "COFFEE_ERROR": "Failed to open Buy Me a Coffee page"
+    },
+    "FEATURES": {
+      "QUICK_LAUNCH": {
+        "TITLE": "Quick Launch",
+        "DESCRIPTION": "Launch Age of Mythology: Retold with one click"
+      },
+      "MY_MODS": {
+        "TITLE": "My Mods",
+        "DESCRIPTION": "Manage and organize your local and subscribed mods"
+      },
+      "RESOURCES": {
+        "TITLE": "Resources",
+        "DESCRIPTION": "Access modding tools, community content, and other game resources easily"
+      },
+      "CORE_DATA_GUIDE": {
+        "TITLE": "Data Guide",
+        "DESCRIPTION": "Explore game data, statistics, and detailed information"
+      },
+      "LEADERBOARDS": {
+        "TITLE": "Leaderboards",
+        "DESCRIPTION": "Track your progress and compete with players worldwide"
+      },
+      "BUILD_ORDERS": {
+        "TITLE": "Build Orders",
+        "DESCRIPTION": "Learn and master strategic build orders for competitive play"
+      },
+      "TIERS": {
+        "TITLE": "Tier Lists",
+        "DESCRIPTION": "Analyze major and minor gods tier rankings and meta analysis"
+      },
+      "YOUTUBE_FEED": {
+        "TITLE": "YouTube Feed",
+        "DESCRIPTION": "Watch the latest Age of Mythology content from top creators"
+      },
+      "SETTINGS": {
+        "TITLE": "Settings",
+        "DESCRIPTION": "Configure your launcher preferences and game paths"
+      },
+      "MORE_COMING": {
+        "TITLE": "More Features",
+        "DESCRIPTION": "Additional exciting features are coming soon!"
+      }
+    },
+    "FEEDBACK": {
+      "TEXT_START": "AoM:R Hero Launcher v1.0 powered by <i>sliferdev</i>. Any feedback, bug report, or feature suggestion? Join my server on",
+      "TEXT_MIDDLE": "or open an issue on"
+    }
+  },
+  "MY_MODS": {
+    "TITLE": "My Mods",
+    "COMING_SOON": "Mod Manager Coming Soon",
+    "DESCRIPTION": "Manage and organize your local and subscribed mods",
+    "SAVE_CHANGES": "Save Changes",
+    "FILTER_PLACEHOLDER": "Filter mods by title, author, or description...",
+    "UNSAVED_CHANGES": "You have unsaved changes. Click 'Save Changes' to persist your modifications.",
+    "TOGGLE_ENABLED": "Toggle mod enabled/disabled",
+    "EMPTY": {
+      "TITLE": "No Mods Found",
+      "DESCRIPTION": "No mods were found. Make sure your mod file path is configured correctly in Settings."
+    },
+    "NO_RESULTS": {
+      "TITLE": "No Mods Found",
+      "DESCRIPTION": "No mods match your search criteria. Try adjusting your filter."
+    },
+    "SIMDATA_MERGER": {
+      "LABEL": "Enable simdata merger (experimental)",
+      "TOOLTIP": "This experimental feature merges simdata files to improve mod compatibility. Use with caution as it may affect game stability."
+    },
+    "MESSAGES": {
+      "AUTO_SAVE_ERROR": "Failed to auto-save mod changes",
+      "UNKNOWN_DATE": "Unknown",
+      "SIMDATA_MERGER_TOGGLE_INFO": "This functionality is currently unavailable"
+    },
+    "SOURCE": {
+      "LOCAL": "Local",
+      "WORKSHOP": "Subscribed"
+    },
+    "TABLE": {
+      "ENABLED": "Enabled",
+      "PRIORITY": "Priority",
+      "SOURCE": "Source",
+      "TITLE": "Title",
+      "AUTHOR": "Author",
+      "UPDATED": "Last Updated",
+      "INSTALLED": "Installed"
+    }
+  },
+  "RESOURCES": {
+    "TITLE": "Resources",
+    "DESCRIPTION": "Access modding tools, community content, and other game resources easily",
+    "LOADING": "Loading resources...",
+    "FILTER_PLACEHOLDER": "Filter resources by title, description, author, or type...",
+    "TYPE": {
+      "WEB": "Web",
+      "LOCAL": "Local"
+    },
+    "ACTION": {
+      "OPEN_LINK": "Open Link",
+      "DOWNLOAD": "Download"
+    },
+    "MESSAGES": {
+      "LOAD_ERROR": "Failed to load resources configuration",
+      "OPENING_LINK": "Opening link in browser...",
+      "LINK_ERROR": "Failed to open web link",
+      "DOWNLOAD_ERROR": "Failed to download resource"
+    },
+    "EMPTY": {
+      "TITLE": "No Resources Available",
+      "DESCRIPTION": "There are currently no resources configured. Check back later for updates."
+    },
+    "NO_RESULTS": {
+      "TITLE": "No Resources Found",
+      "DESCRIPTION": "No resources match your search criteria. Try adjusting your filter."
+    },
+    "ERROR": {
+      "TITLE": "Failed to Load Resources",
+      "DESCRIPTION": "An error occurred while loading the resources configuration.",
+      "RETRY": "Retry"
+    }
+  },
+  "LEADERBOARD": {
+    "TITLE": "Leaderboard",
+    "DESCRIPTION": "Track your 1v1 supremacy ranking and compete globally with other players",
+    "SEARCH_PLACEHOLDER": "Search players...",
+    "LAST_UPDATED": "Last updated",
+    "EMPTY_STATE_TITLE": "No Players Found",
+    "EMPTY_STATE_DESCRIPTION": "No players match your search criteria. Try adjusting your search terms.",
+    "SHOWING": "Showing",
+    "OF": "of",
+    "PLAYERS": "players",
+    "GO_TO_PAGE": "Go to page",
+    "TABLE": {
+      "RANK": "Rank",
+      "HIGHEST_ELO": "Highest ELO",
+      "ELO": "ELO",
+      "LEADER": "Leader",
+      "WIN_RATE": "Win Rate",
+      "WINS": "Wins",
+      "LOSSES": "Losses",
+      "TOTAL_GAMES": "Total Games",
+      "STREAK": "Streak"
+    }
+  },
+  "SETTINGS": {
+    "TITLE": "Settings",
+    "DESCRIPTION": "Configure your launcher preferences and game paths",
+    "GAME_PATHS": {
+      "TITLE": "Game Paths",
+      "DESCRIPTION": "Configure your game paths to enable advanced features"
+    },
+    "FORM": {
+      "GAME_PATH": {
+        "LABEL": "Game Executable File",
+        "PLACEHOLDER": "Full path to aomrt_s.exe",
+        "HELP": "Select aomrt_s.exe from your game directory (usually located in \"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Age of Mythology Retold\")",
+        "BROWSE": "Browse",
+        "ERROR": "Please select a valid directory containing aomrt_s.exe"
+      },
+      "MODS_PATH": {
+        "LABEL": "Mods Status File",
+        "PLACEHOLDER": "Full path to myth-mod-status.json",
+        "HELP": "Select myth-mod-status.json from your mods directory (usually located in \"C:\\Users\\<YourUsername>\\Games\\Age of Mythology Retold\\<SteamID>\\Mods\")",
+        "BROWSE": "Browse",
+        "ERROR": "Please select a valid directory containing myth-mod-status.json"
+      },
+      "SAVE": "Save Settings",
+      "SUCCESS": "Settings saved successfully!",
+      "ERROR": "Please fix all errors before saving.",
+      "GAME_PATH_VALID": "Valid aomrt_s.exe file selected",
+      "MODS_PATH_VALID": "Valid myth-mod-status.json file selected",
+      "GAME_EXE_NOT_FOUND": "Please select the aomrt_s.exe file",
+      "MODS_JSON_NOT_FOUND": "Please select the myth-mod-status.json file"
+    },
+    "MESSAGES": {
+      "WELCOME_SETUP": "Welcome! Please configure your game paths to get started with advanced features."
+    },
+    "CACHE": {
+      "TITLE": "Clear Application Cache",
+      "DESCRIPTION": "Remove all cached data, settings, and reload the application",
+      "CLEAR_BUTTON": "Clear Cache",
+      "CLEARING": "Clearing...",
+      "CLEAR_SUCCESS": "Application cache cleared successfully",
+      "CLEAR_ERROR": "Failed to clear application cache",
+      "RELOAD_MESSAGE": "Application will reload in 2 seconds..."
+    },
+    "USER_CONFIG": {
+      "TITLE": "User Configuration Manager",
+      "DESCRIPTION": "Manage advanced game settings in user.cfg file",
+      "UNSAVED_CHANGES": "You have unsaved configuration changes.",
+      "TABLE": {
+        "CONFIG": "Configuration",
+        "DESCRIPTION": "Description",
+        "ENABLED": "Enabled"
+      },
+      "CONFIGS": {
+        "aiDebug": "Enables extra debug logging and UI for the AI.",
+        "aiShowBPValueText": "Display AI blueprint value text information in-game.",
+        "dataValidation": "Enable data validation checks during game runtime.",
+        "dataValidationOnDebugRandomMaps": "Validate data specifically for random map generation.",
+        "debugOutputGameData": "Output detailed game data for debugging purposes.",
+        "debugRandomMaps": "Required for the XS debugger to be used, always add this.",
+        "debugTriggers": "Required for the XS debugger to be used with the trigger runtime.",
+        "developer": "Enable developer mode with additional tools and features.",
+        "disableAssetPreloading": "Disables asset preloading when starting a game for shorter load times.",
+        "enableTriggerEcho": "Required to get any trigger echo output as these will be optimized away otherwise.",
+        "generateAIConstants": "Generates MythAIConstantsPlayerXX.txt in temp/Logs containing all available global constants for AI players.",
+        "generateRMConstants": "Generates MythRMConstants.txt in temp/Logs containing all available global constants for RMs.",
+        "generateTRConstants": "Generates MythTRConstants.txt in temp/Logs containing all available global constants for triggers.",
+        "noIntroCinematics": "Disables the intro cinematics for a faster startup.",
+        "showAIEchoes": "Display AI echo messages in the debug output.",
+        "showAIOutput": "Show detailed AI decision-making output for analysis."
+      },
+      "MESSAGES": {
+        "AUTO_SAVE_SUCCESS": "User configuration auto-saved successfully",
+        "AUTO_SAVE_ERROR": "Failed to auto-save user configuration",
+        "SAVE_SUCCESS": "Configuration saved: {{count}} settings enabled",
+        "LOAD_SUCCESS": "Configuration loaded: {{count}} settings enabled",
+        "LOAD_ERROR": "Failed to load user configuration file",
+        "FILE_NOT_FOUND": "user.cfg file not found, creating new configuration",
+        "FILE_CREATED": "user.cfg file created successfully",
+        "CREATE_ERROR": "Failed to create user.cfg file",
+        "CONFIG_TOGGLED": "{{configName}} {{state}}",
+        "ENABLED": "enabled",
+        "DISABLED": "disabled"
+      }
+    }
+  },
+  "DATA_GUIDE": {
+    "TITLE": "Core Data Guide",
+    "DESCRIPTION": "Explore all core game data for Age of Mythology: Retold",
+    "LOADING": "Loading core data...",
+    "SEARCH_PLACEHOLDER": "Search data sections...",
+    "EXPAND_ALL": "Expand All",
+    "COLLAPSE_ALL": "Collapse All",
+    "SECTION": "Section",
+    "PARAMETER": "Parameter",
+    "VALUE": "Value",
+    "TYPE": "Type",
+    "ENTRIES": "entries",
+    "PARAMETERS": "parameters",
+    "SECTIONS_COUNT": "{{count}} sections",
+    "TOTAL_ENTRIES": "{{count}} total entries",
+    "SYNTAX": "Syntax",
+    "NESTED": "nested",
+    "ENTRY_DESCRIPTION": "Description",
+    "DEPRECATED": "Deprecated",
+    "DEPRECATED_TOOLTIP": "This entry is deprecated and may be removed in future updates",
+    "COPY_ENTRY": "Copy entire entry to clipboard",
+    "COPY_SYNTAX": "Copy syntax to clipboard",
+    "COPY_ENTRY_SUCCESS": "Entry copied to clipboard successfully!",
+    "COPY_SYNTAX_SUCCESS": "Syntax copied to clipboard successfully!",
+    "COPY_FALLBACK_SUCCESS": "Content copied to clipboard successfully!",
+    "COPY_ERROR": "Failed to copy to clipboard. Please try again.",
+    "ADD_BOOKMARK": "Add to bookmarks",
+    "REMOVE_BOOKMARK": "Remove from bookmarks", 
+    "BOOKMARK_ADDED": "{{name}} added to bookmarks",
+    "BOOKMARK_REMOVED": "{{name}} removed from bookmarks",
+    "BOOKMARKED_ENTRY": "This entry is bookmarked",
+    "HAS_NOTES": "This entry has personal notes",
+    "NOTES": "Notes",
+    "NOTES_PLACEHOLDER": "Add your personal notes for this entry...",
+    "SHOW_DEPRECATED_LABEL": "Show deprecated entries",
+    "SHOW_DEPRECATED_TOOLTIP": "Toggle visibility of deprecated entries (shown with warning badges)",
+    "DEPRECATED_SHOWN": "Deprecated entries are now visible",
+    "DEPRECATED_HIDDEN": "Deprecated entries are now hidden",
+    "DATA_SOURCE_INFO": "Core Data was parsed from the official Core Data Guide PDF, it might contain parsing errors. Core Data does not currently cover TechTree Effect Data.",
+    "ERROR": {
+      "TITLE": "Failed to Load Data",
+      "DESCRIPTION": "Could not load the core data file. Please try again later."
+    },
+    "EMPTY": {
+      "TITLE": "No Data Available",
+      "DESCRIPTION": "The core data file appears to be empty or invalid."
+    },
+    "NO_RESULTS": {
+      "TITLE": "No Results Found",
+      "DESCRIPTION": "No data sections match your search criteria. Try different search terms."
+    }
+  },
+  "BUILD_ORDERS": {
+    "TITLE": "Build Orders",
+    "DESCRIPTION": "Learn and master strategic build orders for competitive play",
+    "SELECT_MAJOR_GOD": "Select a Major God",
+    "EMPTY_STATE_TITLE": "No Build Orders Available",
+    "EMPTY_STATE_DESCRIPTION": "Build orders for the selected god are coming soon. Check back later for strategic guides and builds!"
+  },
+  "TIERS": {
+    "TITLE": "Tier Lists",
+    "DESCRIPTION": "Create and customize tier lists for major and minor gods",
+    "SELECT_TIER_LIST": "Select Tier List",
+    "SELECT_PLACEHOLDER": "Choose a tier list to start ranking",
+    "RESET_BUTTON": "Reset Tier List",
+    "RESET_TOOLTIP": "Move all items back to the unassigned pool",
+    "NO_TIER_LISTS": "No tier lists available",
+    "UNASSIGNED_ITEMS": "Available Items",
+    "LOADING_MESSAGE": "Loading tier lists...",
+    "EMPTY_STATE": {
+      "TITLE": "No Tier List Selected",
+      "MESSAGE": "Choose a tier list from the dropdown above to start creating your rankings"
+    },
+    "MESSAGES": {
+      "TIER_LIST_LOADED": "Tier list '{{name}}' loaded successfully",
+      "AUTO_SAVED": "Tier list '{{name}}' auto-saved",
+      "RESET_SUCCESS": "Tier list '{{name}}' has been reset",
+      "LOAD_ERROR": "Failed to load tier lists",
+      "NO_TIER_LISTS_FOUND": "No tier lists found in the assets/images/tiers folder"
+    }
+  },
+  "YOUTUBE_FEED": {
+    "TITLE": "YouTube Feed",
+    "DESCRIPTION": "Latest videos from Age of Mythology content creators",
+    "SEARCH_PLACEHOLDER": "Search by channel name...",
+    "LATEST_VIDEOS": "Latest videos",
+    "NO_VIDEOS": "No recent videos available",
+    "PUBLISHED": "Published",
+    "RETRY": "Try Again",
+    "EMPTY": {
+      "TITLE": "No YouTube Feeds Available",
+      "DESCRIPTION": "YouTube feeds could not be loaded at this time. Please try again later."
+    },
+    "ERROR": {
+      "TITLE": "Failed to Load Feeds",
+      "DESCRIPTION": "There was a problem loading the YouTube feeds. This could be due to network issues or server timeouts."
+    },
+    "NO_RESULTS": {
+      "TITLE": "No Channels Found",
+      "DESCRIPTION": "No channels match your search criteria. Try adjusting your search terms."
+    }
+  }
+}

@@ -1,0 +1,64 @@
+<div class="app-container">
+  <!-- Tab Navigation -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid navbar-container">
+      <!-- Logo -->
+      <div class="logo-container">
+        <a routerLink="/home" class="logo-link">
+          <img src="assets/images/logo.png" alt="AoM:R Hero Launcher" class="nav-logo">
+        </a>
+      </div>
+      
+      <!-- Navigation Menu -->
+      <div class="navbar-nav">
+        
+        <ng-container *ngFor="let navItem of navigationItems">
+          <!-- Simple Navigation Link -->
+          <div *ngIf="!isDropdownGroup(navItem)" class="nav-item">
+            <a class="nav-link" 
+               [class.active]="isNavItemActive(navItem)" 
+               [routerLink]="navItem.route">
+              <i [class]="navItem.icon + ' me-2'"></i>
+              {{ navItem.label | translate }}
+            </a>
+          </div>
+          
+          <!-- Dropdown Navigation Group -->
+          <div *ngIf="isDropdownGroup(navItem)" 
+               class="nav-item dropdown" 
+               ngbDropdown 
+               placement="bottom-left">
+            <button class="nav-link dropdown-toggle" 
+                    [class.active]="isNavGroupActive(navItem)" 
+                    ngbDropdownToggle
+                    [id]="navItem.id + 'Dropdown'"
+                    type="button">
+              <i [class]="navItem.icon + ' me-2'"></i>
+              {{ navItem.label | translate }}
+            </button>
+            <div class="dropdown-menu" 
+                 ngbDropdownMenu 
+                 [attr.aria-labelledby]="navItem.id + 'Dropdown'">
+              <a *ngFor="let subItem of navItem.items"
+                 class="dropdown-item" 
+                 [class.active]="isNavItemActive(subItem)" 
+                 [routerLink]="subItem.route">
+                <i [class]="subItem.icon + ' me-2'"></i>
+                {{ subItem.label | translate }}
+              </a>
+            </div>
+          </div>
+        </ng-container>
+        
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content Area -->
+  <div class="content-container">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+<!-- Global Toast Container -->
+<app-toast-container></app-toast-container>

@@ -1,0 +1,351 @@
+@use '../../shared/styles/shared.scss';
+@use '../../shared/styles/typography' as *;
+@use '../../shared/styles/forms' as *;
+
+.leaderboard-content {
+  .last-updated {
+    text-align: center;
+    
+    small {
+      font-style: italic;
+    }
+  }
+
+  .leaderboard-table-container {
+    margin-bottom: 100px;
+    
+    .table-responsive {
+      overflow: visible;
+    }
+    
+    .table {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      margin-bottom: 0;
+      
+      thead th {
+        background: rgba(0, 0, 0, 0.3);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        font-weight: 600;
+        padding: 1rem 0.75rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        @include noto-font;
+
+        &.sortable-header {
+          cursor: pointer;
+          user-select: none;
+          transition: all 0.2s ease;
+          
+          &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+          }
+          
+          &.sorted {
+            background: rgba(102, 126, 234, 0.2);
+            color: #fff;
+          }
+          
+          i {
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+          }
+          
+          &:hover i,
+          &.sorted i {
+            opacity: 1;
+          }
+        }
+      }
+      
+      tbody {
+        tr {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          transition: all 0.2s ease;
+          
+          &:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+          }
+        }
+        
+        td {
+          padding: 0.75rem;
+          vertical-align: middle;
+          color: rgba(255, 255, 255, 0.9);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+      }
+
+      .player-row {
+        .rank-cell {
+          .rank-number {
+            font-weight: 600;
+            color: var(--bs-light);
+
+            &.rank-gold { color: #ffd700; }
+            &.rank-silver { color: #c0c0c0; }
+            &.rank-bronze { color: #cd7f32; }
+          }
+        }
+
+        .elo-cell {
+          .elo-highest {
+            color: #ffd700;
+            font-weight: 600;
+          }
+          
+          .elo-current {
+            color: var(--bs-light);
+            font-weight: 500;
+          }
+        }
+
+        .leader-cell {
+          .leader-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+
+            .player-avatar {
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              object-fit: cover;
+              border: 2px solid rgba(255, 255, 255, 0.2);
+              transition: border-color 0.2s ease;
+
+              &:hover {
+                border-color: rgba(255, 255, 255, 0.4);
+              }
+            }
+
+            .player-name {
+              color: var(--bs-light);
+              font-weight: 500;
+              @include noto-font;
+            }
+          }
+        }
+
+        .win-rate-cell {
+          .win-rate {
+            color: var(--bs-info);
+            font-weight: 500;
+          }
+        }
+
+        .wins-cell {
+          .wins {
+            color: #90ee90;
+            font-weight: 800;
+          }
+        }
+
+        .losses-cell {
+          .losses {
+            color: #fd8962;
+            font-weight: 600;
+          }
+        }
+
+        .total-games-cell {
+          .total-games {
+            color: var(--bs-light);
+            font-weight: 500;
+          }
+        }
+
+        .streak-cell {
+          .streak {
+            color: #fd8962;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+
+            &.positive-streak {
+              color: #90ee90;
+              font-weight: 800;
+              
+              .fa-arrow-up {
+                color: #90ee90;
+              }
+            }
+            
+            &.negative-streak {
+              color: #ff6b6b;
+              font-weight: 800;
+              
+              .fa-arrow-down {
+                color: #ff6b6b;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .pagination-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      ::ng-deep {
+        .pagination {
+          .page-link {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--bs-light);
+
+            &:hover {
+              background: rgba(255, 255, 255, 0.1);
+              border-color: rgba(255, 255, 255, 0.2);
+              color: var(--bs-light);
+            }
+
+            &:focus {
+              box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+            }
+          }
+
+          .page-item.active .page-link {
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
+            color: white;
+          }
+
+          .page-item.disabled .page-link {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.3);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Pagination Footer - Similar to Home Page Footer
+.pagination-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 100;
+
+  .pagination-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+
+    .btn {
+      min-width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      
+      &:not(:disabled):hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateY(-1px);
+      }
+      
+      &:disabled {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.3);
+        cursor: not-allowed;
+      }
+      
+      i {
+        font-size: 0.9rem;
+      }
+    }
+
+    .page-jump-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .page-input {
+        width: 60px;
+        height: 42px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        
+        &:focus {
+          background: rgba(255, 255, 255, 0.15);
+          border-color: #0d6efd;
+          box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+          color: white;
+          outline: none;
+        }
+        
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.6);
+        }
+      }
+    }
+  }
+
+  // Pagination info similar to home page feedback text
+  .pagination-info {
+    text-align: center;
+    
+    span {
+      @include noto-font;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.4;
+      margin-bottom: 0;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .leaderboard-content {
+    .leaderboard-table-container {
+      .table {
+        font-size: 0.875rem;
+
+        th, td {
+          padding: 0.5rem 0.25rem;
+        }
+
+        .leader-cell {
+          .leader-info {
+            gap: 0.5rem;
+
+            .player-avatar {
+              width: 32px;
+              height: 32px;
+            }
+
+            .player-name {
+              font-size: 0.875rem;
+            }
+          }
+        }
+      }
+    }
+  }
+}

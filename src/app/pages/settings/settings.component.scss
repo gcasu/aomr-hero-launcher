@@ -1,0 +1,52 @@
+@use '../../shared/styles/typography' as *;
+@use '../../shared/styles/forms' as *;
+
+:host {
+  display: block;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.settings-spacing {
+  margin-bottom: 2rem;
+}
+
+// Typography styles using shared mixins
+.section-title {
+  @include maiola-font;
+  color: #ffffff;
+  
+  i {
+    color: #CDA351;
+  }
+}
+
+.body-text {
+  @include noto-font;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+// Table specific styles
+.config-name {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  background: rgba(13, 202, 240, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  color: #0dcaf0 !important;
+}
+
+.config-description {
+  @include noto-font;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.form-check-input {
+  cursor: pointer;
+  
+  &:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+}

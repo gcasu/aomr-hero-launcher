@@ -1,0 +1,170 @@
+<app-page-container containerClass="with-side-padding">
+  <!-- Page Header -->
+  <app-page-header 
+    title="MY_MODS.TITLE" 
+    description="MY_MODS.DESCRIPTION">
+  </app-page-header>
+
+  <!-- Filter Section - Only show when mods exist -->
+  <div *ngIf="hasAnyMods">
+    <app-search-filter
+      [(ngModel)]="filterText"
+      (filterChange)="onFilterChange()"
+      placeholder="MY_MODS.FILTER_PLACEHOLDER"
+      inputId="filterInput">
+      <!-- Simdata Merger Toggle -->
+      <div class="col-auto">
+        <div class="form-check form-switch">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            role="switch" 
+            id="simdataMergerToggle"
+            [(ngModel)]="simdataMergerEnabled"
+            (change)="onSimdataMergerToggle()"
+            [attr.aria-label]="'MY_MODS.SIMDATA_MERGER.LABEL' | translate">
+          <label 
+            class="form-check-label text-light small" 
+            for="simdataMergerToggle"
+            [attr.data-bs-toggle]="'tooltip'"
+            [attr.data-bs-placement]="'top'"
+            [attr.data-bs-title]="'MY_MODS.SIMDATA_MERGER.TOOLTIP' | translate"
+            [title]="'MY_MODS.SIMDATA_MERGER.TOOLTIP' | translate">
+            {{ 'MY_MODS.SIMDATA_MERGER.LABEL' | translate }}
+          </label>
+        </div>
+      </div>
+    </app-search-filter>
+  </div>
+
+  <!-- Loading State -->
+  <app-loading-state *ngIf="isLoading"></app-loading-state>
+
+  <!-- Mods Table -->
+  <div *ngIf="!isLoading" class="mods-table-container">
+    <!-- No filtered results state -->
+    <div *ngIf="mods.length > 0 && filteredMods.length === 0" class="text-center">
+      <app-empty-state 
+        title="MY_MODS.NO_RESULTS.TITLE" 
+        description="MY_MODS.NO_RESULTS.DESCRIPTION"
+        iconClass="fas fa-search">
+      </app-empty-state>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="mods.length === 0" class="text-center">
+      <app-empty-state 
+        title="MY_MODS.EMPTY.TITLE" 
+        description="MY_MODS.EMPTY.DESCRIPTION"
+        iconClass="fas fa-box-open">
+      </app-empty-state>
+    </div>
+
+    <div *ngIf="filteredMods.length > 0" class="table-responsive">
+      <table class="table table-dark table-striped table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th scope="col" class="drag-column"></th>
+            <th scope="col" class="text-center">{{ 'MY_MODS.TABLE.ENABLED' | translate }}</th>
+            <th scope="col" class="text-center">{{ 'MY_MODS.TABLE.PRIORITY' | translate }}</th>
+            <th scope="col" class="text-center">{{ 'MY_MODS.TABLE.SOURCE' | translate }}</th>
+            <th scope="col">{{ 'MY_MODS.TABLE.TITLE' | translate }}</th>
+            <th scope="col">{{ 'MY_MODS.TABLE.AUTHOR' | translate }}</th>
+            <th scope="col">{{ 'MY_MODS.TABLE.UPDATED' | translate }}</th>
+            <th scope="col">{{ 'MY_MODS.TABLE.INSTALLED' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody cdkDropList (cdkDropListDropped)="onDrop($event)">
+          <tr *ngFor="let mod of filteredMods; let i = index" 
+              cdkDrag 
+              class="mod-row"
+              [class.mod-disabled]="!mod.Enabled"
+              [attr.data-mod-id]="mod.id">
+            
+            <!-- Drag Handle -->
+            <td class="drag-handle-cell">
+              <div cdkDragHandle class="drag-handle">
+                <i class="fas fa-grip-vertical"></i>
+              </div>
+            </td>
+            
+            <!-- Enabled Toggle -->
+            <td class="text-center">
+              <div class="form-check form-switch d-flex justify-content-center">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  [id]="'enabled-' + mod.id"
+                  [checked]="mod.Enabled"
+                  (change)="onEnabledToggle(mod)"
+                  [attr.aria-label]="'MY_MODS.TOGGLE_ENABLED' | translate"
+                  [attr.title]="'MY_MODS.TOGGLE_ENABLED' | translate">
+                <label 
+                  [for]="'enabled-' + mod.id" 
+                  class="visually-hidden">
+                  {{ 'MY_MODS.TOGGLE_ENABLED' | translate }}
+                </label>
+              </div>
+            </td>
+            
+            <!-- Priority -->
+            <td class="text-center">
+              <span class="badge bg-secondary priority-badge">
+                {{ mod.Priority }}
+              </span>
+            </td>
+            
+            <!-- Source (Local/Workshop) -->
+            <td class="text-center">
+              <span [class]="'badge ' + (mod.isLocal ? 'bg-primary' : 'bg-info')">
+                <i [class]="getModIcon(mod)" class="me-1"></i>
+                {{ getModSource(mod) }}
+              </span>
+            </td>
+            
+            <!-- Title -->
+            <td>
+              <strong class="mod-title" 
+                      [class.text-muted]="!mod.Enabled"
+                      [title]="mod.Description || 'No description available'"
+                      data-bs-toggle="tooltip" 
+                      data-bs-placement="top">
+                {{ mod.Title }}
+              </strong>
+            </td>
+            
+            <!-- Author -->
+            <td>
+              <span class="mod-author" [class.text-muted]="!mod.Enabled">
+                {{ mod.Author || 'Unknown' }}
+              </span>
+            </td>
+            
+            <!-- Last Update -->
+            <td class="text-nowrap">
+              <span class="mod-timestamp" [class.text-muted]="!mod.Enabled">
+                <span *ngIf="mod.lastUpdateDate; else noUpdate">
+                  {{ formatTimestamp(mod.lastUpdateDate) }}
+                </span>
+                <ng-template #noUpdate>-</ng-template>
+              </span>
+            </td>
+            
+            <!-- Install Time -->
+            <td class="text-nowrap">
+              <span class="mod-timestamp" [class.text-muted]="!mod.Enabled">
+                <span *ngIf="mod.installTimeDate; else noInstall">
+                  {{ formatTimestamp(mod.installTimeDate) }}
+                </span>
+                <ng-template #noInstall>-</ng-template>
+              </span>
+            </td>            
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- CDK Drag Placeholder -->
+      <div *cdkDragPlaceholder class="drag-placeholder"></div>
+    </div>
+  </div>
+</app-page-container>
