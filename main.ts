@@ -128,155 +128,54 @@ class Main {
           throw new Error('No executable path provided');
         }
 
-        // Check if file exists
+        // Quick file existence check
         if (!fs.existsSync(exePath)) {
           throw new Error(`Executable file not found: ${exePath}`);
         }
 
-        // Check if file is actually executable
-        const stats = fs.statSync(exePath);
-        if (!stats.isFile()) {
-          throw new Error('Provided path is not a file');
-        }
-
-        // Normalize path separators for Windows
+        // Normalize path for Windows
         const normalizedPath = path.normalize(exePath);
         const workingDir = path.dirname(normalizedPath);
         
-        return new Promise<{ success: boolean; error?: string }>((resolve) => {
-          let hasResolved = false;
+        // Fast launch with immediate return
+        if (process.platform === 'win32') {
+          // Use Windows start command for fastest launch
+          const startCommand = `start "Age of Mythology Retold" /D "${workingDir}" "${normalizedPath}"`;
           
-          // Set a timeout to avoid hanging indefinitely
-          const timeout = setTimeout(() => {
-            if (!hasResolved) {
-              hasResolved = true;
-              resolve({
-                success: false,
-                error: 'Process launch timeout - the executable might not be responding or may require additional permissions'
+          exec(startCommand, { 
+            cwd: workingDir,
+            windowsHide: false
+          }, (error) => {
+            if (error) {
+              console.error('Start command failed, trying direct spawn:', error.message);
+              // Fallback to direct spawn
+              const child = spawn(normalizedPath, [], {
+                detached: true,
+                stdio: 'ignore',
+                cwd: workingDir,
+                windowsHide: false
               });
+              child.unref();
             }
-          }, 10000); // 10 second timeout
+          });
           
-          if (process.platform === 'win32') {
-            // On Windows, try using the Windows shell start command
-            const startCommand = `start "Game" /D "${workingDir}" "${normalizedPath}"`;
-            
-            exec(startCommand, { 
-              cwd: workingDir,
-              windowsHide: false
-            }, (error, stdout, stderr) => {
-              if (error) {
-                // Fallback: try direct spawn
-                const child = spawn(normalizedPath, [], {
-                  detached: true,
-                  stdio: ['ignore', 'ignore', 'pipe'],
-                  cwd: workingDir,
-                  windowsHide: false
-                });
-
-                child.on('error', (spawnError) => {
-                  clearTimeout(timeout);
-                  if (!hasResolved) {
-                    hasResolved = true;
-                    resolve({
-                      success: false,
-                      error: `Failed to launch executable: ${spawnError.message}`
-                    });
-                  }
-                });
-
-                child.on('spawn', () => {
-                  clearTimeout(timeout);
-                  if (!hasResolved) {
-                    hasResolved = true;
-                    child.unref();
-                    resolve({ success: true });
-                  }
-                });
-
-                // Fallback timeout for spawn
-                setTimeout(() => {
-                  if (!hasResolved) {
-                    clearTimeout(timeout);
-                    hasResolved = true;
-                    child.unref();
-                    resolve({ success: true });
-                  }
-                }, 2000);
-                
-              } else {
-                clearTimeout(timeout);
-                if (!hasResolved) {
-                  hasResolved = true;
-                  resolve({ success: true });
-                }
-              }
-            });
-            
-            // Give the start command a moment, then assume success if no error
-            setTimeout(() => {
-              if (!hasResolved) {
-                clearTimeout(timeout);
-                hasResolved = true;
-                resolve({ success: true });
-              }
-            }, 2000);
-            
-          } else {
-            // On other platforms, use spawn
-            const child = spawn(normalizedPath, [], {
-              detached: true,
-              stdio: ['ignore', 'pipe', 'pipe'],
-              cwd: workingDir
-            });
-
-            child.on('error', (error) => {
-              clearTimeout(timeout);
-              if (!hasResolved) {
-                hasResolved = true;
-                resolve({
-                  success: false,
-                  error: `Failed to start process: ${error.message}`
-                });
-              }
-            });
-
-            child.on('spawn', () => {
-              clearTimeout(timeout);
-              if (!hasResolved) {
-                hasResolved = true;
-                child.unref();
-                resolve({ success: true });
-              }
-            });
-
-            child.on('exit', (code, signal) => {
-              clearTimeout(timeout);
-              if (!hasResolved) {
-                hasResolved = true;
-                if (code === 0) {
-                  resolve({ success: true });
-                } else {
-                  resolve({
-                    success: false,
-                    error: `Process exited with code ${code}`
-                  });
-                }
-              }
-            });
-
-            // Fallback timeout
-            setTimeout(() => {
-              if (!hasResolved && child && !child.killed) {
-                clearTimeout(timeout);
-                hasResolved = true;
-                child.unref();
-                resolve({ success: true });
-              }
-            }, 2000);
-          }
-        });
+          // Return success immediately - don't wait for process to fully start
+          return { success: true };
+          
+        } else {
+          // For other platforms, use direct spawn
+          const child = spawn(normalizedPath, [], {
+            detached: true,
+            stdio: 'ignore',
+            cwd: workingDir
+          });
+          
+          child.unref();
+          return { success: true, pid: child.pid };
+        }
+        
       } catch (error) {
+        console.error('Error launching game:', error);
         return { 
           success: false, 
           error: error instanceof Error ? error.message : 'Failed to launch executable' 
@@ -410,7 +309,6 @@ class Main {
         }
 
         const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
-        console.log(`Fetching YouTube feed for channel: ${channelId}`);
 
         return new Promise((resolve) => {
           const request = net.request({
@@ -424,8 +322,6 @@ class Main {
           let responseData = '';
 
           request.on('response', (response) => {
-            console.log(`YouTube feed response status: ${response.statusCode} for channel: ${channelId}`);
-            
             if (response.statusCode !== 200) {
               resolve({
                 success: false,
@@ -440,7 +336,6 @@ class Main {
 
             response.on('end', () => {
               if (responseData.trim()) {
-                console.log(`Successfully fetched YouTube feed for channel: ${channelId} (${responseData.length} bytes)`);
                 resolve({
                   success: true,
                   data: responseData

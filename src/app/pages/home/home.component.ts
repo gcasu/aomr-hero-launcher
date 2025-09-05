@@ -91,34 +91,43 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.startAutoSlide();
   }
 
+  private cachedGamePath: string | null = null;
+  private cacheTimestamp: number = 0;
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
   async launchGame(): Promise<void> {
     if (this.isLaunchingGame) {
       return; // Prevent multiple simultaneous launches
     }
 
     try {
-      // Get the saved game executable path from localStorage
-      const gameExePath = localStorage.getItem('gameExePath');
+      this.isLaunchingGame = true;
+      
+      // Show immediate feedback
+      this.toastService.showInfo(
+        this.translateService.instant('HOME.LAUNCH.LAUNCHING')
+      );
+
+      // Get cached game path (avoid repeated localStorage access)
+      const gameExePath = this.getCachedGamePath();
       
       if (!gameExePath) {
-        // Show error toast for missing game path
         this.toastService.showError(
           this.translateService.instant('HOME.LAUNCH.GAME_PATH_NOT_SET')
         );
+        this.isLaunchingGame = false;
         return;
       }
 
       // Check if we're running in Electron
       if (window.electronAPI) {
-        // Set launching state
-        this.isLaunchingGame = true;
-        
-        // Show launching toast
-        this.toastService.showInfo(
-          this.translateService.instant('HOME.LAUNCH.LAUNCHING')
+        // Launch game with timeout protection
+        const launchPromise = window.electronAPI.launchGame(gameExePath);
+        const timeoutPromise = new Promise<any>((_, reject) => 
+          setTimeout(() => reject(new Error('Launch timeout')), 5000)
         );
 
-        const result = await window.electronAPI.launchGame(gameExePath);
+        const result = await Promise.race([launchPromise, timeoutPromise]);
         
         if (result.success) {
           this.toastService.showSuccess(
@@ -140,14 +149,39 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.toastService.showWarning(
           this.translateService.instant('HOME.LAUNCH.ELECTRON_ONLY')
         );
+        this.isLaunchingGame = false;
       }
     } catch (error) {
-      this.isLaunchingGame = false;
       console.error('Error launching game:', error);
-      this.toastService.showError(
-        this.translateService.instant('HOME.LAUNCH.LAUNCH_ERROR')
-      );
+      
+      const errorMessage = error instanceof Error && error.message === 'Launch timeout' 
+        ? this.translateService.instant('HOME.LAUNCH.LAUNCH_TIMEOUT')
+        : this.translateService.instant('HOME.LAUNCH.LAUNCH_ERROR');
+        
+      this.toastService.showError(errorMessage);
+      this.isLaunchingGame = false;
     }
+  }
+
+  private getCachedGamePath(): string | null {
+    const now = Date.now();
+    
+    // Use cached path if it's still valid
+    if (this.cachedGamePath && (now - this.cacheTimestamp) < this.CACHE_DURATION) {
+      return this.cachedGamePath;
+    }
+    
+    // Refresh cache from localStorage
+    this.cachedGamePath = localStorage.getItem('gameExePath');
+    this.cacheTimestamp = now;
+    
+    return this.cachedGamePath;
+  }
+
+  // Method to invalidate cache when game path changes
+  public invalidateGamePathCache(): void {
+    this.cachedGamePath = null;
+    this.cacheTimestamp = 0;
   }
 
   buyMeCoffee(): void {

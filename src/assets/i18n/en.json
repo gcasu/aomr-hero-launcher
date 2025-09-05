@@ -33,6 +33,7 @@
       "LAUNCH_ERROR": "Failed to launch the game",
       "LAUNCHING": "Launching Age of Mythology: Retold...",
       "LAUNCH_SUCCESS": "Game launched successfully!",
+      "LAUNCH_TIMEOUT": "Game launch timed out. Please check your game path in Settings.",
       "ELECTRON_ONLY": "Game launching is only available in the Electron app"
     },
     "MESSAGES": {
