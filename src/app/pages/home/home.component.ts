@@ -20,13 +20,49 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private autoSlideInterval: number | null = null;
   isLaunchingGame = false;
 
+  // Background selection
+  backgroundSet: 'original' | 'heavenly' = 'original';
+  background1920: string = '';
+  background3840: string = '';
+
   private http = inject(HttpClient);
   private router = inject(Router);
   private translateService = inject(TranslateService);
   private toastService = inject(ToastService);
 
   ngOnInit(): void {
+    this.selectRandomBackground();
     this.loadCarouselConfig();
+  }
+
+  private selectRandomBackground(): void {
+    // Randomly pick between original and heavenly spear backgrounds
+    const sets = [
+      {
+        key: 'original',
+        bg1920: 'assets/images/home/age-of-mythology-1920x1080.jpg',
+        bg3840: 'assets/images/home/age-of-mythology-3840x2160.jpg',
+      },
+      {
+        key: 'heavenly',
+        bg1920: 'assets/images/home/age-of-mythology-heavenly-spear-1920x1080.jpg',
+        bg3840: 'assets/images/home/age-of-mythology-heavenly-spear-3840x2160.jpg',
+      }
+    ];
+    const chosen = sets[Math.floor(Math.random() * sets.length)];
+    this.backgroundSet = chosen.key as 'original' | 'heavenly';
+    this.background1920 = chosen.bg1920;
+    this.background3840 = chosen.bg3840;
+  }
+
+  getBackgroundStyle(): { [key: string]: string } {
+    // Detect high resolution screens
+    const isHighRes = window.innerWidth >= 2560;
+    const backgroundImage = isHighRes ? this.background3840 : this.background1920;
+    
+    return {
+      'background-image': `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${backgroundImage})`
+    };
   }
 
   ngAfterViewInit(): void {
