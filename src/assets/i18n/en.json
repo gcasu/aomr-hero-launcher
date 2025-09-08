@@ -102,14 +102,9 @@
       "TITLE": "No Mods Found",
       "DESCRIPTION": "No mods match your search criteria. Try adjusting your filter."
     },
-    "SIMDATA_MERGER": {
-      "LABEL": "Enable simdata merger (experimental)",
-      "TOOLTIP": "This experimental feature merges simdata files to improve mod compatibility. Use with caution as it may affect game stability."
-    },
     "MESSAGES": {
       "AUTO_SAVE_ERROR": "Failed to auto-save mod changes",
-      "UNKNOWN_DATE": "Unknown",
-      "SIMDATA_MERGER_TOGGLE_INFO": "This functionality is currently unavailable"
+      "UNKNOWN_DATE": "Unknown"
     },
     "SOURCE": {
       "LOCAL": "Local",

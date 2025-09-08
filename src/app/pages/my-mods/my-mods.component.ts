@@ -41,7 +41,6 @@ export class MyModsComponent implements OnInit, OnDestroy, AfterViewInit {
   filteredMods: ModDisplayItem[] = [];
   filterText = '';
   isLoading = false;
-  simdataMergerEnabled = false;
   private autoSaveTimeout: number | null = null;
 
   private modService = inject(ModService);
@@ -168,10 +167,6 @@ export class MyModsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getModSource(mod: ModDisplayItem): string {
     return mod.isLocal ? this.translate.instant('MY_MODS.SOURCE.LOCAL') : this.translate.instant('MY_MODS.SOURCE.WORKSHOP');
-  }
-
-  onSimdataMergerToggle(): void {
-    this.toastService.showInfo(this.translate.instant('MY_MODS.MESSAGES.SIMDATA_MERGER_TOGGLE_INFO'));
   }
 
   ngOnDestroy(): void {
