@@ -76,3 +76,19 @@ export interface MatchListRequest {
   recordCount: number;
   matchType: string;
 }
+
+export interface ProcessedMatch {
+  matchId: string;
+  winningPlayer: string;
+  winningPlayerAvatar: string;
+  matchDate: string;
+  civilization: string;
+  mapType: string;
+  profileId: number;
+}
+
+export interface MatchDataCache {
+  matches: ProcessedMatch[];
+  lastFetchDate: string;
+  totalMatches: number;
+}

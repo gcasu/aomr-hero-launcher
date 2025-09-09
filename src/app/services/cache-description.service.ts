@@ -10,7 +10,8 @@ export class CacheDescriptionService {
     'localModsPath': 'Local mods directory path',
     'selectedMajorGod': 'Selected major god in build orders',
     'dataGuideBookmarks': 'Data guide bookmarked entries',
-    'dataGuideNotes': 'Data guide user notes and annotations'
+    'dataGuideNotes': 'Data guide user notes and annotations',
+    'matchData': 'Top players match history data'
   };
 
   private readonly configKeys = [
@@ -21,7 +22,8 @@ export class CacheDescriptionService {
 
   private readonly dataKeys = [
     'dataGuideBookmarks', 
-    'dataGuideNotes'
+    'dataGuideNotes',
+    'matchData'
   ];
 
   getCacheItemDescription(key: string): string {

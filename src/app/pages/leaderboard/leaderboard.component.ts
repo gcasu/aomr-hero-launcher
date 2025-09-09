@@ -80,7 +80,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     
     const request: LeaderboardRequest = {
-      ...this.leaderboardService.getDefaultRequest(),
+      ...this.leaderboardService.getDefaultLeaderboardRequest(),
       page: this.currentPage,
       searchPlayer: this.filterText,
       count: this.playersPerPage,
