@@ -265,6 +265,8 @@
     "DESCRIPTION": "Explore all core game data for Age of Mythology: Retold",
     "LOADING": "Loading core data...",
     "SEARCH_PLACEHOLDER": "Search data sections...",
+    "SECTION_SEARCH_PLACEHOLDER": "Search sections and types...",
+    "ENTRY_SEARCH_PLACEHOLDER": "Search entries and descriptions...",
     "EXPAND_ALL": "Expand All",
     "COLLAPSE_ALL": "Collapse All",
     "SECTION": "Section",

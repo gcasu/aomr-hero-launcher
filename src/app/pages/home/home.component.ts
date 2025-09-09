@@ -208,7 +208,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   openDiscord(): void {
     try {
-      const url = 'https://discord.gg/ZGpW6j4w';
+      const url = 'https://discord.gg/gyGsqyQzPm';
       
       if (window.electronAPI?.openExternal) {
         window.electronAPI.openExternal(url);

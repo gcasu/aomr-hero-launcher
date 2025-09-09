@@ -14,13 +14,34 @@
     </div>
   </div>
 
-  <!-- Search Filter -->
-  <app-search-filter
-    [(ngModel)]="filterText"
-    (filterChange)="onFilterChange()"
-    placeholder="DATA_GUIDE.SEARCH_PLACEHOLDER"
-    inputId="dataGuideSearchInput">
-  </app-search-filter>
+  <!-- Search Filters -->
+  <div class="container-lg">
+    <div class="search-filters-section mb-4">
+      <!-- Section Filter Container -->
+      <div class="filter-container">
+        <app-search-filter
+          [(ngModel)]="sectionFilterText"
+          (filterChange)="onSectionFilterChange()"
+          placeholder="DATA_GUIDE.SECTION_SEARCH_PLACEHOLDER"
+          iconClass="fas fa-layer-group"
+          inputId="sectionSearchInput"
+          [fullWidth]="true">
+        </app-search-filter>
+      </div>
+      
+      <!-- Entry Filter Container -->
+      <div class="filter-container">
+        <app-search-filter
+          [(ngModel)]="entryFilterText"
+          (filterChange)="onEntryFilterChange()"
+          placeholder="DATA_GUIDE.ENTRY_SEARCH_PLACEHOLDER" 
+          iconClass="fas fa-file-alt"
+          inputId="entrySearchInput"
+          [fullWidth]="true">
+        </app-search-filter>
+      </div>
+    </div>
+  </div>
 
   <!-- Loading State -->
   <app-loading-state *ngIf="isLoading"></app-loading-state>
