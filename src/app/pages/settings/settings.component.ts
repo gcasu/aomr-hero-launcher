@@ -271,6 +271,9 @@ export class SettingsComponent implements OnInit, AfterViewInit {
           this.loadUserConfig();
         }
         
+        // Refresh cache list to show newly saved items
+        this.loadCacheItems();
+        
         // Show success message using toast service
         const successMessage = this.translateService.instant('SETTINGS.FORM.SUCCESS');
         this.toastService.showSuccess(successMessage);
