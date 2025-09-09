@@ -339,7 +339,7 @@
     "DESCRIPTION": "Learn and master strategic build orders for competitive play",
     "SELECT_MAJOR_GOD": "Select a Major God",
     "EMPTY_STATE_TITLE": "No Build Orders Available",
-    "EMPTY_STATE_DESCRIPTION": "Build orders for the selected god are coming soon. Check back later for strategic guides and builds!"
+    "EMPTY_STATE_DESCRIPTION": "Build orders for the selected god are coming soon. Check back later for builds and replays!"
   },
   "TIERS": {
     "TITLE": "Tier Lists",

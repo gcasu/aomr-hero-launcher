@@ -1,18 +1,9 @@
 <app-page-container containerClass="with-side-padding">
   <app-page-header 
     [title]="'DATA_GUIDE.TITLE' | translate"
-    [description]="'DATA_GUIDE.DESCRIPTION' | translate">
+    [description]="'DATA_GUIDE.DESCRIPTION' | translate"
+    [bannerMessage]="'DATA_GUIDE.DATA_SOURCE_INFO'">
   </app-page-header>
-
-  <!-- Info Section -->
-  <div class="info-section text-center mb-4">
-    <div class="info-card">
-      <i class="fas fa-info-circle text-info me-2"></i>
-      <span class="info-text text-light">
-        {{ 'DATA_GUIDE.DATA_SOURCE_INFO' | translate }}
-      </span>
-    </div>
-  </div>
 
   <!-- Search Filters -->
   <div class="container-lg">
