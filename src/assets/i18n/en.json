@@ -82,7 +82,7 @@
       }
     },
     "FEEDBACK": {
-      "TEXT_START": "AoM:R Hero Launcher v1.0 powered by <i>sliferdev</i>. Any feedback, bug report, or feature suggestion? Join my server on",
+      "TEXT_START": "AoM:R Hero Launcher v1.1.0 powered by <i>sliferdev</i>. Any feedback, bug report, or feature suggestion? Join my server on",
       "TEXT_MIDDLE": "or open an issue on"
     }
   },
