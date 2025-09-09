@@ -215,13 +215,28 @@
       "WELCOME_SETUP": "Welcome! Please configure your game paths to get started with advanced features."
     },
     "CACHE": {
-      "TITLE": "Clear Application Cache",
-      "DESCRIPTION": "Remove all cached data, settings, and reload the application",
+      "TITLE": "Cache Management",
+      "DESCRIPTION": "Manage application cache and stored data",
       "CLEAR_BUTTON": "Clear Cache",
+      "CLEAR_SELECTED": "Clear Selected",
+      "CLEAR_ALL": "Clear All",
+      "SELECT_ALL": "Select All",
       "CLEARING": "Clearing...",
       "CLEAR_SUCCESS": "Application cache cleared successfully",
+      "CLEAR_SELECTED_SUCCESS": "Selected cache items cleared successfully",
       "CLEAR_ERROR": "Failed to clear application cache",
-      "RELOAD_MESSAGE": "Application will reload in 2 seconds..."
+      "RELOAD_MESSAGE": "Application will reload in 2 seconds...",
+      "NO_ITEMS": "No cache items found",
+      "TABLE": {
+        "CACHE_ENTRY": "Cache Entry",
+        "DESCRIPTION": "Description",
+        "SIZE": "Size"
+      },
+      "TYPES": {
+        "CONFIG": "Config",
+        "DATA": "Data",
+        "OTHER": "Other"
+      }
     },
     "USER_CONFIG": {
       "TITLE": "User Configuration Manager",

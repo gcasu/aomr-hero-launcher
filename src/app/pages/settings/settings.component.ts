@@ -2,16 +2,13 @@ import { Component, OnInit, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ToastService } from '../../services/toast.service';
+import { CacheDescriptionService } from '../../services/cache-description.service';
+import { UserConfigItem, CacheItem } from '../../interfaces/settings.interface';
+import { USER_CONFIG_KEYS } from '../../constants/settings.constants';
 import { PageContainerComponent } from '../../shared/page-container/page-container.component';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { GlassCardComponent } from '../../shared/glass-card/glass-card.component';
 import { PathInputComponent } from '../../shared/path-input/path-input.component';
-
-export interface UserConfigItem {
-  key: string;
-  enabled: boolean;
-  description: string;
-}
 
 @Component({
   selector: 'app-settings',
@@ -39,33 +36,17 @@ export class SettingsComponent implements OnInit, AfterViewInit {
   
   // Cache management
   isClearingCache = false;
-  
-  private readonly configKeys = [
-    'aiDebug',
-    'aiShowBPValueText',
-    'dataValidation',
-    'dataValidationOnDebugRandomMaps',
-    'debugOutputGameData',
-    'debugRandomMaps',
-    'debugTriggers',
-    'developer',
-    'disableAssetPreloading',
-    'enableTriggerEcho',
-    'generateAIConstants',
-    'generateRMConstants',
-    'generateTRConstants',
-    'noIntroCinematics',
-    'showAIEchoes',
-    'showAIOutput'
-  ];
+  cacheItems: CacheItem[] = [];
 
   private translateService = inject(TranslateService);
   private toastService = inject(ToastService);
+  private cacheDescriptionService = inject(CacheDescriptionService);
 
   ngOnInit(): void {
     // Load settings immediately
     this.loadSettings();
     this.initializeUserConfigs();
+    this.loadCacheItems();
   }
 
   ngAfterViewInit(): void {
@@ -306,6 +287,116 @@ export class SettingsComponent implements OnInit, AfterViewInit {
   }
 
   // Cache Management Methods
+  loadCacheItems(): void {
+    this.cacheItems = [];
+    
+    // Get all localStorage keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        const value = localStorage.getItem(key);
+        const size = this.cacheDescriptionService.formatBytes(new Blob([value || '']).size);
+        
+        this.cacheItems.push({
+          key,
+          selected: false,
+          description: this.cacheDescriptionService.getCacheItemDescription(key),
+          size,
+          type: this.cacheDescriptionService.getCacheItemType(key)
+        });
+      }
+    }
+    
+    // Sort by type and then by key
+    this.cacheItems.sort((a, b) => {
+      if (a.type !== b.type) {
+        const typeOrder = { 'config': 0, 'data': 1, 'other': 2 };
+        return typeOrder[a.type] - typeOrder[b.type];
+      }
+      return a.key.localeCompare(b.key);
+    });
+  }
+
+  onCacheItemToggle(item: CacheItem): void {
+    item.selected = !item.selected;
+  }
+
+  selectAllCacheItems(): void {
+    const allSelected = this.cacheItems.every(item => item.selected);
+    this.cacheItems.forEach(item => item.selected = !allSelected);
+  }
+
+  get hasSelectedCacheItems(): boolean {
+    return this.cacheItems.some(item => item.selected);
+  }
+
+  get selectedCacheItemsCount(): number {
+    return this.cacheItems.filter(item => item.selected).length;
+  }
+
+  get allCacheItemsSelected(): boolean {
+    return this.cacheItems.length > 0 && this.cacheItems.every(item => item.selected);
+  }
+
+  get someButNotAllCacheItemsSelected(): boolean {
+    return this.hasSelectedCacheItems && !this.cacheItems.every(item => item.selected);
+  }
+
+  async clearSelectedCacheItems(): Promise<void> {
+    if (!this.hasSelectedCacheItems) {
+      return;
+    }
+
+    this.isClearingCache = true;
+    
+    try {
+      const selectedItems = this.cacheItems.filter(item => item.selected);
+      
+      // Set navigation flag before clearing storage to avoid blank screen
+      sessionStorage.setItem('navigateAfterReload', 'home');
+      
+      // Remove selected items from localStorage
+      selectedItems.forEach(item => {
+        localStorage.removeItem(item.key);
+      });
+      
+      // Show success message
+      const successMessage = this.translateService.instant('SETTINGS.CACHE.CLEAR_SELECTED_SUCCESS');
+      this.toastService.showSuccess(successMessage);
+      
+      // Inform user that application will reload
+      const reloadMessage = this.translateService.instant('SETTINGS.CACHE.RELOAD_MESSAGE');
+      this.toastService.showInfo(reloadMessage);
+      
+      // Reload the application after a short delay
+      setTimeout(async () => {
+        try {
+          if (window.electronAPI && window.electronAPI.reloadWindow) {
+            // Use Electron's window reload method
+            await window.electronAPI.reloadWindow();
+          } else if (window.electronAPI && window.electronAPI.restartApp) {
+            // Fallback to full restart
+            await window.electronAPI.restartApp();
+          } else {
+            // Web environment - simple reload
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error('Error reloading application:', error);
+          // Ultimate fallback
+          window.location.reload();
+        }
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error clearing selected cache items:', error);
+      const errorMessage = this.translateService.instant('SETTINGS.CACHE.CLEAR_ERROR');
+      this.toastService.showError(errorMessage);
+    } finally {
+      this.isClearingCache = false;
+    }
+  }
+
   async clearApplicationCache(): Promise<void> {
     this.isClearingCache = true;
     
@@ -355,7 +446,7 @@ export class SettingsComponent implements OnInit, AfterViewInit {
 
   // User Config Management Methods
   initializeUserConfigs(): void {
-    this.userConfigs = this.configKeys.map(key => ({
+    this.userConfigs = USER_CONFIG_KEYS.map(key => ({
       key,
       enabled: false,
       description: this.translateService.instant(`SETTINGS.USER_CONFIG.CONFIGS.${key}`)
