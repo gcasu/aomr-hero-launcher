@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 import { LeaderboardService } from '../../services/leaderboard.service';
@@ -53,6 +53,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
   private leaderboardService = inject(LeaderboardService);
   private toastService = inject(ToastService);
+  private translateService = inject(TranslateService);
 
   ngOnInit(): void {
     this.setupSearchDebounce();
@@ -98,7 +99,9 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to load leaderboard:', error);
-        this.toastService.showError('Failed to load leaderboard data');
+        this.translateService.get('LEADERBOARD.ERRORS.FAILED_TO_LOAD_DATA').subscribe(message => {
+          this.toastService.showError(message);
+        });
         this.isLoading = false;
       }
     });
@@ -265,5 +268,18 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
       case 3: return 'rank-bronze';
       default: return '';
     }
+  }
+
+  openPlayerStats(player: LeaderboardPlayer): void {
+    if (!player.rlUserId) {
+      console.warn('No profile ID available for player:', player.userName);
+      this.translateService.get('LEADERBOARD.ERRORS.PLAYER_PROFILE_NOT_AVAILABLE').subscribe(message => {
+        this.toastService.showWarning(message);
+      });
+      return;
+    }
+    
+    const statsUrl = `https://www.ageofempires.com/stats/?profileId=${player.rlUserId}&game=ageMyth&matchType=1`;
+    window.open(statsUrl, '_blank');
   }
 }
