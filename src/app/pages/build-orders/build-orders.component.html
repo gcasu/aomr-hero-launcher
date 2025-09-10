@@ -29,7 +29,14 @@
 
     <!-- Match History Table -->
     <div id="match-history-section" class="match-history-section" *ngIf="selectedGodId">
-      <h3 class="section-title">{{ getSelectedGodMatchTitle() }}</h3>
+      <div class="section-header">
+        <h3 class="section-title">{{ getSelectedGodMatchTitle() }}</h3>
+        <div *ngIf="hasGodMatches()" class="match-count-text">
+          <small class="text-light">
+            {{ getMatchCountText() }}
+          </small>
+        </div>
+      </div>
       
       <!-- Search Bar (only visible if there are matches for the god) -->
       <div *ngIf="hasGodMatches()">
@@ -97,7 +104,9 @@
                       class="player-avatar"
                       (error)="onImageError($event)"
                       loading="lazy">
-                    <span class="player-name">
+                    <span class="player-name clickable" 
+                          (click)="onFilterByPlayer(match.winningPlayer)"
+                          [title]="'Click to filter by ' + match.winningPlayer">
                       {{ match.winningPlayer }}
                     </span>
                   </div>
@@ -110,7 +119,11 @@
                 
                 <!-- Map -->
                 <td class="text-center map-cell">
-                  <span class="map-name">{{ formatMapName(match.mapType) }}</span>
+                  <span class="map-name clickable" 
+                        (click)="onFilterByMap(match.mapType)"
+                        [title]="'Click to filter by ' + formatMapName(match.mapType)">
+                    {{ formatMapName(match.mapType) }}
+                  </span>
                 </td>
                 
                 <!-- Actions -->

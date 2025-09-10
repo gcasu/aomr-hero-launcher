@@ -153,6 +153,16 @@ export class BuildOrdersComponent implements OnInit {
     this.applySearchFilter();
   }
 
+  onFilterByPlayer(playerName: string): void {
+    this.searchTerm = playerName;
+    this.applySearchFilter();
+  }
+
+  onFilterByMap(mapType: string): void {
+    this.searchTerm = this.formatMapName(mapType);
+    this.applySearchFilter();
+  }
+
   hasGodMatches(): boolean {
     return this.godMatches.length > 0;
   }
@@ -181,6 +191,16 @@ export class BuildOrdersComponent implements OnInit {
       return `${baseTitle} for ${selectedGod.name}`;
     }
     return baseTitle;
+  }
+
+  getMatchCountText(): string {
+    const total = this.godMatches.length;
+    const filtered = this.filteredMatches.length;
+    
+    if (this.searchTerm.trim()) {
+      return `${filtered} of ${total} matches`;
+    }
+    return `${total} matches`;
   }
 
   // Sorting methods
