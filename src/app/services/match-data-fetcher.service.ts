@@ -4,7 +4,9 @@ import {
   LeaderboardPlayer, 
   MatchListItem, 
   ProcessedMatch, 
-  MatchDataCache 
+  MatchDataCache,
+  LeaderboardSnapshot,
+  LeaderboardPlayerSnapshot
 } from '../interfaces/leaderboard.interface';
 import { firstValueFrom } from 'rxjs';
 
@@ -13,7 +15,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class MatchDataFetcherService {
   private readonly CACHE_KEY = 'matchData';
-  private readonly TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+  private readonly CACHE_TIMEOUT = 30 * 60 * 1000; // 30 minutes cache timeout
   private readonly REQUEST_DELAY = 100; // 100ms delay between requests
   private readonly MAX_MATCHES = 1000; // Maximum total matches to store
   
@@ -30,40 +32,54 @@ export class MatchDataFetcherService {
   }
 
   /**
-   * Main method to fetch match data if needed
+   * Main method to fetch match data with smart caching
    */
   async fetchMatchDataIfNeeded(): Promise<void> {
     try {
-      if (!this.shouldFetch()) {
-        console.log('Match data fetch not needed - within 24h window');
+      const cachedData = this.getCachedData();
+      
+      // Check if we're within the cache window
+      if (this.isWithinCacheWindow(cachedData)) {
+        console.log('Match data fetch not needed - within 30 minute cache window');
         return;
       }
 
-      console.log(`Starting match data fetch for top ${this.topPlayersCount} players`);
-      await this.fetchAndStoreMatchData();
-      console.log('Match data fetch completed successfully');
+      console.log(`Starting smart match data fetch for top ${this.topPlayersCount} players`);
+      
+      // Get current leaderboard
+      const currentLeaderboard = await this.fetchCurrentLeaderboard();
+      
+      if (!cachedData?.leaderboardSnapshot) {
+        // First time - fetch all players
+        console.log('No cached leaderboard found - fetching all players');
+        await this.fetchAllPlayerMatches(currentLeaderboard, cachedData);
+      } else {
+        // Compare leaderboards and fetch only changed players
+        console.log('Comparing leaderboards for differential update');
+        await this.fetchChangedPlayerMatches(currentLeaderboard, cachedData);
+      }
+
+      console.log('Smart match data fetch completed successfully');
     } catch (error) {
       console.error('Error during match data fetch:', error);
     }
   }
 
   /**
-   * Check if we should fetch data (24h window)
+   * Check if we're within the 15-minute cache window
    */
-  private shouldFetch(): boolean {
-    const cachedData = this.getCachedData();
-    if (!cachedData) return true;
+  private isWithinCacheWindow(cachedData: MatchDataCache | null): boolean {
+    if (!cachedData?.lastLeaderboardCheck) return false;
 
-    const lastFetchTime = new Date(cachedData.lastFetchDate).getTime();
+    const lastCheckTime = new Date(cachedData.lastLeaderboardCheck).getTime();
     const now = Date.now();
-    return (now - lastFetchTime) > this.TWENTY_FOUR_HOURS;
+    return (now - lastCheckTime) < this.CACHE_TIMEOUT;
   }
 
   /**
-   * Fetch top players and their match lists
+   * Fetch current leaderboard data
    */
-  private async fetchAndStoreMatchData(): Promise<void> {
-    // Get top players from leaderboard
+  private async fetchCurrentLeaderboard(): Promise<LeaderboardPlayer[]> {
     const leaderboardRequest = this.leaderboardService.getDefaultLeaderboardRequest();
     leaderboardRequest.count = this.topPlayersCount;
     
@@ -71,23 +87,28 @@ export class MatchDataFetcherService {
       this.leaderboardService.getLeaderboard(leaderboardRequest)
     );
 
-    const topPlayers = leaderboardResponse.items;
-    console.log(`Fetched ${topPlayers.length} top players`);
+    return leaderboardResponse.items;
+  }
 
-    // Fetch matches for each player with delay
+  /**
+   * Fetch matches for all players (first time or full refresh)
+   */
+  private async fetchAllPlayerMatches(players: LeaderboardPlayer[], cachedData: MatchDataCache | null): Promise<void> {
+    console.log(`Fetching matches for all ${players.length} players`);
+    
     const allMatches: ProcessedMatch[] = [];
     
-    for (let i = 0; i < topPlayers.length; i++) {
-      const player = topPlayers[i];
+    for (let i = 0; i < players.length; i++) {
+      const player = players[i];
       
       try {
         const playerMatches = await this.fetchPlayerMatches(player);
         allMatches.push(...playerMatches);
         
-        console.log(`Processed player ${i + 1}/${topPlayers.length}: ${player.userName} (${playerMatches.length} wins)`);
+        console.log(`Processed player ${i + 1}/${players.length}: ${player.userName} (${playerMatches.length} wins)`);
         
         // Add delay between requests (except for the last one)
-        if (i < topPlayers.length - 1) {
+        if (i < players.length - 1) {
           await this.delay(this.REQUEST_DELAY);
         }
       } catch (error) {
@@ -96,27 +117,138 @@ export class MatchDataFetcherService {
       }
     }
 
-    // Merge with existing data and limit to MAX_MATCHES
-    const existingData = this.getCachedData();
-    const existingMatches = existingData?.matches || [];
+    // Merge with existing data and save
+    await this.saveMatchData(allMatches, players, cachedData);
+  }
+
+  /**
+   * Fetch matches only for players whose ELO has changed
+   */
+  private async fetchChangedPlayerMatches(currentPlayers: LeaderboardPlayer[], cachedData: MatchDataCache): Promise<void> {
+    const changedPlayers = this.findChangedPlayers(currentPlayers, cachedData.leaderboardSnapshot!);
     
-    // Combine and remove duplicates based on matchId
-    const combinedMatches = this.mergeMatches(existingMatches, allMatches);
+    if (changedPlayers.length === 0) {
+      console.log('No players with ELO changes found - updating leaderboard snapshot only');
+      await this.updateLeaderboardSnapshot(currentPlayers, cachedData);
+      return;
+    }
+
+    console.log(`Fetching matches for ${changedPlayers.length} players with ELO changes`);
+    
+    const newMatches: ProcessedMatch[] = [];
+    
+    for (let i = 0; i < changedPlayers.length; i++) {
+      const player = changedPlayers[i];
+      
+      try {
+        const playerMatches = await this.fetchPlayerMatches(player);
+        newMatches.push(...playerMatches);
+        
+        console.log(`Processed changed player ${i + 1}/${changedPlayers.length}: ${player.userName} (${playerMatches.length} wins)`);
+        
+        // Add delay between requests (except for the last one)
+        if (i < changedPlayers.length - 1) {
+          await this.delay(this.REQUEST_DELAY);
+        }
+      } catch (error) {
+        console.error(`Error fetching matches for player ${player.userName}:`, error);
+        // Continue with next player even if one fails
+      }
+    }
+
+    // Merge with existing data and save
+    await this.saveMatchData(newMatches, currentPlayers, cachedData);
+  }
+
+  /**
+   * Find players whose ELO has changed
+   */
+  private findChangedPlayers(currentPlayers: LeaderboardPlayer[], previousSnapshot: LeaderboardSnapshot): LeaderboardPlayer[] {
+    const previousPlayersMap = new Map<number, LeaderboardPlayerSnapshot>();
+    previousSnapshot.players.forEach(player => {
+      previousPlayersMap.set(player.rlUserId, player);
+    });
+
+    const changedPlayers: LeaderboardPlayer[] = [];
+
+    for (const currentPlayer of currentPlayers) {
+      const previousPlayer = previousPlayersMap.get(currentPlayer.rlUserId);
+      
+      if (!previousPlayer || previousPlayer.elo !== currentPlayer.elo) {
+        changedPlayers.push(currentPlayer);
+        
+        if (previousPlayer) {
+          console.log(`ELO change detected for ${currentPlayer.userName}: ${previousPlayer.elo} → ${currentPlayer.elo}`);
+        } else {
+          console.log(`New player detected: ${currentPlayer.userName} (${currentPlayer.elo} ELO)`);
+        }
+      }
+    }
+
+    return changedPlayers;
+  }
+
+  /**
+   * Update only the leaderboard snapshot without fetching matches
+   */
+  private async updateLeaderboardSnapshot(currentPlayers: LeaderboardPlayer[], cachedData: MatchDataCache): Promise<void> {
+    const updatedCache: MatchDataCache = {
+      ...cachedData,
+      leaderboardSnapshot: this.createLeaderboardSnapshot(currentPlayers),
+      lastLeaderboardCheck: new Date().toISOString()
+    };
+
+    this.saveCachedData(updatedCache);
+    console.log('Updated leaderboard snapshot without fetching new matches');
+  }
+
+  /**
+   * Save match data with updated leaderboard snapshot
+   */
+  private async saveMatchData(newMatches: ProcessedMatch[], currentPlayers: LeaderboardPlayer[], cachedData: MatchDataCache | null): Promise<void> {
+    // Merge with existing matches
+    const existingMatches = cachedData?.matches || [];
+    const combinedMatches = this.mergeMatches(existingMatches, newMatches);
     
     // Limit to MAX_MATCHES (keep most recent)
     const finalMatches = combinedMatches
       .sort((a, b) => new Date(b.matchDate).getTime() - new Date(a.matchDate).getTime())
       .slice(0, this.MAX_MATCHES);
 
-    // Save to cache
-    const cacheData: MatchDataCache = {
+    // Create updated cache
+    const updatedCache: MatchDataCache = {
       matches: finalMatches,
       lastFetchDate: new Date().toISOString(),
-      totalMatches: finalMatches.length
+      totalMatches: finalMatches.length,
+      leaderboardSnapshot: this.createLeaderboardSnapshot(currentPlayers),
+      lastLeaderboardCheck: new Date().toISOString()
     };
 
-    this.saveCachedData(cacheData);
-    console.log(`Saved ${finalMatches.length} total matches to cache`);
+    this.saveCachedData(updatedCache);
+    console.log(`Saved ${finalMatches.length} total matches to cache with updated leaderboard snapshot`);
+  }
+
+  /**
+   * Create a leaderboard snapshot
+   */
+  private createLeaderboardSnapshot(players: LeaderboardPlayer[]): LeaderboardSnapshot {
+    return {
+      players: players.map(player => ({
+        rlUserId: player.rlUserId,
+        userName: player.userName,
+        elo: player.elo,
+        rank: player.rank
+      })),
+      fetchDate: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Fetch top players and their match lists (legacy method - kept for compatibility)
+   */
+  private async fetchAndStoreMatchData(): Promise<void> {
+    // This method is now handled by the smart caching logic
+    await this.fetchMatchDataIfNeeded();
   }
 
   /**
@@ -204,12 +336,13 @@ export class MatchDataFetcherService {
   /**
    * Get current cache statistics
    */
-  getCacheStats(): { totalMatches: number; lastFetchDate: string | null; needsFetch: boolean } {
+  getCacheStats(): { totalMatches: number; lastFetchDate: string | null; needsFetch: boolean; lastLeaderboardCheck: string | null } {
     const cached = this.getCachedData();
     return {
       totalMatches: cached?.totalMatches || 0,
       lastFetchDate: cached?.lastFetchDate || null,
-      needsFetch: this.shouldFetch()
+      lastLeaderboardCheck: cached?.lastLeaderboardCheck || null,
+      needsFetch: !this.isWithinCacheWindow(cached)
     };
   }
 }

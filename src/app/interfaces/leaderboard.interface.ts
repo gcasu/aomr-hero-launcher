@@ -91,4 +91,18 @@ export interface MatchDataCache {
   matches: ProcessedMatch[];
   lastFetchDate: string;
   totalMatches: number;
+  leaderboardSnapshot: LeaderboardSnapshot | null;
+  lastLeaderboardCheck: string;
+}
+
+export interface LeaderboardSnapshot {
+  players: LeaderboardPlayerSnapshot[];
+  fetchDate: string;
+}
+
+export interface LeaderboardPlayerSnapshot {
+  rlUserId: number;
+  userName: string;
+  elo: number;
+  rank: number;
 }
