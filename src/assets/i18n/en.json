@@ -338,8 +338,20 @@
     "TITLE": "Build Orders",
     "DESCRIPTION": "Learn and master strategic build orders for competitive play",
     "SELECT_MAJOR_GOD": "Select a Major God",
-    "EMPTY_STATE_TITLE": "No Build Orders Available",
-    "EMPTY_STATE_DESCRIPTION": "Build orders for the selected god are coming soon. Check back later for builds and replays!"
+    "RECENT_MATCHES": "Recent Competitive Matches",
+    "SEARCH_PLACEHOLDER": "Search by player name or map...",
+    "NO_MATCHES_TITLE": "No Recent Matches",
+    "NO_MATCHES_DESCRIPTION": "No recent competitive matches found for this god. Check back later as new match data becomes available.",
+    "NO_RESULTS_TITLE": "No Matches Found",
+    "NO_RESULTS_DESCRIPTION": "No matches found for your search criteria. Try adjusting your search terms.",
+    "TABLE": {
+      "PLAYER": "Player",
+      "MATCH_DATE": "Match Date",
+      "MAP": "Map",
+      "ACTIONS": "Actions",
+      "VIEW_REPLAY": "View Replay",
+      "VIEW_STATS": "View Stats"
+    }
   },
   "TIERS": {
     "TITLE": "Tier Lists",
