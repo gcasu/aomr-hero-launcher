@@ -1,26 +1,38 @@
 <app-page-container containerClass="with-side-padding">
   <app-page-header 
     [title]="'DATA_GUIDE.TITLE' | translate"
-    [description]="'DATA_GUIDE.DESCRIPTION' | translate">
+    [description]="'DATA_GUIDE.DESCRIPTION' | translate"
+    [bannerMessage]="'DATA_GUIDE.DATA_SOURCE_INFO'">
   </app-page-header>
 
-  <!-- Info Section -->
-  <div class="info-section text-center mb-4">
-    <div class="info-card">
-      <i class="fas fa-info-circle text-info me-2"></i>
-      <span class="info-text text-light">
-        {{ 'DATA_GUIDE.DATA_SOURCE_INFO' | translate }}
-      </span>
+  <!-- Search Filters -->
+  <div class="container-lg">
+    <div class="search-filters-section mb-4">
+      <!-- Section Filter Container -->
+      <div class="filter-container">
+        <app-search-filter
+          [(ngModel)]="sectionFilterText"
+          (filterChange)="onSectionFilterChange()"
+          placeholder="DATA_GUIDE.SECTION_SEARCH_PLACEHOLDER"
+          iconClass="fas fa-layer-group"
+          inputId="sectionSearchInput"
+          [fullWidth]="true">
+        </app-search-filter>
+      </div>
+      
+      <!-- Entry Filter Container -->
+      <div class="filter-container">
+        <app-search-filter
+          [(ngModel)]="entryFilterText"
+          (filterChange)="onEntryFilterChange()"
+          placeholder="DATA_GUIDE.ENTRY_SEARCH_PLACEHOLDER" 
+          iconClass="fas fa-file-alt"
+          inputId="entrySearchInput"
+          [fullWidth]="true">
+        </app-search-filter>
+      </div>
     </div>
   </div>
-
-  <!-- Search Filter -->
-  <app-search-filter
-    [(ngModel)]="filterText"
-    (filterChange)="onFilterChange()"
-    placeholder="DATA_GUIDE.SEARCH_PLACEHOLDER"
-    inputId="dataGuideSearchInput">
-  </app-search-filter>
 
   <!-- Loading State -->
   <app-loading-state *ngIf="isLoading"></app-loading-state>

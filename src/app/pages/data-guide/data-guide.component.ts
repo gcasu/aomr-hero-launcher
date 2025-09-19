@@ -51,7 +51,8 @@ export class DataGuideComponent implements OnInit, OnDestroy, AfterViewInit {
   coreData: CoreData | null = null;
   sections: DataSection[] = [];
   filteredSections: DataSection[] = [];
-  filterText = '';
+  sectionFilterText = ''; // Filter for section names and types
+  entryFilterText = ''; // Filter for entry names and descriptions  
   searchHighlightTerm = ''; // Store search term for highlighting
   expandedSections = new Set<string>();
   expandedEntries = new Set<string>();
@@ -153,22 +154,45 @@ export class DataGuideComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Apply filtering (including deprecated filter) from the start
-    this.onFilterChange();
+    this.applyFiltering();
     
     // Initialize tooltips after data is loaded
     setTimeout(() => this.initializeTooltips(), 100);
   }
 
   onFilterChange(): void {
-    const searchTerm = this.filterText.trim().toLowerCase();
+    this.applyFiltering();
+  }
+
+  onSectionFilterChange(): void {
+    this.applyFiltering();
+  }
+
+  onEntryFilterChange(): void {
+    this.applyFiltering();
+  }
+
+  private applyFiltering(): void {
+    const sectionSearchTerm = this.sectionFilterText.trim().toLowerCase();
+    const entrySearchTerm = this.entryFilterText.trim().toLowerCase();
     
-    // Set highlight term only if search is at least 2 characters
-    this.searchHighlightTerm = searchTerm.length >= 2 ? searchTerm : '';
-    
+    // Set highlight term only if entry search is at least 2 characters
+    this.searchHighlightTerm = entrySearchTerm.length >= 2 ? entrySearchTerm : '';
+
     this.filteredSections = this.sections.map(section => {
-      const filteredEntries = this.filterEntriesRecursively(section.entries, searchTerm);
+      // First, check if section should be included based on section filter
+      const sectionMatches = !sectionSearchTerm || 
+        section.name.toLowerCase().includes(sectionSearchTerm) ||
+        section.type.toLowerCase().includes(sectionSearchTerm);
       
-      if (filteredEntries.length > 0) {
+      if (!sectionMatches) {
+        return null; // Exclude entire section
+      }
+
+      // Then filter entries within the section
+      const filteredEntries = this.filterEntriesRecursively(section.entries, entrySearchTerm);
+      
+      if (filteredEntries.length > 0 || !entrySearchTerm) {
         return {
           ...section,
           entries: filteredEntries
@@ -190,7 +214,7 @@ export class DataGuideComponent implements OnInit, OnDestroy, AfterViewInit {
     this.disposeTooltips();
     
     // Re-apply filtering to show/hide deprecated entries
-    this.onFilterChange();
+    this.applyFiltering();
     
     // Show toast message
     const messageKey = this.showDeprecatedEntries ? 

@@ -82,7 +82,7 @@
       }
     },
     "FEEDBACK": {
-      "TEXT_START": "AoM:R Hero Launcher v1.0 powered by <i>sliferdev</i>. Any feedback, bug report, or feature suggestion? Join my server on",
+      "TEXT_START": "AoM:R Hero Launcher v1.1.0 powered by <i>sliferdev</i>. Any feedback, bug report, or feature suggestion? Join my server on",
       "TEXT_MIDDLE": "or open an issue on"
     }
   },
@@ -102,14 +102,9 @@
       "TITLE": "No Mods Found",
       "DESCRIPTION": "No mods match your search criteria. Try adjusting your filter."
     },
-    "SIMDATA_MERGER": {
-      "LABEL": "Enable simdata merger (experimental)",
-      "TOOLTIP": "This experimental feature merges simdata files to improve mod compatibility. Use with caution as it may affect game stability."
-    },
     "MESSAGES": {
       "AUTO_SAVE_ERROR": "Failed to auto-save mod changes",
-      "UNKNOWN_DATE": "Unknown",
-      "SIMDATA_MERGER_TOGGLE_INFO": "This functionality is currently unavailable"
+      "UNKNOWN_DATE": "Unknown"
     },
     "SOURCE": {
       "LOCAL": "Local",
@@ -179,6 +174,11 @@
       "LOSSES": "Losses",
       "TOTAL_GAMES": "Total Games",
       "STREAK": "Streak"
+    },
+    "VIEW_PLAYER_STATS": "Click to view player's detailed stats",
+    "ERRORS": {
+      "PLAYER_PROFILE_NOT_AVAILABLE": "Player profile not available",
+      "FAILED_TO_LOAD_DATA": "Failed to load leaderboard data"
     }
   },
   "SETTINGS": {
@@ -215,13 +215,28 @@
       "WELCOME_SETUP": "Welcome! Please configure your game paths to get started with advanced features."
     },
     "CACHE": {
-      "TITLE": "Clear Application Cache",
-      "DESCRIPTION": "Remove all cached data, settings, and reload the application",
+      "TITLE": "Cache Management",
+      "DESCRIPTION": "Manage application cache and stored data",
       "CLEAR_BUTTON": "Clear Cache",
+      "CLEAR_SELECTED": "Clear Selected",
+      "CLEAR_ALL": "Clear All",
+      "SELECT_ALL": "Select All",
       "CLEARING": "Clearing...",
       "CLEAR_SUCCESS": "Application cache cleared successfully",
+      "CLEAR_SELECTED_SUCCESS": "Selected cache items cleared successfully",
       "CLEAR_ERROR": "Failed to clear application cache",
-      "RELOAD_MESSAGE": "Application will reload in 2 seconds..."
+      "RELOAD_MESSAGE": "Application will reload in 2 seconds...",
+      "NO_ITEMS": "No cache items found",
+      "TABLE": {
+        "CACHE_ENTRY": "Cache Entry",
+        "DESCRIPTION": "Description",
+        "SIZE": "Size"
+      },
+      "TYPES": {
+        "CONFIG": "Config",
+        "DATA": "Data",
+        "OTHER": "Other"
+      }
     },
     "USER_CONFIG": {
       "TITLE": "User Configuration Manager",
@@ -270,6 +285,8 @@
     "DESCRIPTION": "Explore all core game data for Age of Mythology: Retold",
     "LOADING": "Loading core data...",
     "SEARCH_PLACEHOLDER": "Search data sections...",
+    "SECTION_SEARCH_PLACEHOLDER": "Search sections and types...",
+    "ENTRY_SEARCH_PLACEHOLDER": "Search entries and descriptions...",
     "EXPAND_ALL": "Expand All",
     "COLLAPSE_ALL": "Collapse All",
     "SECTION": "Section",
@@ -321,8 +338,20 @@
     "TITLE": "Build Orders",
     "DESCRIPTION": "Learn and master strategic build orders for competitive play",
     "SELECT_MAJOR_GOD": "Select a Major God",
-    "EMPTY_STATE_TITLE": "No Build Orders Available",
-    "EMPTY_STATE_DESCRIPTION": "Build orders for the selected god are coming soon. Check back later for strategic guides and builds!"
+    "RECENT_MATCHES": "Recent Competitive Matches",
+    "SEARCH_PLACEHOLDER": "Search by player name or map...",
+    "NO_MATCHES_TITLE": "No Recent Matches",
+    "NO_MATCHES_DESCRIPTION": "No recent competitive matches found for this god. Check back later as new match data becomes available.",
+    "NO_RESULTS_TITLE": "No Matches Found",
+    "NO_RESULTS_DESCRIPTION": "No matches found for your search criteria. Try adjusting your search terms.",
+    "TABLE": {
+      "PLAYER": "Player",
+      "MATCH_DATE": "Match Date",
+      "MAP": "Map",
+      "ACTIONS": "Actions",
+      "VIEW_REPLAY": "View Replay",
+      "VIEW_STATS": "View Stats"
+    }
   },
   "TIERS": {
     "TITLE": "Tier Lists",

@@ -17,10 +17,10 @@ import { TranslateModule } from '@ngx-translate/core';
   template: `
     <div class="filter-section mb-4">
       <div class="row justify-content-center align-items-center">
-        <div class="col-md-6">
+        <div [class]="fullWidth ? 'col-12' : 'col-md-6'">
           <div class="input-group">
             <span class="input-group-text">
-              <i class="fas fa-search"></i>
+              <i [class]="iconClass || 'fas fa-search'"></i>
             </span>
             <label [for]="inputId" class="visually-hidden">
               {{ placeholder | translate }}
@@ -82,6 +82,8 @@ import { TranslateModule } from '@ngx-translate/core';
 export class SearchFilterComponent implements ControlValueAccessor {
   @Input() placeholder: string = 'COMMON.SEARCH_PLACEHOLDER';
   @Input() inputId: string = 'filterInput';
+  @Input() iconClass: string = '';
+  @Input() fullWidth: boolean = false;
   @Output() filterChange = new EventEmitter<string>();
 
   value: string = '';

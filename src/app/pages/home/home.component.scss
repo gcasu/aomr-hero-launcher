@@ -12,23 +12,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-    url('../../../assets/images/home/age-of-mythology-1920x1080-17145.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   padding: 4rem 0;
-  
-  // Use 4K background for high resolution screens
-  @media (min-width: 2560px) {
-    background: 
-      linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-      url('../../../assets/images/home/age-of-mythology-3840x2160-17145.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
 }
 
 .features-section {

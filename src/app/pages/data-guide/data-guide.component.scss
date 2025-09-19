@@ -1,6 +1,67 @@
 @use '../../shared/styles/shared.scss';
 @use '../../shared/styles/typography' as *;
 
+// Search filters section
+.search-filters-section {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  
+  .filter-container {
+    flex: 1;
+    
+    app-search-filter {
+      display: block;
+      width: 100%;
+    }
+  }
+  
+  // Responsive: stack on mobile
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+// Force full width on search filter components using ::ng-deep
+:host ::ng-deep {
+  .search-filters-section {
+    app-search-filter {
+      .filter-section {
+        margin-bottom: 0 !important;
+        padding: 0 !important;
+        
+        .row {
+          margin: 0 !important;
+          
+          .col-md-6 {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            width: 100% !important;
+          }
+        }
+        
+        .input-group {
+          width: 100% !important;
+        }
+      }
+    }
+  }
+
+  pre {
+    font-family: 'Courier New', 'Monaco', monospace;
+
+    code {
+      font-family: inherit;
+
+      span {
+        font-family: inherit;
+      }
+    }
+  }
+}
+
 // Search highlighting
 .search-highlight {
   background: linear-gradient(135deg, #ffd700, #ffed4e);
@@ -20,28 +81,6 @@
   100% {
     background: linear-gradient(135deg, #ffed4e, #ffd700);
     box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
-  }
-}
-
-// Info section styling
-.info-section {
-  .info-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    display: inline-flex;
-    align-items: center;
-    backdrop-filter: blur(10px);
-    
-    .info-text {
-      font-size: 0.875rem;
-      font-style: italic;
-    }
-    
-    .fa-info-circle {
-      font-size: 1rem;
-    }
   }
 }
 
@@ -97,6 +136,7 @@
       &:hover {
         background: rgba(255, 255, 255, 0.15) !important;
         border-color: rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.9);
         transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       }
@@ -316,6 +356,7 @@
               padding: 0.25rem 0.5rem;
               border: none;
               background: rgba(255, 255, 255, 0.1);
+              color: rgba(255, 255, 255, 0.7);
               
               &:hover {
                 background: rgba(255, 255, 255, 0.2) !important;
@@ -369,7 +410,6 @@
 
                 code {
                   color: #e2e8f0;
-                  font-family: 'Courier New', 'Monaco', monospace;
                   font-size: 0.875rem;
                   white-space: pre-wrap;
                 }
@@ -383,6 +423,7 @@
                 padding: 0.25rem 0.5rem;
                 border: none;
                 background: rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.7);
                 transition: all 0.2s ease;
 
                 &:hover {
@@ -486,7 +527,6 @@
                       border: 1px solid rgba(255, 255, 255, 0.1);
                       border-radius: 6px;
                       padding: 0.75rem;
-                      font-family: 'Courier New', monospace;
                       font-size: 0.875rem;
                       color: #e9ecef;
                       overflow-x: auto;
@@ -497,7 +537,6 @@
                         color: inherit;
                         padding: 0;
                         border-radius: 0;
-                        font-family: inherit;
                         font-size: inherit;
                       }
                     }
@@ -510,6 +549,7 @@
                       padding: 0.2rem 0.4rem;
                       border: none;
                       background: rgba(255, 255, 255, 0.1);
+                      color: rgba(255, 255, 255, 0.7);
                       transition: all 0.2s ease;
 
                       &:hover {
@@ -632,7 +672,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   padding: 0.75rem;
-  font-family: 'Courier New', monospace;
+  font-family: 'Courier New', 'Monaco', monospace;
   font-size: 0.875rem;
   color: #e9ecef;
   overflow-x: auto;

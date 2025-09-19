@@ -9,6 +9,7 @@ import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavigationItem, NavItem, NavGroup } from './models/navigation.model';
 import { NavigationService } from './services/navigation.service';
 import { ScrollService } from './services/scroll.service';
+import { MatchDataFetcherService } from './services/match-data-fetcher.service';
 
 @Component({
   selector: 'app-root',
@@ -32,6 +33,7 @@ export class AppComponent implements OnInit {
   router = inject(Router);
   navigationService = inject(NavigationService);
   private scrollService = inject(ScrollService); // Initialize scroll service
+  private matchDataFetcher = inject(MatchDataFetcherService); // Initialize match data fetcher
 
   // Navigation structure from config
   navigationItems: NavigationItem[] = this.navigationService.getNavigationItems();
@@ -42,6 +44,9 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Initialize background match data fetching
+    this.initializeBackgroundTasks();
+    
     // Check for post-reload navigation flag to prevent blank screen
     this.checkPostReloadNavigation();
     
@@ -74,6 +79,18 @@ export class AppComponent implements OnInit {
   // Update active tab based on current route
   private updateActiveTab(url: string): void {
     this.activeTab = this.navigationService.getActiveTabFromUrl(url);
+  }
+
+  private async initializeBackgroundTasks(): Promise<void> {
+    try {
+      // Set top players count for development/testing (can be configured)
+      // this.matchDataFetcher.setTopPlayersCount(10); // Uncomment for testing with fewer players
+      
+      // Start background match data fetching
+      await this.matchDataFetcher.fetchMatchDataIfNeeded();
+    } catch (error) {
+      console.error('Error initializing background tasks:', error);
+    }
   }
 
   private checkPostReloadNavigation(): void {

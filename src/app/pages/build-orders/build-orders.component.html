@@ -1,4 +1,4 @@
-<app-page-container>
+<app-page-container containerClass="with-side-padding">
   <app-page-header 
     [title]="'BUILD_ORDERS.TITLE' | translate"
     [description]="'BUILD_ORDERS.DESCRIPTION' | translate">
@@ -27,11 +27,124 @@
       </div>
     </div>
 
-    <!-- Empty state when no build orders are available -->
-    <app-empty-state 
-      [title]="'BUILD_ORDERS.EMPTY_STATE_TITLE' | translate"
-      [description]="'BUILD_ORDERS.EMPTY_STATE_DESCRIPTION' | translate"
-      icon="fas fa-scroll">
-    </app-empty-state>
+    <!-- Match History Table -->
+    <div id="match-history-section" class="match-history-section" *ngIf="selectedGodId">
+      <div class="section-header">
+        <h3 class="section-title">{{ getSelectedGodMatchTitle() }}</h3>
+        <div *ngIf="hasGodMatches()" class="match-count-text">
+          <small class="text-light">
+            {{ getMatchCountText() }}
+          </small>
+        </div>
+      </div>
+      
+      <!-- Search Bar (only visible if there are matches for the god) -->
+      <div *ngIf="hasGodMatches()">
+        <app-search-filter 
+          [placeholder]="'BUILD_ORDERS.SEARCH_PLACEHOLDER'"
+          [fullWidth]="false"
+          [(ngModel)]="searchTerm"
+          (filterChange)="onSearchChange()">
+        </app-search-filter>
+      </div>
+      
+      <div class="match-history-table-container">
+        <!-- Empty State for no matches for this god -->
+        <div *ngIf="!hasGodMatches()">
+          <app-empty-state 
+            [title]="'BUILD_ORDERS.NO_MATCHES_TITLE' | translate"
+            [description]="'BUILD_ORDERS.NO_MATCHES_DESCRIPTION' | translate"
+            icon="fas fa-history">
+          </app-empty-state>
+        </div>
+
+        <!-- Empty State for no search results -->
+        <div *ngIf="isSearchFiltered()">
+          <app-empty-state 
+            [title]="'BUILD_ORDERS.NO_RESULTS_TITLE' | translate"
+            [description]="'BUILD_ORDERS.NO_RESULTS_DESCRIPTION' | translate"
+            icon="fas fa-search">
+          </app-empty-state>
+        </div>
+
+        <!-- Matches Table -->
+        <div *ngIf="filteredMatches.length > 0" class="table-responsive">
+          <table class="table table-dark table-striped table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th scope="col" class="sortable-header" 
+                    (click)="onSort('winningPlayer')"
+                    [class.sorted]="isSortedBy('winningPlayer')">
+                  {{ 'BUILD_ORDERS.TABLE.PLAYER' | translate }}
+                  <i [class]="getSortIcon('winningPlayer')" class="ms-1"></i>
+                </th>
+                <th scope="col" class="text-center sortable-header" 
+                    (click)="onSort('matchDate')"
+                    [class.sorted]="isSortedBy('matchDate')">
+                  {{ 'BUILD_ORDERS.TABLE.MATCH_DATE' | translate }}
+                  <i [class]="getSortIcon('matchDate')" class="ms-1"></i>
+                </th>
+                <th scope="col" class="text-center sortable-header" 
+                    (click)="onSort('mapType')"
+                    [class.sorted]="isSortedBy('mapType')">
+                  {{ 'BUILD_ORDERS.TABLE.MAP' | translate }}
+                  <i [class]="getSortIcon('mapType')" class="ms-1"></i>
+                </th>
+                <th scope="col" class="text-center">{{ 'BUILD_ORDERS.TABLE.ACTIONS' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let match of filteredMatches; trackBy: trackByMatch" class="match-row">
+                <!-- Player (Avatar + Name) -->
+                <td class="leader-cell">
+                  <div class="leader-info">
+                    <img 
+                      [src]="match.winningPlayerAvatar" 
+                      [alt]="match.winningPlayer"
+                      class="player-avatar"
+                      (error)="onImageError($event)"
+                      loading="lazy">
+                    <span class="player-name clickable" 
+                          (click)="onFilterByPlayer(match.winningPlayer)"
+                          [title]="'Click to filter by ' + match.winningPlayer">
+                      {{ match.winningPlayer }}
+                    </span>
+                  </div>
+                </td>
+                
+                <!-- Match Date -->
+                <td class="text-center match-date-cell">
+                  <span class="match-date">{{ formatDate(match.matchDate) | date:'dd MMMM yy, HH:mm' }}</span>
+                </td>
+                
+                <!-- Map -->
+                <td class="text-center map-cell">
+                  <span class="map-name clickable" 
+                        (click)="onFilterByMap(match.mapType)"
+                        [title]="'Click to filter by ' + formatMapName(match.mapType)">
+                    {{ formatMapName(match.mapType) }}
+                  </span>
+                </td>
+                
+                <!-- Actions -->
+                <td class="text-center actions-cell">
+                  <div class="action-buttons">
+                    <!-- Placeholder for action buttons -->
+                    <button type="button" class="btn btn-outline-primary btn-sm me-2" disabled>
+                      <i class="fas fa-play me-1"></i>
+                      {{ 'BUILD_ORDERS.TABLE.VIEW_REPLAY' | translate }}
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                      <i class="fas fa-chart-line me-1"></i>
+                      {{ 'BUILD_ORDERS.TABLE.VIEW_STATS' | translate }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </app-page-container>
