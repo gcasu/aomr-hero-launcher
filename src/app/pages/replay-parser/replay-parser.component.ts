@@ -110,7 +110,7 @@ export class ReplayParserComponent implements OnInit {
       const result = await this.replayParserService.parseReplay(
         this.selectedFile,
         this.parseOptions
-      );
+      ) as ParseResult;
       
       this.parseResult = result;
 

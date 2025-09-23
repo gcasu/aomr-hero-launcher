@@ -3,6 +3,9 @@
   <app-page-header 
     title="REPLAY_PARSER.TITLE" 
     description="REPLAY_PARSER.DESCRIPTION">
+    <div class="mt-3">
+      <p class="text-light">{{ 'REPLAY_PARSER.INFO.ABOUT_DESCRIPTION' | translate }}</p>
+    </div>
   </app-page-header>
 
   <!-- File Upload Section -->
@@ -49,11 +52,11 @@
 
   <!-- Parse Options -->
   <div *ngIf="selectedFile" class="parse-options-section mb-4">
-    <h5 class="mb-3">
+    <h4 class="mb-3">
       <i class="fas fa-cogs me-2"></i>
       {{ 'REPLAY_PARSER.OPTIONS.TITLE' | translate }}
-    </h5>
-    
+    </h4>
+
     <div class="row">
       <div class="col-md-6">
         <div class="form-check mb-3">
@@ -174,43 +177,47 @@
     </div>
   </div>
 
-  <!-- Information Section -->
-  <div class="info-section mt-5">
-    <div class="row">
-      <div class="col-12">
-        <app-glass-card cardClass="padded">
-          <h5>
-            <i class="fas fa-info-circle me-2 text-primary"></i>
-            {{ 'REPLAY_PARSER.INFO.ABOUT_TITLE' | translate }}
-          </h5>
-          <p>{{ 'REPLAY_PARSER.INFO.ABOUT_DESCRIPTION' | translate }}</p>
-          
-          <h5 class="mt-4 mb-3">
-            <i class="fas fa-tools me-2 text-primary"></i>
-            {{ 'REPLAY_PARSER.INFO.FEATURES_TITLE' | translate }}
-          </h5>
-          <ul class="list-unstyled">
-            <li class="mb-2">
-              <i class="fas fa-file me-2 text-alert"></i>
-              {{ 'REPLAY_PARSER.INFO.SUPPORTED_FORMATS' | translate }}: .mythrec, .mythrec.gz
-            </li>
-            <li class="mb-2">
-              <i class="fas fa-compress-alt me-2 text-success"></i>
-              {{ 'REPLAY_PARSER.INFO.FEATURE_SLIM' | translate }}
-            </li>
-            <li class="mb-2">
-              <i class="fas fa-chart-bar me-2 text-info"></i>
-              {{ 'REPLAY_PARSER.INFO.FEATURE_STATS' | translate }}
-            </li>
-            <li class="mb-2">
-              <i class="fas fa-code me-2 text-warning"></i>
-              {{ 'REPLAY_PARSER.INFO.FEATURE_PRETTY' | translate }}
-            </li>
-            <li class="mb-2">
-              <i class="fas fa-file-archive me-2 text-secondary"></i>
-              {{ 'REPLAY_PARSER.INFO.FEATURE_GZIP' | translate }}
-            </li>
-          </ul>
+  <!-- Features Section -->
+  <div class="features-section mt-5">
+    <h4 class="text-center mb-4">
+      <i class="fas fa-tools me-2 text-primary"></i>
+      {{ 'REPLAY_PARSER.INFO.FEATURES_TITLE' | translate }}
+    </h4>
+
+    <div class="row g-3">
+      <!-- Supported Formats Card -->
+      <div class="col-lg-3 col-md-6">
+        <app-glass-card cardClass="padded text-center h-100">
+          <i class="fas fa-file fa-2x mb-3 text-alert"></i>
+          <h4>{{ 'REPLAY_PARSER.INFO.SUPPORTED_FORMATS' | translate }}</h4>
+          <p class="small mb-0">.mythrec, .mythrec.gz</p>
+        </app-glass-card>
+      </div>
+      
+      <!-- Slim Mode Card -->
+      <div class="col-lg-3 col-md-6">
+        <app-glass-card cardClass="padded text-center h-100">
+          <i class="fas fa-compress-alt fa-2x mb-3 text-success"></i>
+          <h4>Slim Mode</h4>
+          <p class="small mb-0">{{ 'REPLAY_PARSER.INFO.FEATURE_SLIM' | translate }}</p>
+        </app-glass-card>
+      </div>
+      
+      <!-- Statistics Card -->
+      <div class="col-lg-3 col-md-6">
+        <app-glass-card cardClass="padded text-center h-100">
+          <i class="fas fa-chart-bar fa-2x mb-3 text-info"></i>
+          <h4>Statistics</h4>
+          <p class="small mb-0">{{ 'REPLAY_PARSER.INFO.FEATURE_STATS' | translate }}</p>
+        </app-glass-card>
+      </div>
+      
+      <!-- Pretty Print Card -->
+      <div class="col-lg-3 col-md-6">
+        <app-glass-card cardClass="padded text-center h-100">
+          <i class="fas fa-code fa-2x mb-3 text-warning"></i>
+          <h4>Pretty Print</h4>
+          <p class="small mb-0">{{ 'REPLAY_PARSER.INFO.FEATURE_PRETTY' | translate }}</p>
         </app-glass-card>
       </div>
     </div>
