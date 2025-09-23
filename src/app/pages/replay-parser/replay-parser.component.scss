@@ -1,0 +1,216 @@
+.file-upload-section {
+  margin-bottom: 2rem;
+}
+
+.file-drop-zone {
+  border: 2px dashed var(--bs-border-color);
+  border-radius: 0.5rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  
+  &:hover {
+    border-color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), 0.1);
+  }
+  
+  &.drag-over {
+    border-color: var(--bs-success);
+    background: rgba(var(--bs-success-rgb), 0.1);
+    transform: scale(1.02);
+  }
+  
+  &.has-file {
+    border-color: var(--bs-success);
+    background: rgba(var(--bs-success-rgb), 0.05);
+  }
+}
+
+.drop-zone-content {
+  .no-file-state {
+    i {
+      font-size: 3rem;
+      color: var(--bs-primary);
+      margin-bottom: 1rem;
+    }
+    
+    h4 {
+      color: var(--bs-body-color);
+      margin-bottom: 0.5rem;
+    }
+    
+    .text-small {
+      font-size: 0.875rem;
+    }
+  }
+  
+  .selected-file-state {
+    i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    h5 {
+      color: var(--bs-body-color);
+      margin-bottom: 0.5rem;
+      word-break: break-all;
+    }
+  }
+}
+
+.parse-options-section {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--bs-border-color);
+  
+  h5 {
+    color: var(--bs-body-color);
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-check {
+    .form-check-input {
+      &:checked {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+      }
+      
+      &:focus {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+      }
+    }
+    
+    .form-check-label {
+      color: var(--bs-body-color);
+      
+      small {
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+      }
+    }
+  }
+}
+
+.parse-results-section {
+  .alert {
+    border-radius: 0.5rem;
+    border: none;
+    backdrop-filter: blur(10px);
+    
+    &.alert-success {
+      background: rgba(var(--bs-success-rgb), 0.1);
+      color: var(--bs-success);
+      border: 1px solid rgba(var(--bs-success-rgb), 0.3);
+    }
+    
+    &.alert-danger {
+      background: rgba(var(--bs-danger-rgb), 0.1);
+      color: var(--bs-danger);
+      border: 1px solid rgba(var(--bs-danger-rgb), 0.3);
+    }
+    
+    .alert-heading {
+      margin-bottom: 0.75rem;
+    }
+  }
+}
+
+.info-section {
+  .info-card {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    border: 1px solid var(--bs-border-color);
+    height: 100%;
+    
+    h5, h6 {
+      color: var(--bs-body-color);
+    }
+    
+    p {
+      color: var(--bs-body-color-muted);
+      line-height: 1.6;
+    }
+    
+    ul {
+      li {
+        color: var(--bs-body-color);
+        padding: 0.25rem 0;
+        
+        i {
+          width: 1.2rem;
+        }
+      }
+    }
+  }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--bs-primary), #0d6efd);
+  border: none;
+  box-shadow: 0 4px 15px rgba(var(--bs-primary-rgb), 0.3);
+  transition: all 0.3s ease;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--bs-primary-rgb), 0.4);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--bs-success), #157347);
+  border: none;
+  box-shadow: 0 4px 15px rgba(var(--bs-success-rgb), 0.3);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--bs-success-rgb), 0.4);
+  }
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .file-drop-zone {
+    padding: 2rem 1rem;
+  }
+  
+  .parse-options-section {
+    padding: 1rem;
+  }
+  
+  .info-section {
+    .info-card {
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+// Dark theme specific adjustments
+@media (prefers-color-scheme: dark) {
+  .file-drop-zone {
+    background: rgba(255, 255, 255, 0.01);
+  }
+  
+  .parse-options-section,
+  .info-card {
+    background: rgba(255, 255, 255, 0.01);
+  }
+}

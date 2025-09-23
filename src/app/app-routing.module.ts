@@ -20,6 +20,10 @@ const routes: Routes = [
     loadChildren: () => import('./pages/resources/resources.module').then(m => m.ResourcesModule)
   },
   {
+    path: 'replay-parser',
+    loadChildren: () => import('./pages/replay-parser/replay-parser.module').then(m => m.ReplayParserModule)
+  },
+  {
     path: 'data-guide',
     loadChildren: () => import('./pages/data-guide/data-guide.module').then(m => m.DataGuideModule)
   },

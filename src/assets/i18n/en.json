@@ -52,6 +52,10 @@
         "TITLE": "Resources",
         "DESCRIPTION": "Access modding tools, community content, and other game resources easily"
       },
+      "REPLAY_PARSER": {
+        "TITLE": "Replay Parser",
+        "DESCRIPTION": "Parse Age of Mythology: Retold replay files into readable JSON format"
+      },
       "CORE_DATA_GUIDE": {
         "TITLE": "Data Guide",
         "DESCRIPTION": "Explore game data, statistics, and detailed information"
@@ -394,6 +398,64 @@
     "NO_RESULTS": {
       "TITLE": "No Channels Found",
       "DESCRIPTION": "No channels match your search criteria. Try adjusting your search terms."
+    }
+  },
+  "REPLAY_PARSER": {
+    "TITLE": "Replay Parser",
+    "DESCRIPTION": "Parse Age of Mythology: Retold replay files into human-readable JSON format",
+    "UPLOAD": {
+      "TITLE": "Drop or Click to Upload Replay",
+      "DESCRIPTION": "Drag and drop your replay file here or click to browse",
+      "FORMATS": "Supported formats: .mythrec, .mythrec.gz",
+      "CLEAR": "Clear File"
+    },
+    "OPTIONS": {
+      "TITLE": "Parsing Options",
+      "SLIM_MODE": "Slim Mode",
+      "SLIM_MODE_DESC": "Exclude game commands from output for smaller file size",
+      "STATS_MODE": "Stats Mode",
+      "STATS_MODE_DESC": "Include additional statistics in the output (incompatible with slim mode)",
+      "PRETTY_PRINT": "Pretty Print",
+      "PRETTY_PRINT_DESC": "Format JSON output with indentation for better readability",
+      "GZIP_COMPRESSION": "GZIP Compression",
+      "GZIP_COMPRESSION_DESC": "Indicate if the input file is compressed with GZIP",
+      "VERBOSE_LOGGING": "Verbose Logging",
+      "VERBOSE_LOGGING_DESC": "Enable detailed logging during parsing process"
+    },
+    "BUTTONS": {
+      "PARSE": "Parse Replay",
+      "PROCESSING": "Processing...",
+      "DOWNLOAD": "Download JSON"
+    },
+    "MESSAGES": {
+      "PARSE_SUCCESS": "Replay parsed successfully!"
+    },
+    "ERRORS": {
+      "NO_FILE_SELECTED": "Please select a replay file first",
+      "INVALID_FILE_TYPE": "Invalid file type. Please select a .mythrec or .mythrec.gz file",
+      "PARSE_FAILED": "Failed to parse replay file"
+    },
+    "RESULTS": {
+      "SUCCESS_TITLE": "Parsing Completed Successfully",
+      "SUCCESS_MESSAGE": "Your replay has been parsed successfully. You can now download the JSON file.",
+      "ERROR_TITLE": "Parsing Failed",
+      "UNKNOWN_ERROR": "An unknown error occurred during parsing",
+      "RESULT_SIZE": "Result size"
+    },
+    "PROCESSING_MESSAGE": "Parsing replay file, please wait...",
+    "INFO": {
+      "ABOUT_TITLE": "About Replay Parser",
+      "ABOUT_DESCRIPTION": "This tool converts Age of Mythology: Retold .mythrec files into human-readable JSON format, making replay data accessible for analysis and statistics.",
+      "SUPPORTED_FORMATS": "Supported Formats",
+      "FEATURES_TITLE": "Features",
+      "FEATURE_SLIM": "Slim mode for reduced file size",
+      "FEATURE_STATS": "Enhanced statistics extraction",
+      "FEATURE_PRETTY": "Pretty-printed JSON output",
+      "FEATURE_GZIP": "GZIP compression support"
+    },
+    "EMPTY": {
+      "TITLE": "Ready to Parse Replays",
+      "DESCRIPTION": "Upload a .mythrec or .mythrec.gz file to get started with parsing your replay data."
     }
   }
 }

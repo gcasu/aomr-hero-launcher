@@ -8,6 +8,7 @@
 .angular/
 /release/
 /.vscode/
+/repo/
 
 # Node modules and dependency files
 /node_modules/

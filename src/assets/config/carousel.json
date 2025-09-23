@@ -28,6 +28,12 @@
       "id": "slide-2",
       "cards": [
         {
+          "icon": "fas fa-file-code",
+          "titleKey": "HOME.FEATURES.REPLAY_PARSER.TITLE",
+          "descriptionKey": "HOME.FEATURES.REPLAY_PARSER.DESCRIPTION",
+          "route": "/replay-parser"
+        },
+        {
           "icon": "fas fa-book-open",
           "titleKey": "HOME.FEATURES.CORE_DATA_GUIDE.TITLE",
           "descriptionKey": "HOME.FEATURES.CORE_DATA_GUIDE.DESCRIPTION",
@@ -38,18 +44,18 @@
           "titleKey": "HOME.FEATURES.LEADERBOARDS.TITLE",
           "descriptionKey": "HOME.FEATURES.LEADERBOARDS.DESCRIPTION",
           "route": "/leaderboard"
-        },
-        {
-          "icon": "fas fa-hammer",
-          "titleKey": "HOME.FEATURES.BUILD_ORDERS.TITLE",
-          "descriptionKey": "HOME.FEATURES.BUILD_ORDERS.DESCRIPTION",
-          "route": "/build-orders"
         }
       ]
     },
     {
       "id": "slide-3",
       "cards": [
+        {
+          "icon": "fas fa-hammer",
+          "titleKey": "HOME.FEATURES.BUILD_ORDERS.TITLE",
+          "descriptionKey": "HOME.FEATURES.BUILD_ORDERS.DESCRIPTION",
+          "route": "/build-orders"
+        },
         {
           "icon": "fas fa-layer-group",
           "titleKey": "HOME.FEATURES.TIERS.TITLE",
@@ -61,18 +67,18 @@
           "titleKey": "HOME.FEATURES.YOUTUBE_FEED.TITLE",
           "descriptionKey": "HOME.FEATURES.YOUTUBE_FEED.DESCRIPTION",
           "route": "/youtube-feed"
-        },
-        {
-          "icon": "fas fa-cog",
-          "titleKey": "HOME.FEATURES.SETTINGS.TITLE",
-          "descriptionKey": "HOME.FEATURES.SETTINGS.DESCRIPTION",
-          "route": "/settings"
         }
       ]
     },
     {
       "id": "slide-4",
       "cards": [
+        {
+          "icon": "fas fa-cog",
+          "titleKey": "HOME.FEATURES.SETTINGS.TITLE",
+          "descriptionKey": "HOME.FEATURES.SETTINGS.DESCRIPTION",
+          "route": "/settings"
+        },
         {
           "icon": "fas fa-plus",
           "titleKey": "HOME.FEATURES.MORE_COMING.TITLE",
