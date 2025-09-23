@@ -28,6 +28,13 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
         type: 'link'
       },
       {
+        id: 'replay-parser',
+        label: 'NAVIGATION.REPLAY_PARSER',
+        icon: 'fas fa-file-code',
+        route: '/replay-parser',
+        type: 'link'
+      },
+      {
         id: 'data-guide',
         label: 'NAVIGATION.CORE_DATA_GUIDE',
         icon: 'fas fa-book-open',

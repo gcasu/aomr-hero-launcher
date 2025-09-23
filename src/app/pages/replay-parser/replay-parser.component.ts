@@ -10,6 +10,7 @@ import { PageContainerComponent } from '../../shared/page-container/page-contain
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component';
 import { LoadingStateComponent } from '../../shared/loading-state/loading-state.component';
+import { GlassCardComponent } from '../../shared/glass-card/glass-card.component';
 
 @Component({
   selector: 'app-replay-parser',
@@ -23,7 +24,8 @@ import { LoadingStateComponent } from '../../shared/loading-state/loading-state.
     PageContainerComponent,
     PageHeaderComponent,
     EmptyStateComponent,
-    LoadingStateComponent
+    LoadingStateComponent,
+    GlassCardComponent
   ]
 })
 export class ReplayParserComponent implements OnInit {
