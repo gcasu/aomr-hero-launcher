@@ -151,6 +151,11 @@ export class ReplayParserComponent implements OnInit {
     this.selectedFile = null;
     this.parseResult = null;
     this.isDragOver = false;
+    // Reset file input value so re-selecting the same file works
+    const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = '';
+    }
   }
 
   getFileSizeString(bytes: number): string {
