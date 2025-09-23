@@ -46,6 +46,13 @@
             {{ 'REPLAY_PARSER.UPLOAD.CLEAR' | translate }}
           </button>
         </div>
+        
+        <!-- Debug section -->
+        <div class="debug-section mt-3">
+          <button type="button" class="btn btn-outline-info btn-sm" (click)="debugParseResult()">
+            Debug Parse Result
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -146,34 +153,215 @@
 
   <!-- Parse Results -->
   <div *ngIf="parseResult && !isProcessing" class="parse-results-section">
-    <div *ngIf="parseResult.success" class="alert alert-success">
-      <h5 class="alert-heading">
-        <i class="fas fa-check-circle me-2"></i>
-        {{ 'REPLAY_PARSER.RESULTS.SUCCESS_TITLE' | translate }}
-      </h5>
-      <p class="mb-3">{{ 'REPLAY_PARSER.RESULTS.SUCCESS_MESSAGE' | translate }}</p>
-      
-      <div class="d-flex justify-content-between align-items-center">
-        <small>
-          {{ 'REPLAY_PARSER.RESULTS.RESULT_SIZE' | translate }}: 
-          {{ getResultSizeString() }}
-        </small>
-        <button 
-          type="button" 
-          class="btn btn-success"
-          (click)="downloadResult()">
-          <i class="fas fa-download me-2"></i>
-          {{ 'REPLAY_PARSER.BUTTONS.DOWNLOAD' | translate }}
-        </button>
-      </div>
-    </div>
-
+    <!-- Error State -->
     <div *ngIf="!parseResult.success" class="alert alert-danger">
       <h5 class="alert-heading">
         <i class="fas fa-exclamation-triangle me-2"></i>
         {{ 'REPLAY_PARSER.RESULTS.ERROR_TITLE' | translate }}
       </h5>
       <p class="mb-0">{{ parseResult.error || ('REPLAY_PARSER.RESULTS.UNKNOWN_ERROR' | translate) }}</p>
+    </div>
+
+    <!-- Success State with Detailed Results -->
+    <div *ngIf="parseResult.success && parseResult.data" class="replay-analysis">
+      <!-- Header with Download -->
+      <div class="row mb-4">
+        <div class="col-md-8">
+          <h4 class="text-success mb-2">
+            <i class="fas fa-check-circle me-2"></i>
+            Replay Analysis Complete
+          </h4>
+          <p class="text-light mb-0">Parsed replay data with detailed insights</p>
+        </div>
+        <div class="col-md-4 text-end">
+          <button 
+            type="button" 
+            class="btn btn-outline-success"
+            (click)="downloadResult()">
+            <i class="fas fa-download me-2"></i>
+            Download JSON ({{ getResultSizeString() }})
+          </button>
+        </div>
+      </div>
+
+      <!-- Game Overview -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <app-glass-card cardClass="padded">
+            <h5 class="mb-3">
+              <i class="fas fa-info-circle me-2 text-primary"></i>
+              Game Overview
+            </h5>
+            <div class="row">
+              <div class="col-md-3">
+                <strong>Map: </strong>{{ parseResult.data.MapName || 'Unknown' }}
+              </div>
+              <div class="col-md-3">
+                <strong>Duration: </strong>{{ formatGameTime(parseResult.data.GameLengthSecs) }}
+              </div>
+              <div class="col-md-3">
+                <!-- Show winning player(s) instead of team label -->
+                <strong>Winner: </strong>
+                <ng-container *ngIf="parseResult.data.Players as pls">
+                  <ng-container *ngFor="let p of pls; let last = last" >
+                    <ng-container *ngIf="p.Winner">{{ 'Player ' + p.PlayerNum }}<span *ngIf="!last">, </span></ng-container>
+                  </ng-container>
+                </ng-container>
+              </div>
+              <div class="col-md-3">
+                <strong>Build: </strong>{{ parseResult.data.BuildNumber }}
+              </div>
+            </div>
+          </app-glass-card>
+        </div>
+      </div>
+
+      <!-- Players Information -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <app-glass-card cardClass="padded">
+            <h5 class="mb-3">
+              <i class="fas fa-users me-2 text-primary"></i>
+              Players ({{ parseResult.data.Players?.length || 0 }})
+            </h5>
+            <div class="row" *ngIf="parseResult.data.Players">
+              <div class="col-md-6 mb-3" *ngFor="let player of parseResult.data.Players">
+                <div class="player-card p-3 border rounded">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <h6 class="mb-1" [class.text-success]="player.Winner" [class.text-light]="!player.Winner">
+                        <i class="fas fa-crown me-1" *ngIf="player.Winner"></i>
+                        {{ player.Name }}
+                      </h6>
+                      <small class="text-muted d-block">Player {{ player.PlayerNum }} • {{ player.God }}</small>
+                      <small class="text-muted" *ngIf="getMinorGods(player).length > 0">
+                        Minor Gods: {{ getMinorGods(player).join(', ') }}
+                      </small>
+                    </div>
+                    <span class="badge" [class.bg-success]="player.Winner" [class.bg-secondary]="!player.Winner">
+                      {{ player.Winner ? 'Winner' : 'Loser' }}
+                    </span>
+                  </div>
+                  <div class="player-stats">
+                    <div class="row text-center">
+                      <div class="col-4">
+                        <small class="text-muted d-block">EAPM</small>
+                        <strong>{{ roundNumber(player.EAPM) }}</strong>
+                      </div>
+                      <div class="col-4">
+                        <small class="text-muted d-block">Minor Gods</small>
+                        <strong>{{ getMinorGodsCount(player.MinorGods) }}</strong>
+                      </div>
+                      <div class="col-4">
+                        <small class="text-muted d-block">Color</small>
+                        <div class="player-color" [style.background-color]="getPlayerColor(player.Color)"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </app-glass-card>
+        </div>
+      </div>
+
+      <!-- Statistics (if available) -->
+      <div class="row mb-4" *ngIf="parseResult.data.Stats">
+        <div class="col-12">
+          <app-glass-card cardClass="padded">
+            <h5 class="mb-3">
+              <i class="fas fa-chart-bar me-2 text-info"></i>
+              Player Statistics
+            </h5>
+            <div class="row">
+              <div class="col-md-6 mb-3" *ngFor="let playerStats of getPlayerStatsArray()">
+                <h6>{{ getPlayerName(playerStats.playerNum) }}</h6>
+                <div class="stats-grid">
+                  <div class="stat-item" *ngIf="playerStats.stats.UnitCounts">
+                    <small class="text-muted">Units Created</small>
+                    <strong>{{ getTotalCount(playerStats.stats.UnitCounts) }}</strong>
+                  </div>
+                  <div class="stat-item" *ngIf="playerStats.stats.BuildingCounts">
+                    <small class="text-muted">Buildings Built</small>
+                    <strong>{{ getTotalCount(playerStats.stats.BuildingCounts) }}</strong>
+                  </div>
+                  <div class="stat-item" *ngIf="playerStats.stats.TechsResearched">
+                    <small class="text-muted">Technologies</small>
+                    <strong>{{ playerStats.stats.TechsResearched.length }}</strong>
+                  </div>
+                  <div class="stat-item" *ngIf="playerStats.stats.GodPowerCounts">
+                    <small class="text-muted">God Powers</small>
+                    <strong>{{ getTotalCount(playerStats.stats.GodPowerCounts) }}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </app-glass-card>
+        </div>
+      </div>
+
+      <!-- Timeline (up to 10 minutes) -->
+      <div class="row mb-4" *ngIf="hasTimelineData()">
+        <div class="col-12">
+          <app-glass-card cardClass="padded">
+            <h5 class="mb-3">
+              <i class="fas fa-clock me-2 text-warning"></i>
+              Game Timeline (First 10 Minutes)
+            </h5>
+            <div class="timeline-container">
+              <div class="timeline-segment" *ngFor="let segment of getTimelineSegments(); let i = index">
+                <!-- Only show segments that have any activity across all players -->
+                <div *ngIf="hasSegmentActivity(segment)">
+                  <div class="timeline-header">
+                    <strong>{{ formatTimeSegment(i) }}</strong>
+                    <small class="text-muted ms-2">({{ i * 30 }}s - {{ (i + 1) * 30 }}s)</small>
+                  </div>
+                  <div class="timeline-events">
+                    <div class="row">
+                      <!-- Always show Player 1 on the left (col-1), Player 2 on the right (col-2) -->
+                      <div class="col-md-6">
+                        <div class="player-activity">
+                          <h6 class="mb-2">{{ getPlayerActivity(segment, 1).playerName }}</h6>
+                          <div class="activity-list" *ngIf="getPlayerActivity(segment, 1).events.length > 0">
+                            <div class="activity-item" *ngFor="let event of getPlayerActivity(segment, 1).events">
+                              <i class="fas fa-dot-circle me-2 text-primary"></i>
+                              <span>{{ event }}</span>
+                            </div>
+                          </div>
+                          <div class="text-muted small" *ngIf="getPlayerActivity(segment, 1).events.length === 0">
+                            No activity
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="player-activity">
+                          <h6 class="mb-2">{{ getPlayerActivity(segment, 2).playerName }}</h6>
+                          <div class="activity-list" *ngIf="getPlayerActivity(segment, 2).events.length > 0">
+                            <div class="activity-item" *ngFor="let event of getPlayerActivity(segment, 2).events">
+                              <i class="fas fa-dot-circle me-2 text-success"></i>
+                              <span>{{ event }}</span>
+                            </div>
+                          </div>
+                          <div class="text-muted small" *ngIf="getPlayerActivity(segment, 2).events.length === 0">
+                            No activity
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Debug info when no timeline data is found -->
+              <div *ngIf="getTimelineSegments().length === 0" class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                No timeline data found. Click "Debug Parse Result" to see the raw data structure.
+              </div>
+            </div>
+          </app-glass-card>
+        </div>
+      </div>
+
     </div>
   </div>
 

@@ -233,3 +233,115 @@
     color: #ffffff !important;
   }
 }
+
+// Replay Analysis Styles
+.replay-analysis {
+  .player-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+    
+    .player-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin: 0 auto;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+  
+    small.text-muted + small.text-muted {
+      margin-top: 2px;
+      display: block;
+      font-size: 0.7rem;
+      opacity: 0.85;
+    }
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    
+    .stat-item {
+      text-align: center;
+      padding: 0.25rem;
+      
+      small {
+        display: block;
+        font-size: 0.7rem;
+        margin-bottom: 0.25rem;
+      }
+      
+      strong {
+        font-size: 1.1rem;
+      }
+    }
+  }
+  
+  .timeline-container {
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden; // Prevent horizontal scrollbar
+    
+    .timeline-segment {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .timeline-header {
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 0.25rem;
+      }
+      
+      .player-activity {
+        margin-bottom: 1rem;
+        
+        h6 {
+          font-size: 0.9rem;
+          margin-bottom: 0.5rem;
+          color: var(--bs-primary) !important;
+        }
+        
+        .activity-list {
+          .activity-item {
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            padding: 0.25rem 0;
+            word-wrap: break-word; // Prevent text overflow
+            overflow-wrap: break-word; // Ensure long words break
+            
+            span {
+              display: inline-block;
+              max-width: calc(100% - 1.5rem); // Account for icon space
+              white-space: normal; // Allow text wrapping
+            }
+            
+            i {
+              color: var(--bs-primary);
+            }
+          }
+        }
+      }
+      
+      .timeline-events {
+        .row {
+          > div:first-child {
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+          }
+        }
+      }
+    }
+  }
+}
