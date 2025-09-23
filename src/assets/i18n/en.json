@@ -446,9 +446,9 @@
     "PROCESSING_MESSAGE": "Parsing replay file, please wait...",
     "INFO": {
       "ABOUT_TITLE": "About Replay Parser",
-      "ABOUT_DESCRIPTION": "This tool converts Age of Mythology: Retold .mythrec files into human-readable JSON format, making replay data accessible for analysis and statistics.",
+      "ABOUT_DESCRIPTION": "This tool leverages the AoM:R Restoration project parser to convert Age of Mythology: Retold .mythrec files into human-readable JSON format, making replay data accessible for analysis and statistics.",
       "SUPPORTED_FORMATS": "Supported Formats",
-      "FEATURES_TITLE": "Features",
+      "FEATURES_TITLE": "Features & Capabilities",
       "FEATURE_SLIM": "Slim mode for reduced file size",
       "FEATURE_STATS": "Enhanced statistics extraction",
       "FEATURE_PRETTY": "Pretty-printed JSON output",

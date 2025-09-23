@@ -79,9 +79,6 @@ export class ReplayParserService {
         args.push('--verbose');
       }
       
-      // Add quiet flag to suppress stdout output (we want JSON only)
-      args.push('--quiet');
-      
       // Add the file path as the last argument
       args.push(tempFilePath);
 
