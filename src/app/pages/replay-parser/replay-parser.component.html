@@ -40,7 +40,7 @@
           <p>{{ getFileSizeString(selectedFile.size) }}</p>
           <button 
             type="button" 
-            class="btn btn-warning"
+            class="btn btn-outline-warning"
             (click)="clearFile(); $event.stopPropagation()">
             <i class="fas fa-trash-alt me-2"></i>
             {{ 'REPLAY_PARSER.UPLOAD.CLEAR' | translate }}
@@ -194,11 +194,7 @@
               </div>
               <div class="col-md-3">
                 <strong>{{ 'REPLAY_PARSER.RESULTS.WINNER' | translate }}: </strong>
-                <ng-container *ngIf="parseResult.data.Players as pls">
-                  <ng-container *ngFor="let p of pls; let last = last" >
-                    <ng-container *ngIf="p.Winner">{{ getPlayerLabel(p.PlayerNum) }}<span *ngIf="!last">, </span></ng-container>
-                  </ng-container>
-                </ng-container>
+                {{ getWinnerNames() || ('REPLAY_PARSER.RESULTS.UNKNOWN' | translate) }}
               </div>
               <div class="col-md-3">
                 <strong>{{ 'REPLAY_PARSER.RESULTS.BUILD' | translate }}: </strong>{{ parseResult.data.BuildNumber }}
@@ -225,9 +221,9 @@
                         <i class="fas fa-crown me-1" *ngIf="player.Winner"></i>
                         {{ player.Name }}
                       </h6>
-                      <small class="text-muted d-block">{{ getPlayerLabel(player.PlayerNum) }} • {{ player.God }}</small>
+                      <small class="d-block">{{ getPlayerLabel(player.PlayerNum) }} • {{ player.God }}</small>
                       <div class="minor-gods mt-1" *ngIf="getMinorGods(player).length > 0">
-                        <small class="text-muted d-block mb-1">{{ 'REPLAY_PARSER.RESULTS.MINOR_GODS' | translate }}:</small>
+                        <small class="d-block mb-1">{{ 'REPLAY_PARSER.RESULTS.MINOR_GODS' | translate }}:</small>
                         <div class="d-flex flex-wrap align-items-center gap-2">
                           <div class="minor-god-icon-wrapper" *ngFor="let mg of getMinorGods(player)" [title]="mg">
                             <img *ngIf="getMinorGodIcon(mg) as iconSrc" [src]="iconSrc" [alt]="mg" class="minor-god-icon" (error)="handleGodIconError($event)">
@@ -243,15 +239,15 @@
                   <div class="player-stats">
                     <div class="row text-center">
                       <div class="col-4">
-                        <small class="text-muted d-block">{{ 'REPLAY_PARSER.RESULTS.EAPM' | translate }}</small>
+                        <small class="d-block">{{ 'REPLAY_PARSER.RESULTS.EAPM' | translate }}</small>
                         <strong>{{ roundNumber(player.EAPM) }}</strong>
                       </div>
                       <div class="col-4">
-                        <small class="text-muted d-block">{{ 'REPLAY_PARSER.RESULTS.MINOR_GODS' | translate }}</small>
-                        <strong>{{ getMinorGodsCount(player.MinorGods) }}</strong>
+                        <small class="d-block">{{ 'REPLAY_PARSER.RESULTS.LAST_AGE' | translate }}</small>
+                        <strong>{{ getLastAgeReached(player) }}</strong>
                       </div>
                       <div class="col-4">
-                        <small class="text-muted d-block">{{ 'REPLAY_PARSER.RESULTS.COLOR' | translate }}</small>
+                        <small class="d-block">{{ 'REPLAY_PARSER.RESULTS.COLOR' | translate }}</small>
                         <div class="player-color" [style.background-color]="getPlayerColor(player.Color)"></div>
                       </div>
                     </div>
@@ -276,19 +272,19 @@
                 <h6>{{ getPlayerName(playerStats.playerNum) }}</h6>
                 <div class="stats-grid">
                   <div class="stat-item" *ngIf="playerStats.stats.UnitCounts">
-                    <small class="text-muted">{{ 'REPLAY_PARSER.RESULTS.UNITS_CREATED' | translate }}</small>
+                    <small>{{ 'REPLAY_PARSER.RESULTS.UNITS_CREATED' | translate }}</small>
                     <strong>{{ getTotalCount(playerStats.stats.UnitCounts) }}</strong>
                   </div>
                   <div class="stat-item" *ngIf="playerStats.stats.BuildingCounts">
-                    <small class="text-muted">{{ 'REPLAY_PARSER.RESULTS.BUILDINGS_BUILT' | translate }}</small>
+                    <small>{{ 'REPLAY_PARSER.RESULTS.BUILDINGS_BUILT' | translate }}</small>
                     <strong>{{ getTotalCount(playerStats.stats.BuildingCounts) }}</strong>
                   </div>
                   <div class="stat-item" *ngIf="playerStats.stats.TechsResearched">
-                    <small class="text-muted">{{ 'REPLAY_PARSER.RESULTS.TECHNOLOGIES' | translate }}</small>
+                    <small>{{ 'REPLAY_PARSER.RESULTS.TECHNOLOGIES' | translate }}</small>
                     <strong>{{ playerStats.stats.TechsResearched.length }}</strong>
                   </div>
                   <div class="stat-item" *ngIf="playerStats.stats.GodPowerCounts">
-                    <small class="text-muted">{{ 'REPLAY_PARSER.RESULTS.GOD_POWERS' | translate }}</small>
+                    <small>{{ 'REPLAY_PARSER.RESULTS.GOD_POWERS' | translate }}</small>
                     <strong>{{ getTotalCount(playerStats.stats.GodPowerCounts) }}</strong>
                   </div>
                 </div>
@@ -312,14 +308,14 @@
                 <div *ngIf="hasSegmentActivity(segment)">
                   <div class="timeline-header">
                     <strong>{{ formatTimeSegment(i) }}</strong>
-                    <small class="text-muted ms-2">({{ i * 30 }}s - {{ (i + 1) * 30 }}s)</small>
+                    <small class="ms-2">({{ i * 30 }}s - {{ (i + 1) * 30 }}s)</small>
                   </div>
                   <div class="timeline-events">
                     <div class="row">
                       <!-- Always show Player 1 on the left (col-1), Player 2 on the right (col-2) -->
                       <div class="col-md-6">
                         <div class="player-activity">
-                          <h6 class="mb-2">{{ getPlayerActivity(segment, 1).playerName }}</h6>
+                          <h6 class="mb-2 text-muted">{{ getPlayerActivity(segment, 1).playerName }}</h6>
                           <div class="activity-list" *ngIf="getPlayerActivity(segment, 1).events.length > 0">
                             <div class="activity-item" *ngFor="let event of getPlayerActivity(segment, 1).events">
                               <i class="fas fa-dot-circle me-2 text-primary"></i>
@@ -333,7 +329,7 @@
                       </div>
                       <div class="col-md-6">
                         <div class="player-activity">
-                          <h6 class="mb-2">{{ getPlayerActivity(segment, 2).playerName }}</h6>
+                          <h6 class="mb-2 text-muted">{{ getPlayerActivity(segment, 2).playerName }}</h6>
                           <div class="activity-list" *ngIf="getPlayerActivity(segment, 2).events.length > 0">
                             <div class="activity-item" *ngFor="let event of getPlayerActivity(segment, 2).events">
                               <i class="fas fa-dot-circle me-2 text-success"></i>
@@ -363,7 +359,7 @@
   </div>
 
   <!-- Features Section -->
-  <div class="features-section mt-5">
+  <div class="features-section mt-5" *ngIf="!parseResult">
     <h4 class="text-center mb-4">
       <i class="fas fa-tools me-2 text-primary"></i>
       {{ 'REPLAY_PARSER.INFO.FEATURES_TITLE' | translate }}

@@ -224,11 +224,79 @@ export class ReplayParserComponent implements OnInit {
       return this.minorGodIconCache[key];
     }
     const fileName = key.replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') + '.png';
+    
+    // Create a mapping of known gods to their correct age folders
+    const godToAgeMap: Record<string, string> = {
+      // Classical Age
+      'anubis': 'Minor Gods (Classical Age)',
+      'ares': 'Minor Gods (Classical Age)',
+      'athena': 'Minor Gods (Classical Age)',
+      'bast': 'Minor Gods (Classical Age)',
+      'chiyou': 'Minor Gods (Classical Age)',
+      'forseti': 'Minor Gods (Classical Age)',
+      'freyja': 'Minor Gods (Classical Age)',
+      'heimdall': 'Minor Gods (Classical Age)',
+      'hermes': 'Minor Gods (Classical Age)',
+      'houtu': 'Minor Gods (Classical Age)',
+      'leto': 'Minor Gods (Classical Age)',
+      'oceanus': 'Minor Gods (Classical Age)',
+      'prometheus': 'Minor Gods (Classical Age)',
+      'ptah': 'Minor Gods (Classical Age)',
+      'ullr': 'Minor Gods (Classical Age)',
+      'xuannu': 'Minor Gods (Classical Age)',
+      
+      // Heroic Age
+      'aegir': 'Minor Gods (Heroic Age)',
+      'aphrodite': 'Minor Gods (Heroic Age)',
+      'apollo': 'Minor Gods (Heroic Age)',
+      'bragi': 'Minor Gods (Heroic Age)',
+      'dionysus': 'Minor Gods (Heroic Age)',
+      'goumang': 'Minor Gods (Heroic Age)',
+      'hyperion': 'Minor Gods (Heroic Age)',
+      'nephthys': 'Minor Gods (Heroic Age)',
+      'njord': 'Minor Gods (Heroic Age)',
+      'nuba': 'Minor Gods (Heroic Age)',
+      'rheia': 'Minor Gods (Heroic Age)',
+      'rushou': 'Minor Gods (Heroic Age)',
+      'sekhmet': 'Minor Gods (Heroic Age)',
+      'skadi': 'Minor Gods (Heroic Age)',
+      'sobek': 'Minor Gods (Heroic Age)',
+      'theia': 'Minor Gods (Heroic Age)',
+      
+      // Mythic Age
+      'artemis': 'Minor Gods (Mythic Age)',
+      'atlas': 'Minor Gods (Mythic Age)',
+      'baldr': 'Minor Gods (Mythic Age)',
+      'gonggong': 'Minor Gods (Mythic Age)',
+      'hekate': 'Minor Gods (Mythic Age)',
+      'hel': 'Minor Gods (Mythic Age)',
+      'helios': 'Minor Gods (Mythic Age)',
+      'hephaestus': 'Minor Gods (Mythic Age)',
+      'hera': 'Minor Gods (Mythic Age)',
+      'horus': 'Minor Gods (Mythic Age)',
+      'huangdi': 'Minor Gods (Mythic Age)',
+      'osiris': 'Minor Gods (Mythic Age)',
+      'thoth': 'Minor Gods (Mythic Age)',
+      'tyr': 'Minor Gods (Mythic Age)',
+      'vidar': 'Minor Gods (Mythic Age)',
+      'zhurong': 'Minor Gods (Mythic Age)'
+    };
+    
+    // Try to use the mapped folder first
+    const correctFolder = godToAgeMap[key];
+    if (correctFolder) {
+      const path = `assets/images/tiers/${correctFolder}/${fileName}`;
+      this.minorGodIconCache[key] = path;
+      return path;
+    }
+    
+    // Fallback: try all folders in order
     for (const folder of this.minorGodIconFolders) {
       const path = `${folder}/${fileName}`;
       this.minorGodIconCache[key] = path;
       return path;
     }
+    
     return null;
   }
 
@@ -514,5 +582,41 @@ export class ReplayParserComponent implements OnInit {
   getMinorGodsCount(minorGods: string[]): number {
     if (!minorGods) return 0;
     return minorGods.filter(g => g && g.trim() !== '').length;
+  }
+
+  getLastAgeReached(player: any): string {
+    if (!player?.MinorGods || !Array.isArray(player.MinorGods)) {
+      return 'Classical Age';
+    }
+    
+    const minorGods = this.getMinorGods(player);
+    if (minorGods.length === 0) {
+      return 'Classical Age';
+    }
+    
+    // Define age tiers based on minor god names
+    const classicalAge = ['anubis', 'ares', 'athena', 'bast', 'chiyou', 'forseti', 'freyja', 'heimdall', 'hermes', 'houtu', 'leto', 'oceanus', 'prometheus', 'ptah', 'ullr', 'xuannu'];
+    const heroicAge = ['aegir', 'aphrodite', 'apollo', 'bragi', 'dionysus', 'goumang', 'hyperion', 'nephthys', 'njord', 'nuba', 'rheia', 'rushou', 'sekhmet', 'skadi', 'sobek', 'theia'];
+    const mythicAge = ['artemis', 'atlas', 'baldr', 'gonggong', 'hekate', 'hel', 'helios', 'hephaestus', 'hera', 'horus', 'huangdi', 'osiris', 'thoth', 'tyr', 'vidar', 'zhurong'];
+    
+    let lastAge = 'Classical Age';
+    
+    for (const god of minorGods) {
+      const godKey = god.toLowerCase();
+      if (mythicAge.includes(godKey)) {
+        lastAge = 'Mythic Age';
+      } else if (heroicAge.includes(godKey) && lastAge !== 'Mythic Age') {
+        lastAge = 'Heroic Age';
+      }
+    }
+    
+    return lastAge;
+  }
+
+  getWinnerNames(): string {
+    if (!this.parseResult?.data?.Players) return '';
+    
+    const winners = this.parseResult.data.Players.filter((p: any) => p.Winner);
+    return winners.map((p: any) => p.Name).join(', ');
   }
 }
