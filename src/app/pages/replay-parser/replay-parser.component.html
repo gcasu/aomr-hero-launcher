@@ -46,13 +46,6 @@
             {{ 'REPLAY_PARSER.UPLOAD.CLEAR' | translate }}
           </button>
         </div>
-        
-        <!-- Debug section -->
-        <div class="debug-section mt-3">
-          <button type="button" class="btn btn-outline-info btn-sm" (click)="debugParseResult()">
-            Debug Parse Result
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -169,9 +162,9 @@
         <div class="col-md-8">
           <h4 class="text-success mb-2">
             <i class="fas fa-check-circle me-2"></i>
-            Replay Analysis Complete
+            {{ 'REPLAY_PARSER.RESULTS.ANALYSIS_COMPLETE' | translate }}
           </h4>
-          <p class="text-light mb-0">Parsed replay data with detailed insights</p>
+          <p class="text-light mb-0">{{ 'REPLAY_PARSER.RESULTS.ANALYSIS_DESCRIPTION' | translate }}</p>
         </div>
         <div class="col-md-4 text-end">
           <button 
@@ -179,7 +172,7 @@
             class="btn btn-outline-success"
             (click)="downloadResult()">
             <i class="fas fa-download me-2"></i>
-            Download JSON ({{ getResultSizeString() }})
+            {{ 'REPLAY_PARSER.BUTTONS.DOWNLOAD_JSON' | translate }} ({{ getResultSizeString() }})
           </button>
         </div>
       </div>
@@ -190,26 +183,25 @@
           <app-glass-card cardClass="padded">
             <h5 class="mb-3">
               <i class="fas fa-info-circle me-2 text-primary"></i>
-              Game Overview
+              {{ 'REPLAY_PARSER.RESULTS.GAME_OVERVIEW' | translate }}
             </h5>
             <div class="row">
               <div class="col-md-3">
-                <strong>Map: </strong>{{ parseResult.data.MapName || 'Unknown' }}
+                <strong>{{ 'REPLAY_PARSER.RESULTS.MAP' | translate }}: </strong>{{ parseResult.data.MapName || ('REPLAY_PARSER.RESULTS.UNKNOWN' | translate) }}
               </div>
               <div class="col-md-3">
-                <strong>Duration: </strong>{{ formatGameTime(parseResult.data.GameLengthSecs) }}
+                <strong>{{ 'REPLAY_PARSER.RESULTS.DURATION' | translate }}: </strong>{{ formatGameTime(parseResult.data.GameLengthSecs) }}
               </div>
               <div class="col-md-3">
-                <!-- Show winning player(s) instead of team label -->
-                <strong>Winner: </strong>
+                <strong>{{ 'REPLAY_PARSER.RESULTS.WINNER' | translate }}: </strong>
                 <ng-container *ngIf="parseResult.data.Players as pls">
                   <ng-container *ngFor="let p of pls; let last = last" >
-                    <ng-container *ngIf="p.Winner">{{ 'Player ' + p.PlayerNum }}<span *ngIf="!last">, </span></ng-container>
+                    <ng-container *ngIf="p.Winner">{{ getPlayerLabel(p.PlayerNum) }}<span *ngIf="!last">, </span></ng-container>
                   </ng-container>
                 </ng-container>
               </div>
               <div class="col-md-3">
-                <strong>Build: </strong>{{ parseResult.data.BuildNumber }}
+                <strong>{{ 'REPLAY_PARSER.RESULTS.BUILD' | translate }}: </strong>{{ parseResult.data.BuildNumber }}
               </div>
             </div>
           </app-glass-card>
@@ -222,7 +214,7 @@
           <app-glass-card cardClass="padded">
             <h5 class="mb-3">
               <i class="fas fa-users me-2 text-primary"></i>
-              Players ({{ parseResult.data.Players?.length || 0 }})
+              {{ 'REPLAY_PARSER.RESULTS.PLAYERS' | translate }} ({{ parseResult.data.Players?.length || 0 }})
             </h5>
             <div class="row" *ngIf="parseResult.data.Players">
               <div class="col-md-6 mb-3" *ngFor="let player of parseResult.data.Players">
@@ -233,27 +225,33 @@
                         <i class="fas fa-crown me-1" *ngIf="player.Winner"></i>
                         {{ player.Name }}
                       </h6>
-                      <small class="text-muted d-block">Player {{ player.PlayerNum }} • {{ player.God }}</small>
-                      <small class="text-muted" *ngIf="getMinorGods(player).length > 0">
-                        Minor Gods: {{ getMinorGods(player).join(', ') }}
-                      </small>
+                      <small class="text-muted d-block">{{ getPlayerLabel(player.PlayerNum) }} • {{ player.God }}</small>
+                      <div class="minor-gods mt-1" *ngIf="getMinorGods(player).length > 0">
+                        <small class="text-muted d-block mb-1">{{ 'REPLAY_PARSER.RESULTS.MINOR_GODS' | translate }}:</small>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                          <div class="minor-god-icon-wrapper" *ngFor="let mg of getMinorGods(player)" [title]="mg">
+                            <img *ngIf="getMinorGodIcon(mg) as iconSrc" [src]="iconSrc" [alt]="mg" class="minor-god-icon" (error)="handleGodIconError($event)">
+                            <span class="fallback-god-name" *ngIf="!getMinorGodIcon(mg)">{{ mg }}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <span class="badge" [class.bg-success]="player.Winner" [class.bg-secondary]="!player.Winner">
-                      {{ player.Winner ? 'Winner' : 'Loser' }}
+                      {{ player.Winner ? ('REPLAY_PARSER.RESULTS.WINNER_BADGE' | translate) : ('REPLAY_PARSER.RESULTS.LOSER_BADGE' | translate) }}
                     </span>
                   </div>
                   <div class="player-stats">
                     <div class="row text-center">
                       <div class="col-4">
-                        <small class="text-muted d-block">EAPM</small>
+                        <small class="text-muted d-block">{{ 'REPLAY_PARSER.RESULTS.EAPM' | translate }}</small>
                         <strong>{{ roundNumber(player.EAPM) }}</strong>
                       </div>
                       <div class="col-4">
-                        <small class="text-muted d-block">Minor Gods</small>
+                        <small class="text-muted d-block">{{ 'REPLAY_PARSER.RESULTS.MINOR_GODS' | translate }}</small>
                         <strong>{{ getMinorGodsCount(player.MinorGods) }}</strong>
                       </div>
                       <div class="col-4">
-                        <small class="text-muted d-block">Color</small>
+                        <small class="text-muted d-block">{{ 'REPLAY_PARSER.RESULTS.COLOR' | translate }}</small>
                         <div class="player-color" [style.background-color]="getPlayerColor(player.Color)"></div>
                       </div>
                     </div>
@@ -271,26 +269,26 @@
           <app-glass-card cardClass="padded">
             <h5 class="mb-3">
               <i class="fas fa-chart-bar me-2 text-info"></i>
-              Player Statistics
+              {{ 'REPLAY_PARSER.RESULTS.PLAYER_STATISTICS' | translate }}
             </h5>
             <div class="row">
               <div class="col-md-6 mb-3" *ngFor="let playerStats of getPlayerStatsArray()">
                 <h6>{{ getPlayerName(playerStats.playerNum) }}</h6>
                 <div class="stats-grid">
                   <div class="stat-item" *ngIf="playerStats.stats.UnitCounts">
-                    <small class="text-muted">Units Created</small>
+                    <small class="text-muted">{{ 'REPLAY_PARSER.RESULTS.UNITS_CREATED' | translate }}</small>
                     <strong>{{ getTotalCount(playerStats.stats.UnitCounts) }}</strong>
                   </div>
                   <div class="stat-item" *ngIf="playerStats.stats.BuildingCounts">
-                    <small class="text-muted">Buildings Built</small>
+                    <small class="text-muted">{{ 'REPLAY_PARSER.RESULTS.BUILDINGS_BUILT' | translate }}</small>
                     <strong>{{ getTotalCount(playerStats.stats.BuildingCounts) }}</strong>
                   </div>
                   <div class="stat-item" *ngIf="playerStats.stats.TechsResearched">
-                    <small class="text-muted">Technologies</small>
+                    <small class="text-muted">{{ 'REPLAY_PARSER.RESULTS.TECHNOLOGIES' | translate }}</small>
                     <strong>{{ playerStats.stats.TechsResearched.length }}</strong>
                   </div>
                   <div class="stat-item" *ngIf="playerStats.stats.GodPowerCounts">
-                    <small class="text-muted">God Powers</small>
+                    <small class="text-muted">{{ 'REPLAY_PARSER.RESULTS.GOD_POWERS' | translate }}</small>
                     <strong>{{ getTotalCount(playerStats.stats.GodPowerCounts) }}</strong>
                   </div>
                 </div>
@@ -306,7 +304,7 @@
           <app-glass-card cardClass="padded">
             <h5 class="mb-3">
               <i class="fas fa-clock me-2 text-warning"></i>
-              Game Timeline (First 10 Minutes)
+              {{ 'REPLAY_PARSER.RESULTS.GAME_TIMELINE' | translate }}
             </h5>
             <div class="timeline-container">
               <div class="timeline-segment" *ngFor="let segment of getTimelineSegments(); let i = index">
@@ -329,7 +327,7 @@
                             </div>
                           </div>
                           <div class="text-muted small" *ngIf="getPlayerActivity(segment, 1).events.length === 0">
-                            No activity
+                            {{ 'REPLAY_PARSER.RESULTS.NO_ACTIVITY' | translate }}
                           </div>
                         </div>
                       </div>
@@ -343,7 +341,7 @@
                             </div>
                           </div>
                           <div class="text-muted small" *ngIf="getPlayerActivity(segment, 2).events.length === 0">
-                            No activity
+                            {{ 'REPLAY_PARSER.RESULTS.NO_ACTIVITY' | translate }}
                           </div>
                         </div>
                       </div>
@@ -352,10 +350,9 @@
                 </div>
               </div>
               
-              <!-- Debug info when no timeline data is found -->
               <div *ngIf="getTimelineSegments().length === 0" class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
-                No timeline data found. Click "Debug Parse Result" to see the raw data structure.
+                {{ 'REPLAY_PARSER.RESULTS.NO_TIMELINE_DATA' | translate }}
               </div>
             </div>
           </app-glass-card>
@@ -386,7 +383,7 @@
       <div class="col-lg-3 col-md-6">
         <app-glass-card cardClass="padded text-center h-100">
           <i class="fas fa-compress-alt fa-2x mb-3 text-success"></i>
-          <h4>Slim Mode</h4>
+          <h4>{{ 'REPLAY_PARSER.INFO.SLIM_MODE_TITLE' | translate }}</h4>
           <p class="small mb-0">{{ 'REPLAY_PARSER.INFO.FEATURE_SLIM' | translate }}</p>
         </app-glass-card>
       </div>
@@ -395,7 +392,7 @@
       <div class="col-lg-3 col-md-6">
         <app-glass-card cardClass="padded text-center h-100">
           <i class="fas fa-chart-bar fa-2x mb-3 text-info"></i>
-          <h4>Statistics</h4>
+          <h4>{{ 'REPLAY_PARSER.INFO.STATISTICS_TITLE' | translate }}</h4>
           <p class="small mb-0">{{ 'REPLAY_PARSER.INFO.FEATURE_STATS' | translate }}</p>
         </app-glass-card>
       </div>
@@ -404,7 +401,7 @@
       <div class="col-lg-3 col-md-6">
         <app-glass-card cardClass="padded text-center h-100">
           <i class="fas fa-code fa-2x mb-3 text-warning"></i>
-          <h4>Pretty Print</h4>
+          <h4>{{ 'REPLAY_PARSER.INFO.PRETTY_PRINT_TITLE' | translate }}</h4>
           <p class="small mb-0">{{ 'REPLAY_PARSER.INFO.FEATURE_PRETTY' | translate }}</p>
         </app-glass-card>
       </div>

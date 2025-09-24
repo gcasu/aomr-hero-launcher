@@ -122,7 +122,6 @@ export class ReplayParserComponent implements OnInit {
         );
       }
     } catch (error) {
-      console.error('Error parsing replay:', error);
       this.toastService.showError('REPLAY_PARSER.ERRORS.PARSE_FAILED');
     } finally {
       this.isProcessing = false;
@@ -151,64 +150,13 @@ export class ReplayParserComponent implements OnInit {
     this.selectedFile = null;
     this.parseResult = null;
     this.isDragOver = false;
-    // Reset file input value so re-selecting the same file works
     const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
     if (fileInput) {
       fileInput.value = '';
     }
   }
 
-  debugParseResult(): void {
-    if (this.parseResult) {
-      console.log('=== FULL PARSE RESULT ===');
-      console.log(JSON.stringify(this.parseResult, null, 2));
-      
-      console.log('=== GAMECOMMANDS STRUCTURE ===');
-      if (this.parseResult.data?.GameCommands) {
-        console.log('GameCommands found:', this.parseResult.data.GameCommands.length);
-        console.log('First 5 commands:', this.parseResult.data.GameCommands.slice(0, 5));
-        
-        // Show unique command types
-        const commandTypes = new Set();
-        this.parseResult.data.GameCommands.forEach((cmd: any) => {
-          commandTypes.add(cmd.CommandType || 'Unknown');
-        });
-        console.log('Command types found:', Array.from(commandTypes));
-        
-        // Show unique players
-        const players = new Set();
-        this.parseResult.data.GameCommands.forEach((cmd: any) => {
-          players.add(cmd.PlayerNum);
-        });
-        console.log('Players with commands:', Array.from(players));
-      } else {
-        console.log('No GameCommands array found');
-      }
-      
-      console.log('=== STATS STRUCTURE ===');
-      if (this.parseResult.data?.Stats) {
-        Object.keys(this.parseResult.data.Stats).forEach(playerNum => {
-          console.log(`Player ${playerNum}:`, this.parseResult!.data.Stats[playerNum]);
-        });
-      } else {
-        console.log('No Stats found');
-      }
-      
-      console.log('=== TIMELINE CHECK ===');
-      console.log('hasTimelineData():', this.hasTimelineData());
-      const segments = this.getTimelineSegments();
-      console.log('getTimelineSegments() length:', segments.length);
-      console.log('First 3 segments:', segments.slice(0, 3));
-      
-      // Count segments with activity
-      const segmentsWithActivity = segments.filter(segment => 
-        segment.some(playerActivity => playerActivity.events.length > 0)
-      );
-      console.log('Segments with activity:', segmentsWithActivity.length);
-    } else {
-      console.log('No parse result available');
-    }
-  }
+
 
   getFileSizeString(bytes: number): string {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -262,6 +210,35 @@ export class ReplayParserComponent implements OnInit {
     return player.MinorGods.filter((g: string) => g && g.trim() !== '');
   }
 
+  private minorGodIconCache: Record<string, string> = {};
+  private minorGodIconFolders: string[] = [
+    'assets/images/tiers/Minor Gods (Classical Age)',
+    'assets/images/tiers/Minor Gods (Heroic Age)',
+    'assets/images/tiers/Minor Gods (Mythic Age)'
+  ];
+
+  getMinorGodIcon(godName: string): string | null {
+    if (!godName) return null;
+    const key = godName.toLowerCase();
+    if (this.minorGodIconCache[key]) {
+      return this.minorGodIconCache[key];
+    }
+    const fileName = key.replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') + '.png';
+    for (const folder of this.minorGodIconFolders) {
+      const path = `${folder}/${fileName}`;
+      this.minorGodIconCache[key] = path;
+      return path;
+    }
+    return null;
+  }
+
+  handleGodIconError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.style.display = 'none';
+    }
+  }
+
   getTotalCount(countObject: any): number {
     if (!countObject) return 0;
     return Object.values(countObject).reduce((sum: number, count: any) => sum + (Number(count) || 0), 0);
@@ -297,11 +274,7 @@ export class ReplayParserComponent implements OnInit {
     const maxSegments = 20; // 10 minutes / 30 seconds = 20 segments
     const segments: Array<Array<{playerName: string, events: string[]}>> = [];
     
-    // First, try to process commands data (more reliable for timeline) - using correct field name
     if (this.parseResult?.data?.GameCommands && Array.isArray(this.parseResult.data.GameCommands)) {
-      console.log('Processing GameCommands data for timeline:', this.parseResult.data.GameCommands.length, 'commands');
-      
-      // Get all unique players from commands
       const playersSet = new Set<number>();
       this.parseResult.data.GameCommands.forEach((command: any) => {
         if (command.PlayerNum !== undefined) {
@@ -309,7 +282,6 @@ export class ReplayParserComponent implements OnInit {
         }
       });
       const players = Array.from(playersSet);
-      console.log('Found players in commands:', players);
       
       for (let i = 0; i < maxSegments; i++) {
         const segmentActivities: Array<{playerName: string, events: string[]}> = [];
@@ -353,17 +325,14 @@ export class ReplayParserComponent implements OnInit {
                   eventDescription = `Prequeued ${prequeueTechName}`;
                 } else {
                   eventDescription = 'Prequeued Unknown Technology';
-                  console.log('Prequeue command with no payload:', command);
                 }
                 break;
-              case 'research': // Handle actual research commands
-                // Handle cases where payload might be null/empty
+              case 'research':
                 const techName = command.Payload || 'Unknown Technology';
                 if (techName && techName.trim() !== '') {
                   eventDescription = `Researched ${techName}`;
                 } else {
                   eventDescription = 'Researched Unknown Technology';
-                  console.log('Research command with no payload:', command);
                 }
                 break;
               case 'autoqueue':
@@ -418,7 +387,6 @@ export class ReplayParserComponent implements OnInit {
                 } else {
                   eventDescription = `${command.CommandType} command`;
                 }
-                console.log('Unknown command type:', command);
             }
             
             eventGroups[eventDescription] = (eventGroups[eventDescription] || 0) + 1;
@@ -447,13 +415,10 @@ export class ReplayParserComponent implements OnInit {
         segments.push(segmentActivities);
       }
       
-      console.log('Timeline segments from GameCommands:', segments.slice(0, 3));
       return segments;
     }
     
-    // Fallback: try to process stats-based timeline data
     if (this.parseResult?.data?.Stats) {
-      console.log('Processing stats data for timeline');
       
       for (let i = 0; i < maxSegments; i++) {
         const segmentActivities: Array<{playerName: string, events: string[]}> = [];
@@ -505,8 +470,6 @@ export class ReplayParserComponent implements OnInit {
         
         segments.push(segmentActivities);
       }
-      
-      console.log('Timeline segments from stats:', segments.slice(0, 3));
     }
     
     return segments;

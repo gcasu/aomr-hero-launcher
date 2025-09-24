@@ -253,6 +253,40 @@
       margin: 0 auto;
       border: 2px solid rgba(255, 255, 255, 0.3);
     }
+
+    .minor-gods {
+      .minor-god-icon-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 6px;
+        overflow: hidden;
+        transition: background .15s ease, transform .15s ease;
+        
+        &:hover {
+          background: rgba(255,255,255,0.12);
+          transform: translateY(-2px);
+        }
+      }
+      .minor-god-icon {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+      }
+      .fallback-god-name {
+        font-size: 0.55rem;
+        text-align: center;
+        padding: 2px 3px;
+        line-height: 1.1;
+        word-break: break-word;
+      }
+    }
   
     small.text-muted + small.text-muted {
       margin-top: 2px;

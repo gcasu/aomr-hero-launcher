@@ -426,7 +426,8 @@
     "BUTTONS": {
       "PARSE": "Parse Replay",
       "PROCESSING": "Processing...",
-      "DOWNLOAD": "Download JSON"
+      "DOWNLOAD": "Download JSON",
+      "DOWNLOAD_JSON": "Download JSON"
     },
     "MESSAGES": {
       "PARSE_SUCCESS": "Replay parsed successfully!"
@@ -441,7 +442,29 @@
       "SUCCESS_MESSAGE": "Your replay has been parsed successfully. You can now download the JSON file.",
       "ERROR_TITLE": "Parsing Failed",
       "UNKNOWN_ERROR": "An unknown error occurred during parsing",
-      "RESULT_SIZE": "Result size"
+      "RESULT_SIZE": "Result size",
+      "ANALYSIS_COMPLETE": "Replay Analysis Complete",
+      "ANALYSIS_DESCRIPTION": "Parsed replay data with detailed insights",
+      "GAME_OVERVIEW": "Game Overview",
+      "MAP": "Map",
+      "DURATION": "Duration",
+      "WINNER": "Winner",
+      "BUILD": "Build",
+      "UNKNOWN": "Unknown",
+      "PLAYERS": "Players",
+      "MINOR_GODS": "Minor Gods",
+      "WINNER_BADGE": "Winner",
+      "LOSER_BADGE": "Loser",
+      "EAPM": "EAPM",
+      "COLOR": "Color",
+      "PLAYER_STATISTICS": "Player Statistics",
+      "UNITS_CREATED": "Units Created",
+      "BUILDINGS_BUILT": "Buildings Built",
+      "TECHNOLOGIES": "Technologies",
+      "GOD_POWERS": "God Powers",
+      "GAME_TIMELINE": "Game Timeline (First 10 Minutes)",
+      "NO_ACTIVITY": "No activity",
+      "NO_TIMELINE_DATA": "No timeline data found."
     },
     "PROCESSING_MESSAGE": "Parsing replay file, please wait...",
     "INFO": {
@@ -452,7 +475,10 @@
       "FEATURE_SLIM": "Slim mode for reduced file size",
       "FEATURE_STATS": "Enhanced statistics extraction",
       "FEATURE_PRETTY": "Pretty-printed JSON output",
-      "FEATURE_GZIP": "GZIP compression support"
+      "FEATURE_GZIP": "GZIP compression support",
+      "SLIM_MODE_TITLE": "Slim Mode",
+      "STATISTICS_TITLE": "Statistics",
+      "PRETTY_PRINT_TITLE": "Pretty Print"
     },
     "EMPTY": {
       "TITLE": "Ready to Parse Replays",
