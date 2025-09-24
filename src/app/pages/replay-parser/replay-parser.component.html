@@ -22,7 +22,7 @@
       <input 
         #fileInput 
         type="file" 
-        accept=".mythrec,.mythrec.gz"
+        accept=".mythrec,.gz,.zip"
         (change)="onFileSelected($event)"
         style="display: none;">
 
@@ -187,7 +187,7 @@
             </h5>
             <div class="row">
               <div class="col-md-3">
-                <strong>{{ 'REPLAY_PARSER.RESULTS.MAP' | translate }}: </strong>{{ parseResult.data.MapName || ('REPLAY_PARSER.RESULTS.UNKNOWN' | translate) }}
+                <strong>{{ 'REPLAY_PARSER.RESULTS.MAP' | translate }}: </strong>{{ getMapName() || ('REPLAY_PARSER.RESULTS.UNKNOWN' | translate) }}
               </div>
               <div class="col-md-3">
                 <strong>{{ 'REPLAY_PARSER.RESULTS.DURATION' | translate }}: </strong>{{ formatGameTime(parseResult.data.GameLengthSecs) }}
@@ -221,7 +221,13 @@
                         <i class="fas fa-crown me-1" *ngIf="player.Winner"></i>
                         {{ player.Name }}
                       </h6>
-                      <small class="d-block">{{ getPlayerLabel(player.PlayerNum) }} • {{ player.God }}</small>
+                      <div class="d-flex align-items-center gap-2 mb-1">
+                        <small>{{ getPlayerLabel(player.PlayerNum) }} • </small>
+                        <div class="major-god-display d-flex align-items-center gap-1">
+                          <img *ngIf="getMajorGodIcon(player.God) as iconSrc" [src]="iconSrc" [alt]="player.God" class="major-god-icon" (error)="handleGodIconError($event)">
+                          <small [class.fw-bold]="getMajorGodIcon(player.God)">{{ player.God }}</small>
+                        </div>
+                      </div>
                       <div class="minor-gods mt-1" *ngIf="getMinorGods(player).length > 0">
                         <small class="d-block mb-1">{{ 'REPLAY_PARSER.RESULTS.MINOR_GODS' | translate }}:</small>
                         <div class="d-flex flex-wrap align-items-center gap-2">

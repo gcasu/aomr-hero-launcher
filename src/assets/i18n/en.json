@@ -407,7 +407,7 @@
     "UPLOAD": {
       "TITLE": "Drop or Click to Upload Replay",
       "DESCRIPTION": "Drag and drop your replay file here or click to browse",
-      "FORMATS": "Supported formats: .mythrec, .mythrec.gz",
+      "FORMATS": "Supported formats: .mythrec, .gz, .zip",
       "CLEAR": "Clear File"
     },
     "OPTIONS": {
@@ -434,7 +434,7 @@
     },
     "ERRORS": {
       "NO_FILE_SELECTED": "Please select a replay file first",
-      "INVALID_FILE_TYPE": "Invalid file type. Please select a .mythrec or .mythrec.gz file",
+      "INVALID_FILE_TYPE": "Invalid file type. Please select a .mythrec, .gz, or .zip file",
       "PARSE_FAILED": "Failed to parse replay file"
     },
     "RESULTS": {
@@ -470,7 +470,7 @@
     "PROCESSING_MESSAGE": "Parsing replay file, please wait...",
     "INFO": {
       "ABOUT_TITLE": "About Replay Parser",
-      "ABOUT_DESCRIPTION": "This tool leverages the AoM:R Restoration project parser to convert Age of Mythology: Retold .mythrec files into human-readable JSON format, making replay data accessible for analysis and statistics.",
+      "ABOUT_DESCRIPTION": "This tool leverages the AoM:R Restoration project parser to convert Age of Mythology: Retold replay files (.mythrec, .gz, .zip) into human-readable JSON format, making replay data accessible for analysis and statistics.",
       "SUPPORTED_FORMATS": "Supported Formats",
       "FEATURES_TITLE": "Features & Capabilities",
       "FEATURE_SLIM": "Slim mode for reduced file size",
@@ -483,7 +483,7 @@
     },
     "EMPTY": {
       "TITLE": "Ready to Parse Replays",
-      "DESCRIPTION": "Upload a .mythrec or .mythrec.gz file to get started with parsing your replay data."
+      "DESCRIPTION": "Upload a .mythrec, .gz, or .zip file to get started with parsing your replay data."
     }
   }
 }

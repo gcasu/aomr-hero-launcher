@@ -287,6 +287,16 @@
         word-break: break-word;
       }
     }
+
+    .major-god-display {
+      .major-god-icon {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+        border-radius: 2px;
+      }
+    }
   
     small.text-muted + small.text-muted {
       margin-top: 2px;
