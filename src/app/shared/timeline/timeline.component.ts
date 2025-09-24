@@ -1,18 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-
-export interface TimelineEvent {
-  description: string;
-  icon?: string;
-  iconColor?: string;
-}
-
-export interface TimelineSegment {
-  startTime: number;
-  endTime: number;
-  events: TimelineEvent[];
-}
+import { TimelineEvent, TimelineSegment, TimelineConfig } from './timeline.interfaces';
+import { TimelineService } from './timeline.service';
+import { TimelineModels } from './timeline.models';
 
 @Component({
   selector: 'app-timeline',
@@ -27,61 +18,64 @@ export interface TimelineSegment {
 export class TimelineComponent implements OnInit {
   @Input() playerName: string = '';
   @Input() segments: TimelineSegment[] = [];
+  @Input() config: Partial<TimelineConfig> = {};
+  
+  // Legacy inputs for backward compatibility - will be merged into config
   @Input() maxSegments: number = 20;
-  @Input() segmentDuration: number = 30; // seconds
+  @Input() segmentDuration: number = 30;
   @Input() primaryColor: string = 'text-primary';
-  @Input() playerColor: string = ''; // Hex color from player data
+  @Input() playerColor: string = '';
   @Input() showEmptySegments: boolean = false;
   @Input() compact: boolean = false;
 
-  ngOnInit(): void {
-    // Component initialization
-  }
+  private timelineConfig: TimelineConfig = TimelineModels.DEFAULT_CONFIG;
 
-  formatTimeSegment(startTime: number, endTime: number): string {
-    const startMinutes = Math.floor(startTime / 60);
-    const startSeconds = startTime % 60;
-    const endMinutes = Math.floor(endTime / 60);
-    const endSecondsValue = endTime % 60;
-    
-    return `${startMinutes}:${startSeconds.toString().padStart(2, '0')} - ${endMinutes}:${endSecondsValue.toString().padStart(2, '0')}`;
+  constructor(private timelineService: TimelineService) {}
+
+  ngOnInit(): void {
+    // Merge legacy inputs with config for backward compatibility
+    this.timelineConfig = TimelineModels.mergeConfig({
+      ...this.config,
+      maxSegments: this.maxSegments,
+      segmentDuration: this.segmentDuration,
+      primaryColor: this.primaryColor,
+      playerColor: this.playerColor,
+      showEmptySegments: this.showEmptySegments,
+      compact: this.compact
+    });
   }
 
   hasEvents(segment: TimelineSegment): boolean {
-    return segment.events && segment.events.length > 0;
+    return TimelineModels.hasEvents(segment);
   }
 
   getSegmentLabel(segment: TimelineSegment): string {
-    return this.formatTimeSegment(segment.startTime, segment.endTime);
+    return segment.label || TimelineModels.formatTimeRange(segment.startTime, segment.endTime);
   }
 
   getEventIcon(event: TimelineEvent): string {
-    return event.icon || 'fas fa-dot-circle';
+    return this.timelineService.getEventIcon(event);
   }
 
   getEventIconColor(event: TimelineEvent): string {
-    if (event.iconColor) {
-      return event.iconColor;
-    }
+    const color = this.timelineService.getEventColor(
+      event, 
+      this.timelineConfig.playerColor, 
+      this.timelineConfig.primaryColor
+    );
     
-    // Use player color if available, otherwise fallback to primaryColor
-    if (this.playerColor) {
-      return '';  // Return empty class since we'll use inline style
-    }
-    
-    return this.primaryColor;
+    // Return empty class if using hex color (will use inline style)
+    return color.startsWith('#') ? '' : color;
   }
 
   getEventIconStyle(event: TimelineEvent): any {
-    if (event.iconColor) {
-      return {};
-    }
+    const color = this.timelineService.getEventColor(
+      event, 
+      this.timelineConfig.playerColor, 
+      this.timelineConfig.primaryColor
+    );
     
-    // Use player color if available
-    if (this.playerColor) {
-      return { color: this.playerColor };
-    }
-    
-    return {};
+    // Return inline style if hex color, otherwise empty
+    return color.startsWith('#') ? { color } : {};
   }
 }
