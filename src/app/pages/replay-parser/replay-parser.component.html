@@ -302,53 +302,26 @@
               <i class="fas fa-clock me-2 text-warning"></i>
               {{ 'REPLAY_PARSER.RESULTS.GAME_TIMELINE' | translate }}
             </h5>
-            <div class="timeline-container">
-              <div class="timeline-segment" *ngFor="let segment of getTimelineSegments(); let i = index">
-                <!-- Only show segments that have any activity across all players -->
-                <div *ngIf="hasSegmentActivity(segment)">
-                  <div class="timeline-header">
-                    <strong>{{ formatTimeSegment(i) }}</strong>
-                    <small class="ms-2">({{ i * 30 }}s - {{ (i + 1) * 30 }}s)</small>
-                  </div>
-                  <div class="timeline-events">
-                    <div class="row">
-                      <!-- Always show Player 1 on the left (col-1), Player 2 on the right (col-2) -->
-                      <div class="col-md-6">
-                        <div class="player-activity">
-                          <h6 class="mb-2 text-muted">{{ getPlayerActivity(segment, 1).playerName }}</h6>
-                          <div class="activity-list" *ngIf="getPlayerActivity(segment, 1).events.length > 0">
-                            <div class="activity-item" *ngFor="let event of getPlayerActivity(segment, 1).events">
-                              <i class="fas fa-dot-circle me-2 text-primary"></i>
-                              <span>{{ event }}</span>
-                            </div>
-                          </div>
-                          <div class="text-muted small" *ngIf="getPlayerActivity(segment, 1).events.length === 0">
-                            {{ 'REPLAY_PARSER.RESULTS.NO_ACTIVITY' | translate }}
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="player-activity">
-                          <h6 class="mb-2 text-muted">{{ getPlayerActivity(segment, 2).playerName }}</h6>
-                          <div class="activity-list" *ngIf="getPlayerActivity(segment, 2).events.length > 0">
-                            <div class="activity-item" *ngFor="let event of getPlayerActivity(segment, 2).events">
-                              <i class="fas fa-dot-circle me-2 text-success"></i>
-                              <span>{{ event }}</span>
-                            </div>
-                          </div>
-                          <div class="text-muted small" *ngIf="getPlayerActivity(segment, 2).events.length === 0">
-                            {{ 'REPLAY_PARSER.RESULTS.NO_ACTIVITY' | translate }}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <div class="row">
+              <!-- Player 1 Timeline -->
+              <div class="col-md-6">
+                <app-timeline
+                  [playerName]="getPlayerTimelineName(1)"
+                  [segments]="getTimelineDataForPlayer(1)"
+                  [primaryColor]="'text-primary'"
+                  [playerColor]="getPlayerColorForTimeline(1)"
+                  [compact]="false">
+                </app-timeline>
               </div>
-              
-              <div *ngIf="getTimelineSegments().length === 0" class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                {{ 'REPLAY_PARSER.RESULTS.NO_TIMELINE_DATA' | translate }}
+              <!-- Player 2 Timeline -->
+              <div class="col-md-6">
+                <app-timeline
+                  [playerName]="getPlayerTimelineName(2)"
+                  [segments]="getTimelineDataForPlayer(2)"
+                  [primaryColor]="'text-success'"
+                  [playerColor]="getPlayerColorForTimeline(2)"
+                  [compact]="false">
+                </app-timeline>
               </div>
             </div>
           </app-glass-card>

@@ -11,6 +11,7 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component';
 import { LoadingStateComponent } from '../../shared/loading-state/loading-state.component';
 import { GlassCardComponent } from '../../shared/glass-card/glass-card.component';
+import { TimelineComponent, TimelineSegment, TimelineEvent } from '../../shared/timeline/timeline.component';
 
 @Component({
   selector: 'app-replay-parser',
@@ -25,7 +26,8 @@ import { GlassCardComponent } from '../../shared/glass-card/glass-card.component
     PageHeaderComponent,
     EmptyStateComponent,
     LoadingStateComponent,
-    GlassCardComponent
+    GlassCardComponent,
+    TimelineComponent
   ]
 })
 export class ReplayParserComponent implements OnInit {
@@ -186,6 +188,13 @@ export class ReplayParserComponent implements OnInit {
       '#FFB6C1', '#800080', '#A52A2A', '#FFFFFF'
     ];
     return colors[colorIndex] || '#FFFFFF';
+  }
+
+  getPlayerColorForTimeline(playerNum: number): string {
+    if (!this.parseResult?.data?.Players) return '#FFFFFF';
+    
+    const player = this.parseResult.data.Players.find((p: any) => p.PlayerNumber === playerNum);
+    return player ? this.getPlayerColor(player.Color) : '#FFFFFF';
   }
 
   getPlayerStatsArray(): Array<{playerNum: string, stats: any}> {
@@ -618,5 +627,147 @@ export class ReplayParserComponent implements OnInit {
     
     const winners = this.parseResult.data.Players.filter((p: any) => p.Winner);
     return winners.map((p: any) => p.Name).join(', ');
+  }
+
+  // Methods for the new timeline component
+  getTimelineDataForPlayer(playerNum: number): TimelineSegment[] {
+    const maxSegments = 20;
+    const segments: TimelineSegment[] = [];
+    
+    if (this.parseResult?.data?.GameCommands && Array.isArray(this.parseResult.data.GameCommands)) {
+      for (let i = 0; i < maxSegments; i++) {
+        const startTime = i * 30;
+        const endTime = (i + 1) * 30;
+        
+        // Filter commands for this player and time segment
+        const playerCommands = this.parseResult.data.GameCommands.filter((command: any) => 
+          command.PlayerNum === playerNum &&
+          command.GameTimeSecs >= startTime && 
+          command.GameTimeSecs < endTime
+        );
+        
+        const events: TimelineEvent[] = [];
+        const eventGroups: { [key: string]: number } = {};
+        
+        // Process commands to extract meaningful information
+        playerCommands.forEach((command: any) => {
+          let eventDescription = '';
+          let icon = 'fas fa-dot-circle';
+          let iconColor = playerNum === 1 ? 'text-primary' : 'text-success';
+          
+          switch (command.CommandType) {
+            case 'train':
+              const unitName = command.Payload || 'Unknown Unit';
+              eventDescription = `Trained ${unitName}`;
+              icon = 'fas fa-user-plus';
+              break;
+            case 'build':
+              const buildingName = command.Payload?.Name || 'Unknown Building';
+              const isQueued = command.Payload?.Queued === true;
+              if (isQueued) {
+                eventDescription = `Queued ${buildingName}`;
+                icon = 'fas fa-clock';
+              } else {
+                eventDescription = `Built ${buildingName}`;
+                icon = 'fas fa-hammer';
+              }
+              break;
+            case 'prequeueTech':
+              const prequeueTechName = command.Payload || 'Unknown Technology';
+              eventDescription = prequeueTechName && prequeueTechName.trim() !== '' 
+                ? `Prequeued ${prequeueTechName}` 
+                : 'Prequeued Unknown Technology';
+              icon = 'fas fa-hourglass-start';
+              break;
+            case 'research':
+              const techName = command.Payload || 'Unknown Technology';
+              eventDescription = techName && techName.trim() !== '' 
+                ? `Researched ${techName}` 
+                : 'Researched Unknown Technology';
+              icon = 'fas fa-flask';
+              break;
+            case 'autoqueue':
+              const autoUnit = command.Payload || 'Unknown Unit';
+              eventDescription = `Auto-queued ${autoUnit}`;
+              icon = 'fas fa-sync-alt';
+              break;
+            case 'godPower':
+              const godPowerName = command.Payload?.Name || 'Unknown God Power';
+              eventDescription = `Used ${godPowerName}`;
+              icon = 'fas fa-bolt';
+              iconColor = 'text-warning';
+              break;
+            case 'protoPower':
+              const protoPowerName = command.Payload?.Name || 'Unknown Proto Power';
+              eventDescription = `Used ${protoPowerName}`;
+              icon = 'fas fa-magic';
+              iconColor = 'text-info';
+              break;
+            default:
+              if (command.Payload) {
+                if (typeof command.Payload === 'string') {
+                  eventDescription = `${command.CommandType}: ${command.Payload}`;
+                } else if (command.Payload.Name) {
+                  eventDescription = `${command.CommandType}: ${command.Payload.Name}`;
+                } else {
+                  eventDescription = `${command.CommandType} command`;
+                }
+              } else {
+                eventDescription = `${command.CommandType} command`;
+              }
+          }
+          
+          eventGroups[eventDescription] = (eventGroups[eventDescription] || 0) + 1;
+        });
+        
+        // Convert to events - for research, show each one individually
+        Object.entries(eventGroups).forEach(([eventDesc, count]) => {
+          if (eventDesc.startsWith('Researched ')) {
+            // For research, add each one individually
+            for (let j = 0; j < count; j++) {
+              events.push({
+                description: eventDesc,
+                icon: 'fas fa-flask',
+                iconColor: playerNum === 1 ? 'text-primary' : 'text-success'
+              });
+            }
+          } else {
+            // For other commands, group with count
+            const description = count === 1 ? eventDesc : `${eventDesc} (×${count})`;
+            let icon = 'fas fa-dot-circle';
+            let iconColor = playerNum === 1 ? 'text-primary' : 'text-success';
+            
+            // Set appropriate icon based on event type
+            if (eventDesc.includes('Trained')) icon = 'fas fa-user-plus';
+            else if (eventDesc.includes('Built')) icon = 'fas fa-hammer';
+            else if (eventDesc.includes('Queued')) icon = 'fas fa-clock';
+            else if (eventDesc.includes('Prequeued')) icon = 'fas fa-hourglass-start';
+            else if (eventDesc.includes('Auto-queued')) icon = 'fas fa-sync-alt';
+            else if (eventDesc.includes('Used') && eventDesc.includes('Power')) {
+              icon = 'fas fa-bolt';
+              iconColor = 'text-warning';
+            }
+            
+            events.push({
+              description,
+              icon,
+              iconColor
+            });
+          }
+        });
+        
+        segments.push({
+          startTime,
+          endTime,
+          events
+        });
+      }
+    }
+    
+    return segments;
+  }
+
+  getPlayerTimelineName(playerNum: number): string {
+    return this.getPlayerName(playerNum.toString());
   }
 }
