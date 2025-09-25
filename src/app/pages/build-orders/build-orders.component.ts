@@ -6,11 +6,13 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ToastService } from '../../services/toast.service';
 import { MatchDataFetcherService } from '../../services/match-data-fetcher.service';
 import { ReplayDownloadService } from '../../services/replay-download.service';
-import { ReplayCacheService, CachedReplay } from '../../services/replay-cache.service';
+import { ReplayCacheService } from '../../services/replay-cache.service';
+import { ReplayFileService } from '../../services/replay-file.service';
 import { ReplayParserService, ParseOptions, ParseResult } from '../../services/replay-parser.service';
 import { TimelineService } from '../../shared/timeline/timeline.service';
 import { MajorGod } from '../../interfaces/major-god.interface';
 import { ProcessedMatch } from '../../interfaces/leaderboard.interface';
+import { CachedReplay } from '../../interfaces/replay-cache.interface';
 import { TimelineSegment } from '../../shared/timeline/timeline.interfaces';
 import { MAJOR_GODS_DATA, DEFAULT_SELECTED_GOD_ID } from '../../data/major-gods.data';
 
@@ -68,6 +70,7 @@ export class BuildOrdersComponent implements OnInit {
   private translateService = inject(TranslateService);
   private replayDownloadService = inject(ReplayDownloadService);
   private replayCacheService = inject(ReplayCacheService);
+  private replayFileService = inject(ReplayFileService);
   private replayParserService = inject(ReplayParserService);
   private timelineService = inject(TimelineService);
 
@@ -317,56 +320,18 @@ export class BuildOrdersComponent implements OnInit {
         this.translateService.instant('BUILD_ORDERS.REPLAY.PARSING')
       );
 
-      // Try to detect if the file is actually compressed by checking file signature
-      const isActuallyCompressed = await this.detectFileCompression(downloadResult.file);
-      
-      console.log('File info:', {
-        name: downloadResult.file.name,
-        size: downloadResult.file.size,
-        type: downloadResult.file.type,
-        detectedCompression: isActuallyCompressed
-      });
-
-      let fileToProcess = downloadResult.file;
-      
-      // If compressed, decompress it first
-      if (isActuallyCompressed) {
-        try {
-          console.log('Decompressing file...');
-          fileToProcess = await this.decompressFile(downloadResult.file);
-          console.log('File decompressed successfully, new size:', fileToProcess.size);
-        } catch (decompError) {
-          console.error('Decompression failed:', decompError);
-          const errorMessage = decompError instanceof Error ? decompError.message : 'Unknown decompression error';
-          throw new Error('Failed to decompress replay file: ' + errorMessage);
-        }
-      }
-      
       const parseOptions: ParseOptions = {
         slim: false,
         stats: false,
         prettyPrint: false,
-        isGzip: false, // Always false since we decompress everything
+        isGzip: false,
         verbose: false
       };
 
-      console.log('Parsing with options:', parseOptions);
-      console.log('File to process:', {
-        name: fileToProcess.name,
-        size: fileToProcess.size,
-        type: fileToProcess.type
-      });
-
-      const parseResult = await this.replayParserService.parseReplay(
-        fileToProcess,
+      const parseResult = await this.replayFileService.processReplayFile(
+        downloadResult.file,
         parseOptions
       ) as ParseResult;
-
-      console.log('Parse result:', {
-        success: parseResult.success,
-        hasData: !!parseResult.data,
-        error: parseResult.error
-      });
 
       if (!parseResult.success || !parseResult.data) {
         throw new Error(parseResult.error || 'Failed to parse replay');
@@ -397,17 +362,17 @@ export class BuildOrdersComponent implements OnInit {
       this.analysisMatchId = match.matchId;
       this.showTimeline = true;
 
-      // Step 4: Cache the replay data (using uncompressed file)
+      // Step 4: Cache the replay data
       try {
+        const processedFile = await this.replayFileService.decompressFile(downloadResult.file);
         await this.replayCacheService.cacheReplay(
           match.matchId,
           match.profileId,
-          fileToProcess, // This is the uncompressed file
+          processedFile,
           parseResult.data,
           this.timelineData,
           winner.playerName
         );
-        console.log('Replay cached successfully');
       } catch (cacheError) {
         console.warn('Failed to cache replay:', cacheError);
       }
@@ -419,22 +384,16 @@ export class BuildOrdersComponent implements OnInit {
     } catch (error) {
       console.error('Failed to analyze replay:', error);
       
-      // Try to cache the failed replay if we have an uncompressed file
+      // Try to cache the failed replay
       let fileToCache: File | null = null;
       try {
-        // Check if we got a downloaded file and potentially decompressed it
         const downloadResult = await this.replayDownloadService.downloadReplay(
           match.matchId, 
           match.profileId
         );
         
         if (downloadResult.success && downloadResult.file) {
-          const isActuallyCompressed = await this.detectFileCompression(downloadResult.file);
-          if (isActuallyCompressed) {
-            fileToCache = await this.decompressFile(downloadResult.file);
-          } else {
-            fileToCache = downloadResult.file;
-          }
+          fileToCache = await this.replayFileService.decompressFile(downloadResult.file);
         }
       } catch (downloadError) {
         console.warn('Could not get file for failed replay caching:', downloadError);
@@ -450,7 +409,6 @@ export class BuildOrdersComponent implements OnInit {
             fileToCache,
             errorMessage
           );
-          console.log('Failed replay cached for download access');
         } catch (cacheError) {
           console.warn('Failed to cache failed replay:', cacheError);
         }
@@ -540,213 +498,9 @@ export class BuildOrdersComponent implements OnInit {
     return colors[playerNum - 1] || '#FFFFFF';
   }
 
-  private async detectFileCompression(file: File): Promise<boolean> {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as ArrayBuffer;
-        if (!result) {
-          resolve(false);
-          return;
-        }
 
-        const bytes = new Uint8Array(result.slice(0, 4));
-        
-        // Check for gzip magic numbers (1f 8b)
-        if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
-          resolve(true);
-          return;
-        }
-        
-        // Check for zip magic numbers (50 4b 03 04 or 50 4b 05 06 or 50 4b 07 08)
-        if (bytes[0] === 0x50 && bytes[1] === 0x4b && 
-            (bytes[2] === 0x03 || bytes[2] === 0x05 || bytes[2] === 0x07)) {
-          resolve(true);
-          return;
-        }
-        
-        // Not compressed
-        resolve(false);
-      };
-      
-      reader.onerror = () => resolve(false);
-      reader.readAsArrayBuffer(file.slice(0, 4));
-    });
-  }
 
-  private async decompressFile(file: File): Promise<File> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const compressedData = e.target?.result as ArrayBuffer;
-          if (!compressedData) {
-            reject(new Error('Failed to read file data'));
-            return;
-          }
 
-          const bytes = new Uint8Array(compressedData);
-          
-          // Check if it's gzip format
-          if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
-            try {
-              console.log('Decompressing GZIP file...');
-              const decompressedStream = new DecompressionStream('gzip');
-              const stream = new ReadableStream({
-                start(controller) {
-                  controller.enqueue(bytes);
-                  controller.close();
-                }
-              });
-
-              const decompressedData = await new Response(
-                stream.pipeThrough(decompressedStream)
-              ).arrayBuffer();
-
-              const decompressedFile = new File(
-                [decompressedData], 
-                file.name.replace(/\.(gz|zip)$/, '.mythrec'),
-                { type: 'application/octet-stream' }
-              );
-              
-              console.log('GZIP decompression successful');
-              resolve(decompressedFile);
-            } catch (gzipError) {
-              console.error('GZIP decompression failed:', gzipError);
-              reject(gzipError);
-            }
-          }
-          // Check if it's zip format
-          else if (bytes[0] === 0x50 && bytes[1] === 0x4b) {
-            try {
-              console.log('Decompressing ZIP file...');
-              const decompressedFile = await this.extractFromZip(bytes, file.name);
-              console.log('ZIP decompression successful');
-              resolve(decompressedFile);
-            } catch (zipError) {
-              console.error('ZIP decompression failed:', zipError);
-              reject(zipError);
-            }
-          }
-          else {
-            // Not compressed, return as is
-            console.log('File is not compressed, returning as-is');
-            resolve(file);
-          }
-        } catch (error) {
-          reject(error);
-        }
-      };
-      
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsArrayBuffer(file);
-    });
-  }
-
-  private async extractFromZip(zipBytes: Uint8Array, originalFileName: string): Promise<File> {
-    // Find the first file entry in the ZIP
-    const centralDirStart = this.findCentralDirectory(zipBytes);
-    if (centralDirStart === -1) {
-      throw new Error('Invalid ZIP file: Central directory not found');
-    }
-
-    // Read central directory record
-    const centralDir = zipBytes.slice(centralDirStart);
-    if (centralDir.length < 46) {
-      throw new Error('Invalid ZIP file: Central directory too short');
-    }
-
-    // Extract file information from central directory
-    const compressedSize = this.readUint32LE(centralDir, 20);
-    const uncompressedSize = this.readUint32LE(centralDir, 24);
-    const compressionMethod = this.readUint16LE(centralDir, 10);
-    const fileNameLength = this.readUint16LE(centralDir, 28);
-    const extraFieldLength = this.readUint16LE(centralDir, 30);
-    const localHeaderOffset = this.readUint32LE(centralDir, 42);
-
-    console.log('ZIP file info:', {
-      compressedSize,
-      uncompressedSize,
-      compressionMethod,
-      fileNameLength,
-      extraFieldLength,
-      localHeaderOffset
-    });
-
-    // Find local file header
-    const localHeader = zipBytes.slice(localHeaderOffset);
-    if (localHeader.length < 30) {
-      throw new Error('Invalid ZIP file: Local header too short');
-    }
-
-    // Skip local header and filename/extra fields to get to compressed data
-    const localFileNameLength = this.readUint16LE(localHeader, 26);
-    const localExtraFieldLength = this.readUint16LE(localHeader, 28);
-    const dataStart = localHeaderOffset + 30 + localFileNameLength + localExtraFieldLength;
-    const compressedData = zipBytes.slice(dataStart, dataStart + compressedSize);
-
-    console.log('Extracting compressed data from offset:', dataStart, 'size:', compressedSize);
-
-    // Decompress based on compression method
-    if (compressionMethod === 0) {
-      // No compression
-      const decompressedFile = new File(
-        [compressedData], 
-        originalFileName.replace(/\.(gz|zip)$/, '.mythrec'),
-        { type: 'application/octet-stream' }
-      );
-      return decompressedFile;
-    } else if (compressionMethod === 8) {
-      // Deflate compression
-      try {
-        const decompressedStream = new DecompressionStream('deflate-raw');
-        const stream = new ReadableStream({
-          start(controller) {
-            controller.enqueue(compressedData);
-            controller.close();
-          }
-        });
-
-        const decompressedData = await new Response(
-          stream.pipeThrough(decompressedStream)
-        ).arrayBuffer();
-
-        const decompressedFile = new File(
-          [decompressedData], 
-          originalFileName.replace(/\.(gz|zip)$/, '.mythrec'),
-          { type: 'application/octet-stream' }
-        );
-        
-        return decompressedFile;
-      } catch (deflateError) {
-        console.error('Deflate decompression failed:', deflateError);
-        throw new Error('Failed to decompress ZIP file data');
-      }
-    } else {
-      throw new Error(`Unsupported ZIP compression method: ${compressionMethod}`);
-    }
-  }
-
-  private findCentralDirectory(zipBytes: Uint8Array): number {
-    // Look for End of Central Directory signature (0x06054b50) from the end
-    for (let i = zipBytes.length - 22; i >= 0; i--) {
-      if (zipBytes[i] === 0x50 && zipBytes[i + 1] === 0x4b && 
-          zipBytes[i + 2] === 0x05 && zipBytes[i + 3] === 0x06) {
-        // Found EOCD, read central directory offset
-        const centralDirOffset = this.readUint32LE(zipBytes, i + 16);
-        return centralDirOffset;
-      }
-    }
-    return -1;
-  }
-
-  private readUint16LE(bytes: Uint8Array, offset: number): number {
-    return bytes[offset] | (bytes[offset + 1] << 8);
-  }
-
-  private readUint32LE(bytes: Uint8Array, offset: number): number {
-    return bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24);
-  }
 
   // Cache utility methods
   isReplayCached(match: ProcessedMatch): boolean {

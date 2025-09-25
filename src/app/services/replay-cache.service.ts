@@ -1,53 +1,12 @@
 import { Injectable } from '@angular/core';
 import { TimelineSegment } from '../shared/timeline/timeline.interfaces';
-
-export interface CachedReplay {
-  matchId: string;
-  profileId: number;
-  replayFileName: string; // File name for the cached replay file
-  parsedData: any | null; // null if parsing failed
-  timelineData: TimelineSegment[] | null; // null if parsing failed
-  winnerPlayerName: string | null; // null if parsing failed
-  cachedAt: Date;
-  fileSize: number;
-  parsedSize: number;
-  hasError: boolean; // true if analysis failed
-  errorMessage?: string; // error details if analysis failed
-}
-
-interface CacheIndexEntry {
-  matchId: string;
-  profileId: number;
-  replayFileName: string;
-  parsedData: any | null;
-  timelineData: TimelineSegment[] | null;
-  winnerPlayerName: string | null;
-  cachedAt: string;
-  fileSize: number;
-  parsedSize: number;
-  hasError: boolean;
-  errorMessage?: string;
-}
-
-interface CacheIndex {
-  entries: { [key: string]: CacheIndexEntry };
-  lastCleanup: string;
-}
-
-export interface ReplayCacheStats {
-  totalReplays: number;
-  totalSize: number;
-  oldestCache: Date | null;
-  newestCache: Date | null;
-}
+import { CachedReplay, CacheIndexEntry, CacheIndex, ReplayCacheStats } from '../interfaces/replay-cache.interface';
+import { REPLAY_CACHE_CONFIG } from '../constants/replay-cache.constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReplayCacheService {
-  private readonly CACHE_DIR = 'replay_cache';
-  private readonly CACHE_INDEX_FILE = 'cache_index.json';
-  private readonly MAX_CACHE_SIZE = 500 * 1024 * 1024; // 500MB max cache size
   private readonly MAX_CACHE_ENTRIES = 100; // Maximum number of cached replays
 
   private cache: Map<string, CachedReplay> = new Map();
@@ -102,7 +61,7 @@ export class ReplayCacheService {
       }
 
       const appPath = await window.electronAPI.getAppPath();
-      this.cacheDirectory = window.electronAPI.pathJoin(appPath, this.CACHE_DIR);
+      this.cacheDirectory = window.electronAPI.pathJoin(appPath, REPLAY_CACHE_CONFIG.CACHE_DIR);
       
       // Ensure cache directory exists
       await window.electronAPI.ensureDirectory(this.cacheDirectory);
@@ -304,7 +263,7 @@ export class ReplayCacheService {
     // Remove entries if we exceed the maximum size
     let totalSize = this.getCacheStats().totalSize;
     let index = 0;
-    while (totalSize > this.MAX_CACHE_SIZE && index < replays.length) {
+    while (totalSize > REPLAY_CACHE_CONFIG.MAX_CACHE_SIZE && index < replays.length) {
       const replay = replays[index];
       totalSize -= (replay.replay.fileSize + replay.replay.parsedSize);
       this.cache.delete(replay.key);
@@ -366,7 +325,7 @@ export class ReplayCacheService {
 
   private async ensureCacheSpace(newEntrySize: number): Promise<void> {
     const stats = this.getCacheStats();
-    const wouldExceedSize = (stats.totalSize + newEntrySize) > this.MAX_CACHE_SIZE;
+    const wouldExceedSize = (stats.totalSize + newEntrySize) > REPLAY_CACHE_CONFIG.MAX_CACHE_SIZE;
     const wouldExceedEntries = stats.totalReplays >= this.MAX_CACHE_ENTRIES;
 
     if (wouldExceedSize || wouldExceedEntries) {
@@ -379,11 +338,10 @@ export class ReplayCacheService {
    */
   private async loadCacheIndex(): Promise<void> {
     try {
-      const indexPath = window.electronAPI.pathJoin(this.cacheDirectory, this.CACHE_INDEX_FILE);
+      const indexPath = window.electronAPI.pathJoin(this.cacheDirectory, REPLAY_CACHE_CONFIG.CACHE_INDEX_FILE);
       const indexExists = await window.electronAPI.fileExists(indexPath);
       
       if (!indexExists) {
-        console.log('No cache index found, starting with empty cache');
         return;
       }
 
@@ -435,7 +393,7 @@ export class ReplayCacheService {
    */
   private async saveCacheIndex(): Promise<void> {
     try {
-      const indexPath = window.electronAPI.pathJoin(this.cacheDirectory, this.CACHE_INDEX_FILE);
+      const indexPath = window.electronAPI.pathJoin(this.cacheDirectory, REPLAY_CACHE_CONFIG.CACHE_INDEX_FILE);
       
       const cacheIndex: CacheIndex = {
         entries: {},
