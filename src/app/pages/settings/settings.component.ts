@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { ToastService } from '../../services/toast.service';
 import { CacheDescriptionService } from '../../services/cache-description.service';
@@ -41,6 +42,7 @@ export class SettingsComponent implements OnInit, AfterViewInit {
   private translateService = inject(TranslateService);
   private toastService = inject(ToastService);
   private cacheDescriptionService = inject(CacheDescriptionService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     // Load settings immediately
@@ -355,9 +357,6 @@ export class SettingsComponent implements OnInit, AfterViewInit {
     try {
       const selectedItems = this.cacheItems.filter(item => item.selected);
       
-      // Set navigation flag before clearing storage to avoid blank screen
-      sessionStorage.setItem('navigateAfterReload', 'home');
-      
       // Remove selected items from localStorage
       selectedItems.forEach(item => {
         localStorage.removeItem(item.key);
@@ -367,29 +366,12 @@ export class SettingsComponent implements OnInit, AfterViewInit {
       const successMessage = this.translateService.instant('SETTINGS.CACHE.CLEAR_SELECTED_SUCCESS');
       this.toastService.showSuccess(successMessage);
       
-      // Inform user that application will reload
-      const reloadMessage = this.translateService.instant('SETTINGS.CACHE.RELOAD_MESSAGE');
-      this.toastService.showInfo(reloadMessage);
+      // For selective clearing, refresh the cache items list and navigate to home
+      this.loadCacheItems();
       
-      // Reload the application after a short delay
-      setTimeout(async () => {
-        try {
-          if (window.electronAPI && window.electronAPI.reloadWindow) {
-            // Use Electron's window reload method
-            await window.electronAPI.reloadWindow();
-          } else if (window.electronAPI && window.electronAPI.restartApp) {
-            // Fallback to full restart
-            await window.electronAPI.restartApp();
-          } else {
-            // Web environment - simple reload
-            window.location.reload();
-          }
-        } catch (error) {
-          console.error('Error reloading application:', error);
-          // Ultimate fallback
-          window.location.reload();
-        }
-      }, 2000);
+      setTimeout(() => {
+        this.router.navigate(['/home']);
+      }, 1000);
       
     } catch (error) {
       console.error('Error clearing selected cache items:', error);
