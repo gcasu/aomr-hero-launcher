@@ -15,6 +15,7 @@ try {
     readFile: (filePath) => ipcRenderer.invoke('file:read', filePath),
     writeFile: (filePath, content) => ipcRenderer.invoke('file:write', filePath, content),
     writeFileBuffer: (filePath, buffer) => ipcRenderer.invoke('file:writeBuffer', filePath, buffer),
+    readFileBuffer: (filePath) => ipcRenderer.invoke('file:readBuffer', filePath),
     deleteFile: (filePath) => ipcRenderer.invoke('file:delete', filePath),
     fileExists: (filePath) => ipcRenderer.invoke('file:exists', filePath),
     ensureDirectory: (dirPath) => ipcRenderer.invoke('file:ensureDirectory', dirPath),

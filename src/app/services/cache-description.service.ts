@@ -11,7 +11,8 @@ export class CacheDescriptionService {
     'selectedMajorGod': 'Selected major god in build orders',
     'dataGuideBookmarks': 'Data guide bookmarked entries',
     'dataGuideNotes': 'Data guide user notes and annotations',
-    'matchData': 'Top players match history data'
+    'matchData': 'Top players match history data',
+    'replay_cache': 'Cached replay files and parsed data for build orders analysis'
   };
 
   private readonly configKeys = [
@@ -23,7 +24,8 @@ export class CacheDescriptionService {
   private readonly dataKeys = [
     'dataGuideBookmarks', 
     'dataGuideNotes',
-    'matchData'
+    'matchData',
+    'replay_cache'
   ];
 
   getCacheItemDescription(key: string): string {

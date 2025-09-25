@@ -129,17 +129,60 @@
                 <!-- Actions -->
                 <td class="text-center actions-cell">
                   <div class="action-buttons">
-                    <!-- Analyze Replay Button -->
-                    <button 
-                      type="button" 
-                      class="btn btn-primary btn-sm"
-                      [disabled]="isAnalyzingReplay"
-                      (click)="analyzeReplay(match)"
-                      [title]="'BUILD_ORDERS.TABLE.ANALYZE_REPLAY' | translate">
-                      <span *ngIf="isMatchBeingAnalyzed(match.matchId)" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                      <i *ngIf="!isMatchBeingAnalyzed(match.matchId)" class="fas fa-chart-line me-1"></i>
-                      {{ 'BUILD_ORDERS.TABLE.ANALYZE_REPLAY' | translate }}
-                    </button>
+                    <!-- If not cached, show analyze button -->
+                    <ng-container *ngIf="!isReplayCached(match)">
+                      <button 
+                        type="button" 
+                        class="btn btn-outline-primary btn-sm"
+                        [disabled]="isAnalyzingReplay"
+                        (click)="analyzeReplay(match)"
+                        [title]="'BUILD_ORDERS.REPLAY.ANALYZE_TOOLTIP' | translate">
+                        <span *ngIf="isMatchBeingAnalyzed(match.matchId)" class="spinner-border spinner-border-sm" role="status"></span>
+                        <i *ngIf="!isMatchBeingAnalyzed(match.matchId)" class="fas fa-chart-line"></i>
+                      </button>
+                    </ng-container>
+
+                    <!-- If cached, show action buttons based on success/error state -->
+                    <ng-container *ngIf="isReplayCached(match)">
+                      <!-- Download Replay File (always available) -->
+                      <button 
+                        type="button" 
+                        class="btn btn-outline-success btn-sm me-1"
+                        (click)="downloadReplayFile(match)"
+                        [title]="'BUILD_ORDERS.REPLAY.DOWNLOAD_REPLAY_TOOLTIP' | translate">
+                        <i class="fas fa-download"></i>
+                      </button>
+
+                      <!-- Download JSON (only if analysis was successful) -->
+                      <button 
+                        *ngIf="isReplayCacheSuccessful(match)"
+                        type="button" 
+                        class="btn btn-outline-info btn-sm me-1"
+                        (click)="downloadReplayJson(match)"
+                        [title]="'BUILD_ORDERS.REPLAY.DOWNLOAD_JSON_TOOLTIP' | translate">
+                        <i class="fas fa-file-code"></i>
+                      </button>
+
+                      <!-- Show Timeline (only if analysis was successful) -->
+                      <button 
+                        *ngIf="isReplayCacheSuccessful(match)"
+                        type="button" 
+                        class="btn btn-outline-primary btn-sm"
+                        (click)="showCachedTimeline(match)"
+                        [title]="'BUILD_ORDERS.REPLAY.SHOW_TIMELINE_TOOLTIP' | translate">
+                        <i class="fas fa-chart-line"></i>
+                      </button>
+
+                      <!-- Error indicator (only if analysis failed) -->
+                      <button 
+                        *ngIf="hasReplayCacheError(match)"
+                        type="button" 
+                        class="btn btn-outline-danger btn-sm"
+                        disabled
+                        [title]="'BUILD_ORDERS.REPLAY.ANALYSIS_FAILED' | translate">
+                        <i class="fas fa-exclamation-triangle"></i>
+                      </button>
+                    </ng-container>
                   </div>
                 </td>
               </tr>

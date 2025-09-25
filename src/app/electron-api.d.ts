@@ -23,6 +23,7 @@ export interface ElectronAPI {
   readFile: (filePath: string) => Promise<string>;
   writeFile: (filePath: string, content: string) => Promise<void>;
   writeFileBuffer: (filePath: string, buffer: ArrayBuffer) => Promise<void>;
+  readFileBuffer: (filePath: string) => Promise<ArrayBuffer>;
   deleteFile: (filePath: string) => Promise<void>;
   openExternal: (url: string) => Promise<void>;
   fileExists: (filePath: string) => Promise<boolean>;

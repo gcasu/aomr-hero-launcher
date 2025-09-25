@@ -6,6 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ToastService } from '../../services/toast.service';
 import { MatchDataFetcherService } from '../../services/match-data-fetcher.service';
 import { ReplayDownloadService } from '../../services/replay-download.service';
+import { ReplayCacheService, CachedReplay } from '../../services/replay-cache.service';
 import { ReplayParserService, ParseOptions, ParseResult } from '../../services/replay-parser.service';
 import { TimelineService } from '../../shared/timeline/timeline.service';
 import { MajorGod } from '../../interfaces/major-god.interface';
@@ -66,6 +67,7 @@ export class BuildOrdersComponent implements OnInit {
   private matchDataFetcher = inject(MatchDataFetcherService);
   private translateService = inject(TranslateService);
   private replayDownloadService = inject(ReplayDownloadService);
+  private replayCacheService = inject(ReplayCacheService);
   private replayParserService = inject(ReplayParserService);
   private timelineService = inject(TimelineService);
 
@@ -288,6 +290,13 @@ export class BuildOrdersComponent implements OnInit {
       return; // Prevent multiple simultaneous analyses
     }
 
+    // Check if replay is already cached
+    const cachedReplay = this.replayCacheService.getCachedReplay(match.matchId, match.profileId);
+    if (cachedReplay) {
+      this.displayCachedReplay(cachedReplay, match.matchId);
+      return;
+    }
+
     this.isAnalyzingReplay = true;
     this.currentAnalyzingMatchId = match.matchId;
     this.showTimeline = false;
@@ -388,12 +397,65 @@ export class BuildOrdersComponent implements OnInit {
       this.analysisMatchId = match.matchId;
       this.showTimeline = true;
 
+      // Step 4: Cache the replay data (using uncompressed file)
+      try {
+        await this.replayCacheService.cacheReplay(
+          match.matchId,
+          match.profileId,
+          fileToProcess, // This is the uncompressed file
+          parseResult.data,
+          this.timelineData,
+          winner.playerName
+        );
+        console.log('Replay cached successfully');
+      } catch (cacheError) {
+        console.warn('Failed to cache replay:', cacheError);
+      }
+
       this.toastService.showSuccess(
         this.translateService.instant('BUILD_ORDERS.REPLAY.PARSE_SUCCESS')
       );
 
     } catch (error) {
       console.error('Failed to analyze replay:', error);
+      
+      // Try to cache the failed replay if we have an uncompressed file
+      let fileToCache: File | null = null;
+      try {
+        // Check if we got a downloaded file and potentially decompressed it
+        const downloadResult = await this.replayDownloadService.downloadReplay(
+          match.matchId, 
+          match.profileId
+        );
+        
+        if (downloadResult.success && downloadResult.file) {
+          const isActuallyCompressed = await this.detectFileCompression(downloadResult.file);
+          if (isActuallyCompressed) {
+            fileToCache = await this.decompressFile(downloadResult.file);
+          } else {
+            fileToCache = downloadResult.file;
+          }
+        }
+      } catch (downloadError) {
+        console.warn('Could not get file for failed replay caching:', downloadError);
+      }
+
+      // Cache the failed replay if we have a file
+      if (fileToCache) {
+        try {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown analysis error';
+          await this.replayCacheService.cacheFailedReplay(
+            match.matchId,
+            match.profileId,
+            fileToCache,
+            errorMessage
+          );
+          console.log('Failed replay cached for download access');
+        } catch (cacheError) {
+          console.warn('Failed to cache failed replay:', cacheError);
+        }
+      }
+
       this.toastService.showError(
         error instanceof Error ? error.message : 
         this.translateService.instant('BUILD_ORDERS.REPLAY.PARSE_ERROR')
@@ -402,6 +464,25 @@ export class BuildOrdersComponent implements OnInit {
       this.isAnalyzingReplay = false;
       this.currentAnalyzingMatchId = null;
     }
+  }
+
+  private displayCachedReplay(cachedReplay: CachedReplay, matchId: string): void {
+    if (cachedReplay.hasError) {
+      // Show error message for failed cached replays
+      this.toastService.showError(
+        cachedReplay.errorMessage || this.translateService.instant('BUILD_ORDERS.REPLAY.CACHED_ERROR')
+      );
+      return;
+    }
+
+    this.timelineData = cachedReplay.timelineData || [];
+    this.winnerPlayerName = cachedReplay.winnerPlayerName || '';
+    this.analysisMatchId = matchId;
+    this.showTimeline = true;
+
+    this.toastService.showSuccess(
+      this.translateService.instant('BUILD_ORDERS.REPLAY.CACHED_SUCCESS')
+    );
   }
 
   private findWinner(replayData: any): { playerNumber: number, playerName: string } | null {
@@ -665,6 +746,114 @@ export class BuildOrdersComponent implements OnInit {
 
   private readUint32LE(bytes: Uint8Array, offset: number): number {
     return bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24);
+  }
+
+  // Cache utility methods
+  isReplayCached(match: ProcessedMatch): boolean {
+    return this.replayCacheService.isReplayCached(match.matchId, match.profileId);
+  }
+
+  hasReplayCacheError(match: ProcessedMatch): boolean {
+    return this.replayCacheService.hasReplayCacheError(match.matchId, match.profileId);
+  }
+
+  isReplayCacheSuccessful(match: ProcessedMatch): boolean {
+    return this.replayCacheService.isReplayCacheSuccessful(match.matchId, match.profileId);
+  }
+
+  async downloadReplayFile(match: ProcessedMatch): Promise<void> {
+    try {
+      const replayFile = await this.replayCacheService.exportReplayFile(match.matchId, match.profileId);
+      if (!replayFile) {
+        // If not cached, download it first
+        await this.analyzeReplay(match);
+        
+        // Try again after analysis
+        const newReplayFile = await this.replayCacheService.exportReplayFile(match.matchId, match.profileId);
+        if (!newReplayFile) {
+          throw new Error('Failed to get replay file after analysis');
+        }
+        this.downloadFile(newReplayFile, `match_${match.matchId}.mythrec`);
+      } else {
+        this.downloadFile(replayFile, `match_${match.matchId}.mythrec`);
+      }
+
+      this.toastService.showSuccess(
+        this.translateService.instant('BUILD_ORDERS.REPLAY.DOWNLOAD_SUCCESS')
+      );
+    } catch (error) {
+      console.error('Failed to download replay file:', error);
+      this.toastService.showError(
+        this.translateService.instant('BUILD_ORDERS.REPLAY.DOWNLOAD_ERROR')
+      );
+    }
+  }
+
+  async downloadReplayJson(match: ProcessedMatch): Promise<void> {
+    try {
+      const jsonBlob = this.replayCacheService.exportParsedJson(match.matchId, match.profileId);
+      if (!jsonBlob) {
+        // If not cached, analyze it first
+        await this.analyzeReplay(match);
+        
+        // Try again after analysis
+        const newJsonBlob = this.replayCacheService.exportParsedJson(match.matchId, match.profileId);
+        if (!newJsonBlob) {
+          throw new Error('Failed to get parsed JSON after analysis');
+        }
+        this.downloadBlob(newJsonBlob, `match_${match.matchId}_parsed.json`);
+      } else {
+        this.downloadBlob(jsonBlob, `match_${match.matchId}_parsed.json`);
+      }
+
+      this.toastService.showSuccess(
+        this.translateService.instant('BUILD_ORDERS.REPLAY.JSON_DOWNLOAD_SUCCESS')
+      );
+    } catch (error) {
+      console.error('Failed to download parsed JSON:', error);
+      this.toastService.showError(
+        this.translateService.instant('BUILD_ORDERS.REPLAY.JSON_DOWNLOAD_ERROR')
+      );
+    }
+  }
+
+  async showCachedTimeline(match: ProcessedMatch): Promise<void> {
+    try {
+      const cachedReplay = this.replayCacheService.getCachedReplay(match.matchId, match.profileId);
+      if (!cachedReplay) {
+        // If not cached, analyze it first
+        await this.analyzeReplay(match);
+      } else {
+        this.displayCachedReplay(cachedReplay, match.matchId);
+      }
+    } catch (error) {
+      console.error('Failed to show timeline:', error);
+      this.toastService.showError(
+        this.translateService.instant('BUILD_ORDERS.REPLAY.TIMELINE_ERROR')
+      );
+    }
+  }
+
+  private downloadFile(file: File, filename: string): void {
+    const url = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
 

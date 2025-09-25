@@ -364,6 +364,7 @@
       "PARSING": "Parsing replay data...",
       "DOWNLOAD_SUCCESS": "Replay downloaded successfully",
       "PARSE_SUCCESS": "Replay parsed successfully",
+      "CACHED_SUCCESS": "Replay loaded from cache",
       "DOWNLOAD_ERROR": "Failed to download replay file",
       "PARSE_ERROR": "Failed to parse replay file",
       "REPLAY_NOT_FOUND": "Replay file not found on server",
@@ -371,7 +372,20 @@
       "SERVER_ERROR": "Server error while downloading replay",
       "WINNER_TIMELINE": "Winner's Build Order Timeline",
       "NO_WINNER_DATA": "No winner data available in replay",
-      "CLOSE_TIMELINE": "Close Timeline"
+      "CLOSE_TIMELINE": "Close Timeline",
+      "ANALYZE": "Analyze",
+      "ANALYZE_TOOLTIP": "Download and analyze this replay",
+      "DOWNLOAD_REPLAY": "Replay",
+      "DOWNLOAD_REPLAY_TOOLTIP": "Download the original replay file",
+      "DOWNLOAD_JSON": "JSON",
+      "DOWNLOAD_JSON_TOOLTIP": "Download the parsed replay data as JSON",
+      "SHOW_TIMELINE": "Timeline",
+      "SHOW_TIMELINE_TOOLTIP": "Show the winner's build order timeline",
+      "JSON_DOWNLOAD_SUCCESS": "Parsed JSON downloaded successfully",
+      "JSON_DOWNLOAD_ERROR": "Failed to download parsed JSON",
+      "TIMELINE_ERROR": "Failed to show timeline",
+      "CACHED_ERROR": "Analysis failed for cached replay",
+      "ANALYSIS_FAILED": "Replay analysis failed - only download available"
     }
   },
   "TIERS": {

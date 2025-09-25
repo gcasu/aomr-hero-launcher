@@ -498,6 +498,18 @@ class Main {
       }
     });
 
+    // Handle file buffer reading
+    ipcMain.handle('file:readBuffer', async (event, filePath: string) => {
+      try {
+        const buffer = await fs.promises.readFile(filePath);
+        console.log(`File buffer read successfully: ${filePath}`);
+        return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+      } catch (error) {
+        console.error('Error reading file buffer:', error);
+        throw error;
+      }
+    });
+
     // Handle file deletion
     ipcMain.handle('file:delete', async (event, filePath: string) => {
       try {
