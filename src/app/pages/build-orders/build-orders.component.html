@@ -129,14 +129,16 @@
                 <!-- Actions -->
                 <td class="text-center actions-cell">
                   <div class="action-buttons">
-                    <!-- Placeholder for action buttons -->
-                    <button type="button" class="btn btn-outline-primary btn-sm me-2" disabled>
-                      <i class="fas fa-play me-1"></i>
-                      {{ 'BUILD_ORDERS.TABLE.VIEW_REPLAY' | translate }}
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
-                      <i class="fas fa-chart-line me-1"></i>
-                      {{ 'BUILD_ORDERS.TABLE.VIEW_STATS' | translate }}
+                    <!-- Analyze Replay Button -->
+                    <button 
+                      type="button" 
+                      class="btn btn-primary btn-sm"
+                      [disabled]="isAnalyzingReplay"
+                      (click)="analyzeReplay(match)"
+                      [title]="'BUILD_ORDERS.TABLE.ANALYZE_REPLAY' | translate">
+                      <span *ngIf="isMatchBeingAnalyzed(match.matchId)" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                      <i *ngIf="!isMatchBeingAnalyzed(match.matchId)" class="fas fa-chart-line me-1"></i>
+                      {{ 'BUILD_ORDERS.TABLE.ANALYZE_REPLAY' | translate }}
                     </button>
                   </div>
                 </td>
@@ -145,6 +147,34 @@
           </table>
         </div>
       </div>
+    </div>
+
+    <!-- Timeline Analysis Section -->
+    <div *ngIf="showTimeline" class="timeline-analysis-section mt-4">
+      <div class="section-header">
+        <h3 class="section-title">{{ 'BUILD_ORDERS.REPLAY.WINNER_TIMELINE' | translate }}</h3>
+        <div class="d-flex align-items-center">
+          <small class="text-light me-3">
+            {{ winnerPlayerName }} - {{ 'COMMON.MATCH' | translate }} {{ analysisMatchId }}
+          </small>
+          <button 
+            type="button" 
+            class="btn btn-outline-light btn-sm"
+            (click)="closeTimeline()">
+            <i class="fas fa-times me-1"></i>
+            {{ 'BUILD_ORDERS.REPLAY.CLOSE_TIMELINE' | translate }}
+          </button>
+        </div>
+      </div>
+      
+      <app-glass-card cardClass="padded">
+        <app-timeline 
+          [segments]="timelineData"
+          [playerName]="winnerPlayerName"
+          [playerColor]="getPlayerColorForTimeline(1)"
+          [compact]="false">
+        </app-timeline>
+      </app-glass-card>
     </div>
   </div>
 </app-page-container>

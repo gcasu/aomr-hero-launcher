@@ -1,11 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ToastService } from '../../services/toast.service';
 import { MatchDataFetcherService } from '../../services/match-data-fetcher.service';
+import { ReplayDownloadService } from '../../services/replay-download.service';
+import { ReplayParserService, ParseOptions, ParseResult } from '../../services/replay-parser.service';
+import { TimelineService } from '../../shared/timeline/timeline.service';
 import { MajorGod } from '../../interfaces/major-god.interface';
 import { ProcessedMatch } from '../../interfaces/leaderboard.interface';
+import { TimelineSegment } from '../../shared/timeline/timeline.interfaces';
 import { MAJOR_GODS_DATA, DEFAULT_SELECTED_GOD_ID } from '../../data/major-gods.data';
 
 // Import shared components
@@ -14,6 +19,8 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component';
 import { LoadingStateComponent } from '../../shared/loading-state/loading-state.component';
 import { SearchFilterComponent } from '../../shared/search-filter/search-filter.component';
+import { TimelineComponent } from '../../shared/timeline/timeline.component';
+import { GlassCardComponent } from '../../shared/glass-card/glass-card.component';
 
 @Component({
   selector: 'app-build-orders',
@@ -23,12 +30,15 @@ import { SearchFilterComponent } from '../../shared/search-filter/search-filter.
   imports: [
     CommonModule,
     FormsModule,
+    HttpClientModule,
     TranslateModule,
     PageContainerComponent,
     PageHeaderComponent,
     EmptyStateComponent,
     LoadingStateComponent,
-    SearchFilterComponent
+    SearchFilterComponent,
+    TimelineComponent,
+    GlassCardComponent
   ]
 })
 export class BuildOrdersComponent implements OnInit {
@@ -44,9 +54,20 @@ export class BuildOrdersComponent implements OnInit {
   sortColumn = 'matchDate';
   sortDirection: 'asc' | 'desc' = 'desc';
 
+  // Replay analysis state
+  isAnalyzingReplay = false;
+  currentAnalyzingMatchId: string | null = null;
+  showTimeline = false;
+  timelineData: TimelineSegment[] = [];
+  winnerPlayerName = '';
+  analysisMatchId = '';
+
   private toastService = inject(ToastService);
   private matchDataFetcher = inject(MatchDataFetcherService);
   private translateService = inject(TranslateService);
+  private replayDownloadService = inject(ReplayDownloadService);
+  private replayParserService = inject(ReplayParserService);
+  private timelineService = inject(TimelineService);
 
   ngOnInit(): void {
     this.loadMajorGods();
@@ -260,4 +281,391 @@ export class BuildOrdersComponent implements OnInit {
       return this.sortDirection === 'desc' ? comparison * -1 : comparison;
     });
   }
+
+  // Replay analysis methods
+  async analyzeReplay(match: ProcessedMatch): Promise<void> {
+    if (this.isAnalyzingReplay) {
+      return; // Prevent multiple simultaneous analyses
+    }
+
+    this.isAnalyzingReplay = true;
+    this.currentAnalyzingMatchId = match.matchId;
+    this.showTimeline = false;
+
+    try {
+      // Step 1: Download the replay (service will show its own toast)
+      const downloadResult = await this.replayDownloadService.downloadReplay(
+        match.matchId, 
+        match.profileId
+      );
+
+      if (!downloadResult.success || !downloadResult.file) {
+        throw new Error(downloadResult.error || 'Failed to download replay');
+      }
+
+      // Step 2: Parse the replay
+      this.toastService.showInfo(
+        this.translateService.instant('BUILD_ORDERS.REPLAY.PARSING')
+      );
+
+      // Try to detect if the file is actually compressed by checking file signature
+      const isActuallyCompressed = await this.detectFileCompression(downloadResult.file);
+      
+      console.log('File info:', {
+        name: downloadResult.file.name,
+        size: downloadResult.file.size,
+        type: downloadResult.file.type,
+        detectedCompression: isActuallyCompressed
+      });
+
+      let fileToProcess = downloadResult.file;
+      
+      // If compressed, decompress it first
+      if (isActuallyCompressed) {
+        try {
+          console.log('Decompressing file...');
+          fileToProcess = await this.decompressFile(downloadResult.file);
+          console.log('File decompressed successfully, new size:', fileToProcess.size);
+        } catch (decompError) {
+          console.error('Decompression failed:', decompError);
+          const errorMessage = decompError instanceof Error ? decompError.message : 'Unknown decompression error';
+          throw new Error('Failed to decompress replay file: ' + errorMessage);
+        }
+      }
+      
+      const parseOptions: ParseOptions = {
+        slim: false,
+        stats: false,
+        prettyPrint: false,
+        isGzip: false, // Always false since we decompress everything
+        verbose: false
+      };
+
+      console.log('Parsing with options:', parseOptions);
+      console.log('File to process:', {
+        name: fileToProcess.name,
+        size: fileToProcess.size,
+        type: fileToProcess.type
+      });
+
+      const parseResult = await this.replayParserService.parseReplay(
+        fileToProcess,
+        parseOptions
+      ) as ParseResult;
+
+      console.log('Parse result:', {
+        success: parseResult.success,
+        hasData: !!parseResult.data,
+        error: parseResult.error
+      });
+
+      if (!parseResult.success || !parseResult.data) {
+        throw new Error(parseResult.error || 'Failed to parse replay');
+      }
+
+      // Step 3: Find the winner and create timeline
+      const winner = this.findWinner(parseResult.data);
+      if (!winner) {
+        throw new Error('No winner data found in replay');
+      }
+
+      // Transform the game commands to match the expected format
+      const transformedCommands = this.transformGameCommands(parseResult.data.GameCommands);
+      
+      // Create timeline for the winner
+      this.timelineData = this.timelineService.createTimelineFromReplayData(
+        transformedCommands,
+        winner.playerNumber,
+        {
+          maxSegments: 20,
+          segmentDuration: 30,
+          showEmptySegments: false,
+          compact: false
+        }
+      );
+
+      this.winnerPlayerName = winner.playerName;
+      this.analysisMatchId = match.matchId;
+      this.showTimeline = true;
+
+      this.toastService.showSuccess(
+        this.translateService.instant('BUILD_ORDERS.REPLAY.PARSE_SUCCESS')
+      );
+
+    } catch (error) {
+      console.error('Failed to analyze replay:', error);
+      this.toastService.showError(
+        error instanceof Error ? error.message : 
+        this.translateService.instant('BUILD_ORDERS.REPLAY.PARSE_ERROR')
+      );
+    } finally {
+      this.isAnalyzingReplay = false;
+      this.currentAnalyzingMatchId = null;
+    }
+  }
+
+  private findWinner(replayData: any): { playerNumber: number, playerName: string } | null {
+    if (!replayData?.Players || !Array.isArray(replayData.Players)) {
+      return null;
+    }
+
+    const winner = replayData.Players.find((player: any) => player.Winner === true);
+    if (!winner) {
+      return null;
+    }
+
+    return {
+      playerNumber: winner.PlayerNumber || winner.PlayerNum,
+      playerName: winner.Name || `Player ${winner.PlayerNumber || winner.PlayerNum}`
+    };
+  }
+
+  private transformGameCommands(gameCommands: any[]): any[] {
+    if (!gameCommands || !Array.isArray(gameCommands)) {
+      return [];
+    }
+
+    return gameCommands.map((command: any) => ({
+      PlayerNumber: command.PlayerNum,
+      Time: command.GameTimeSecs,
+      Type: command.CommandType,
+      Unit: typeof command.Payload === 'string' ? command.Payload : command.Payload?.Name,
+      Target: command.Payload?.Name || (typeof command.Payload === 'string' ? command.Payload : ''),
+      Building: command.Payload?.Name,
+      Technology: typeof command.Payload === 'string' ? command.Payload : command.Payload?.Name,
+      GodPower: command.Payload?.Name,
+      Queued: command.Payload?.Queued,
+      Quantity: 1
+    }));
+  }
+
+  closeTimeline(): void {
+    this.showTimeline = false;
+    this.timelineData = [];
+    this.winnerPlayerName = '';
+    this.analysisMatchId = '';
+  }
+
+  isMatchBeingAnalyzed(matchId: string): boolean {
+    return this.isAnalyzingReplay && this.currentAnalyzingMatchId === matchId;
+  }
+
+  getPlayerColorForTimeline(playerNum: number): string {
+    const colors = [
+      '#FF0000', '#0000FF', '#FFFF00', '#00FF00', 
+      '#00FFFF', '#FF00FF', '#808080', '#FFA500',
+      '#FFB6C1', '#800080', '#A52A2A', '#FFFFFF'
+    ];
+    return colors[playerNum - 1] || '#FFFFFF';
+  }
+
+  private async detectFileCompression(file: File): Promise<boolean> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as ArrayBuffer;
+        if (!result) {
+          resolve(false);
+          return;
+        }
+
+        const bytes = new Uint8Array(result.slice(0, 4));
+        
+        // Check for gzip magic numbers (1f 8b)
+        if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
+          resolve(true);
+          return;
+        }
+        
+        // Check for zip magic numbers (50 4b 03 04 or 50 4b 05 06 or 50 4b 07 08)
+        if (bytes[0] === 0x50 && bytes[1] === 0x4b && 
+            (bytes[2] === 0x03 || bytes[2] === 0x05 || bytes[2] === 0x07)) {
+          resolve(true);
+          return;
+        }
+        
+        // Not compressed
+        resolve(false);
+      };
+      
+      reader.onerror = () => resolve(false);
+      reader.readAsArrayBuffer(file.slice(0, 4));
+    });
+  }
+
+  private async decompressFile(file: File): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const compressedData = e.target?.result as ArrayBuffer;
+          if (!compressedData) {
+            reject(new Error('Failed to read file data'));
+            return;
+          }
+
+          const bytes = new Uint8Array(compressedData);
+          
+          // Check if it's gzip format
+          if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
+            try {
+              console.log('Decompressing GZIP file...');
+              const decompressedStream = new DecompressionStream('gzip');
+              const stream = new ReadableStream({
+                start(controller) {
+                  controller.enqueue(bytes);
+                  controller.close();
+                }
+              });
+
+              const decompressedData = await new Response(
+                stream.pipeThrough(decompressedStream)
+              ).arrayBuffer();
+
+              const decompressedFile = new File(
+                [decompressedData], 
+                file.name.replace(/\.(gz|zip)$/, '.mythrec'),
+                { type: 'application/octet-stream' }
+              );
+              
+              console.log('GZIP decompression successful');
+              resolve(decompressedFile);
+            } catch (gzipError) {
+              console.error('GZIP decompression failed:', gzipError);
+              reject(gzipError);
+            }
+          }
+          // Check if it's zip format
+          else if (bytes[0] === 0x50 && bytes[1] === 0x4b) {
+            try {
+              console.log('Decompressing ZIP file...');
+              const decompressedFile = await this.extractFromZip(bytes, file.name);
+              console.log('ZIP decompression successful');
+              resolve(decompressedFile);
+            } catch (zipError) {
+              console.error('ZIP decompression failed:', zipError);
+              reject(zipError);
+            }
+          }
+          else {
+            // Not compressed, return as is
+            console.log('File is not compressed, returning as-is');
+            resolve(file);
+          }
+        } catch (error) {
+          reject(error);
+        }
+      };
+      
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  private async extractFromZip(zipBytes: Uint8Array, originalFileName: string): Promise<File> {
+    // Find the first file entry in the ZIP
+    const centralDirStart = this.findCentralDirectory(zipBytes);
+    if (centralDirStart === -1) {
+      throw new Error('Invalid ZIP file: Central directory not found');
+    }
+
+    // Read central directory record
+    const centralDir = zipBytes.slice(centralDirStart);
+    if (centralDir.length < 46) {
+      throw new Error('Invalid ZIP file: Central directory too short');
+    }
+
+    // Extract file information from central directory
+    const compressedSize = this.readUint32LE(centralDir, 20);
+    const uncompressedSize = this.readUint32LE(centralDir, 24);
+    const compressionMethod = this.readUint16LE(centralDir, 10);
+    const fileNameLength = this.readUint16LE(centralDir, 28);
+    const extraFieldLength = this.readUint16LE(centralDir, 30);
+    const localHeaderOffset = this.readUint32LE(centralDir, 42);
+
+    console.log('ZIP file info:', {
+      compressedSize,
+      uncompressedSize,
+      compressionMethod,
+      fileNameLength,
+      extraFieldLength,
+      localHeaderOffset
+    });
+
+    // Find local file header
+    const localHeader = zipBytes.slice(localHeaderOffset);
+    if (localHeader.length < 30) {
+      throw new Error('Invalid ZIP file: Local header too short');
+    }
+
+    // Skip local header and filename/extra fields to get to compressed data
+    const localFileNameLength = this.readUint16LE(localHeader, 26);
+    const localExtraFieldLength = this.readUint16LE(localHeader, 28);
+    const dataStart = localHeaderOffset + 30 + localFileNameLength + localExtraFieldLength;
+    const compressedData = zipBytes.slice(dataStart, dataStart + compressedSize);
+
+    console.log('Extracting compressed data from offset:', dataStart, 'size:', compressedSize);
+
+    // Decompress based on compression method
+    if (compressionMethod === 0) {
+      // No compression
+      const decompressedFile = new File(
+        [compressedData], 
+        originalFileName.replace(/\.(gz|zip)$/, '.mythrec'),
+        { type: 'application/octet-stream' }
+      );
+      return decompressedFile;
+    } else if (compressionMethod === 8) {
+      // Deflate compression
+      try {
+        const decompressedStream = new DecompressionStream('deflate-raw');
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(compressedData);
+            controller.close();
+          }
+        });
+
+        const decompressedData = await new Response(
+          stream.pipeThrough(decompressedStream)
+        ).arrayBuffer();
+
+        const decompressedFile = new File(
+          [decompressedData], 
+          originalFileName.replace(/\.(gz|zip)$/, '.mythrec'),
+          { type: 'application/octet-stream' }
+        );
+        
+        return decompressedFile;
+      } catch (deflateError) {
+        console.error('Deflate decompression failed:', deflateError);
+        throw new Error('Failed to decompress ZIP file data');
+      }
+    } else {
+      throw new Error(`Unsupported ZIP compression method: ${compressionMethod}`);
+    }
+  }
+
+  private findCentralDirectory(zipBytes: Uint8Array): number {
+    // Look for End of Central Directory signature (0x06054b50) from the end
+    for (let i = zipBytes.length - 22; i >= 0; i--) {
+      if (zipBytes[i] === 0x50 && zipBytes[i + 1] === 0x4b && 
+          zipBytes[i + 2] === 0x05 && zipBytes[i + 3] === 0x06) {
+        // Found EOCD, read central directory offset
+        const centralDirOffset = this.readUint32LE(zipBytes, i + 16);
+        return centralDirOffset;
+      }
+    }
+    return -1;
+  }
+
+  private readUint16LE(bytes: Uint8Array, offset: number): number {
+    return bytes[offset] | (bytes[offset + 1] << 8);
+  }
+
+  private readUint32LE(bytes: Uint8Array, offset: number): number {
+    return bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24);
+  }
+
+
 }

@@ -374,4 +374,32 @@
       }
     }
   }
+
+  .timeline-analysis-section {
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      .section-title {
+        color: var(--bs-light);
+        font-weight: 600;
+        margin: 0;
+        @include maiola-font;
+      }
+
+      .text-light {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+    }
+
+    app-glass-card {
+      .timeline-container {
+        max-height: 500px;
+        overflow-y: auto;
+      }
+    }
+  }
 }

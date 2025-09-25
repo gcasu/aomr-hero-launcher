@@ -8,6 +8,7 @@
     "WARNING": "Warning",
     "INFO": "Information",
     "SEARCH_PLACEHOLDER": "Search...",
+    "MATCH": "Match",
     "PAGE": "Page"
   },
   "NAVIGATION": {
@@ -355,7 +356,22 @@
       "MAP": "Map",
       "ACTIONS": "Actions",
       "VIEW_REPLAY": "View Replay",
-      "VIEW_STATS": "View Stats"
+      "VIEW_STATS": "View Stats",
+      "ANALYZE_REPLAY": "Analyze Replay"
+    },
+    "REPLAY": {
+      "DOWNLOADING": "Downloading replay file...",
+      "PARSING": "Parsing replay data...",
+      "DOWNLOAD_SUCCESS": "Replay downloaded successfully",
+      "PARSE_SUCCESS": "Replay parsed successfully",
+      "DOWNLOAD_ERROR": "Failed to download replay file",
+      "PARSE_ERROR": "Failed to parse replay file",
+      "REPLAY_NOT_FOUND": "Replay file not found on server",
+      "ACCESS_DENIED": "Access denied to replay file",
+      "SERVER_ERROR": "Server error while downloading replay",
+      "WINNER_TIMELINE": "Winner's Build Order Timeline",
+      "NO_WINNER_DATA": "No winner data available in replay",
+      "CLOSE_TIMELINE": "Close Timeline"
     }
   },
   "TIERS": {
