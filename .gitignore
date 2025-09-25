@@ -9,6 +9,7 @@
 /release/
 /.vscode/
 /repo/
+/replay_cache/
 
 # Node modules and dependency files
 /node_modules/

@@ -64,6 +64,12 @@ export class BuildOrdersComponent implements OnInit {
   timelineData: TimelineSegment[] = [];
   winnerPlayerName = '';
   analysisMatchId = '';
+  
+  // Row-specific timeline state
+  expandedRows: Set<string> = new Set(); // Track which rows have their timeline expanded
+  rowTimelineData: Map<string, TimelineSegment[]> = new Map(); // Store timeline data per row
+  rowWinnerNames: Map<string, string> = new Map(); // Store winner names per row
+  rowParsedData: Map<string, any> = new Map(); // Store parsed data per row for color extraction
 
   private toastService = inject(ToastService);
   private matchDataFetcher = inject(MatchDataFetcherService);
@@ -347,7 +353,7 @@ export class BuildOrdersComponent implements OnInit {
       const transformedCommands = this.transformGameCommands(parseResult.data.GameCommands);
       
       // Create timeline for the winner
-      this.timelineData = this.timelineService.createTimelineFromReplayData(
+      const timelineData = this.timelineService.createTimelineFromReplayData(
         transformedCommands,
         winner.playerNumber,
         {
@@ -358,9 +364,16 @@ export class BuildOrdersComponent implements OnInit {
         }
       );
 
+      // Store in row-specific data
+      const rowKey = this.getRowKey(match);
+      this.rowTimelineData.set(rowKey, timelineData);
+      this.rowWinnerNames.set(rowKey, winner.playerName);
+      this.rowParsedData.set(rowKey, parseResult.data);
+
+      // Keep for backward compatibility (if needed)
+      this.timelineData = timelineData;
       this.winnerPlayerName = winner.playerName;
       this.analysisMatchId = match.matchId;
-      this.showTimeline = true;
 
       // Step 4: Cache the replay data
       try {
@@ -370,7 +383,7 @@ export class BuildOrdersComponent implements OnInit {
           match.profileId,
           processedFile,
           parseResult.data,
-          this.timelineData,
+          timelineData,
           winner.playerName
         );
       } catch (cacheError) {
@@ -433,11 +446,7 @@ export class BuildOrdersComponent implements OnInit {
       return;
     }
 
-    this.timelineData = cachedReplay.timelineData || [];
-    this.winnerPlayerName = cachedReplay.winnerPlayerName || '';
-    this.analysisMatchId = matchId;
-    this.showTimeline = true;
-
+    // No longer needed since we use row-based timeline display
     this.toastService.showSuccess(
       this.translateService.instant('BUILD_ORDERS.REPLAY.CACHED_SUCCESS')
     );
@@ -479,6 +488,7 @@ export class BuildOrdersComponent implements OnInit {
   }
 
   closeTimeline(): void {
+    // Legacy method - no longer used since timelines are now inline
     this.showTimeline = false;
     this.timelineData = [];
     this.winnerPlayerName = '';
@@ -496,6 +506,90 @@ export class BuildOrdersComponent implements OnInit {
       '#FFB6C1', '#800080', '#A52A2A', '#FFFFFF'
     ];
     return colors[playerNum - 1] || '#FFFFFF';
+  }
+
+  // Row expansion methods
+  getRowKey(match: ProcessedMatch): string {
+    return `${match.matchId}_${match.profileId}`;
+  }
+
+  isRowExpanded(match: ProcessedMatch): boolean {
+    return this.expandedRows.has(this.getRowKey(match));
+  }
+
+  toggleRowTimeline(match: ProcessedMatch): void {
+    const rowKey = this.getRowKey(match);
+    
+    if (this.expandedRows.has(rowKey)) {
+      // Collapse the row
+      this.expandedRows.delete(rowKey);
+    } else {
+      // Expand the row - load timeline data if not already loaded
+      const cachedReplay = this.replayCacheService.getCachedReplay(match.matchId, match.profileId);
+      if (cachedReplay && !cachedReplay.hasError) {
+        this.rowTimelineData.set(rowKey, cachedReplay.timelineData || []);
+        this.rowWinnerNames.set(rowKey, cachedReplay.winnerPlayerName || '');
+        this.rowParsedData.set(rowKey, cachedReplay.parsedData);
+        this.expandedRows.add(rowKey);
+      }
+    }
+  }
+
+  getRowTimelineData(match: ProcessedMatch): TimelineSegment[] {
+    return this.rowTimelineData.get(this.getRowKey(match)) || [];
+  }
+
+  getRowWinnerName(match: ProcessedMatch): string {
+    return this.rowWinnerNames.get(this.getRowKey(match)) || '';
+  }
+
+  getPlayerColorFromParsedData(match: ProcessedMatch): string {
+    const parsedData = this.rowParsedData.get(this.getRowKey(match));
+    if (!parsedData || !parsedData.Players || !Array.isArray(parsedData.Players)) {
+      return '#FF0000'; // Default red color
+    }
+
+    // Find the winner and get their color
+    const winner = parsedData.Players.find((player: any) => player.Winner === true);
+    if (!winner) {
+      return '#FF0000'; // Default red color
+    }
+
+    // Try to extract color from different possible formats
+    if (winner.Color) {
+      // Format 1: Already a hex string
+      if (typeof winner.Color === 'string' && winner.Color.startsWith('#')) {
+        return winner.Color;
+      }
+      
+      // Format 2: RGB object with values 0-1
+      if (typeof winner.Color === 'object' && winner.Color.R !== undefined) {
+        const r = Math.round((winner.Color.R || 0) * 255);
+        const g = Math.round((winner.Color.G || 0) * 255);
+        const b = Math.round((winner.Color.B || 0) * 255);
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      }
+      
+      // Format 3: RGB object with values 0-255
+      if (typeof winner.Color === 'object' && winner.Color.r !== undefined) {
+        const r = Math.round(winner.Color.r || 0);
+        const g = Math.round(winner.Color.g || 0);
+        const b = Math.round(winner.Color.b || 0);
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      }
+      
+      // Format 4: Array [r, g, b]
+      if (Array.isArray(winner.Color) && winner.Color.length >= 3) {
+        const r = Math.round(winner.Color[0] * (winner.Color[0] <= 1 ? 255 : 1));
+        const g = Math.round(winner.Color[1] * (winner.Color[1] <= 1 ? 255 : 1));
+        const b = Math.round(winner.Color[2] * (winner.Color[2] <= 1 ? 255 : 1));
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      }
+    }
+
+    // Fallback: Use player number to get color from predefined array
+    const playerNum = winner.PlayerNumber || winner.PlayerNum || 1;
+    return this.getPlayerColorForTimeline(playerNum);
   }
 
 
@@ -577,8 +671,13 @@ export class BuildOrdersComponent implements OnInit {
       if (!cachedReplay) {
         // If not cached, analyze it first
         await this.analyzeReplay(match);
+        // After analysis, toggle the row if successful
+        const newCachedReplay = this.replayCacheService.getCachedReplay(match.matchId, match.profileId);
+        if (newCachedReplay && !newCachedReplay.hasError) {
+          this.toggleRowTimeline(match);
+        }
       } else {
-        this.displayCachedReplay(cachedReplay, match.matchId);
+        this.toggleRowTimeline(match);
       }
     } catch (error) {
       console.error('Failed to show timeline:', error);

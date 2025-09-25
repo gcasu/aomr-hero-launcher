@@ -381,6 +381,7 @@
       "DOWNLOAD_JSON_TOOLTIP": "Download the parsed replay data as JSON",
       "SHOW_TIMELINE": "Timeline",
       "SHOW_TIMELINE_TOOLTIP": "Show the winner's build order timeline",
+      "HIDE_TIMELINE_TOOLTIP": "Hide the timeline",
       "JSON_DOWNLOAD_SUCCESS": "Parsed JSON downloaded successfully",
       "JSON_DOWNLOAD_ERROR": "Failed to download parsed JSON",
       "TIMELINE_ERROR": "Failed to show timeline",

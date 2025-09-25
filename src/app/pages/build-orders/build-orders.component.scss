@@ -286,6 +286,46 @@
             }
           }
         }
+
+        // Timeline expansion row
+        .timeline-row {
+          .timeline-cell {
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+
+            .timeline-container {
+              .timeline-header {
+                h6 {
+                  color: var(--bs-light);
+                  font-weight: 600;
+                  margin-bottom: 0.5rem;
+                  @include noto-font;
+
+                  .text-muted {
+                    font-weight: 400;
+                    opacity: 0.7;
+                  }
+                }
+              }
+
+              .timeline-content {
+                margin-top: 1rem;
+                
+                // Override timeline component styles for better integration
+                ::ng-deep {
+                  .timeline-container {
+                    background: transparent;
+                    border: none;
+                    padding: 0;
+                    margin: 0;
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

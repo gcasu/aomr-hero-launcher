@@ -94,130 +94,132 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let match of filteredMatches; trackBy: trackByMatch" class="match-row">
-                <!-- Player (Avatar + Name) -->
-                <td class="leader-cell">
-                  <div class="leader-info">
-                    <img 
-                      [src]="match.winningPlayerAvatar" 
-                      [alt]="match.winningPlayer"
-                      class="player-avatar"
-                      (error)="onImageError($event)"
-                      loading="lazy">
-                    <span class="player-name clickable" 
-                          (click)="onFilterByPlayer(match.winningPlayer)"
-                          [title]="'Click to filter by ' + match.winningPlayer">
-                      {{ match.winningPlayer }}
+              <ng-container *ngFor="let match of filteredMatches; trackBy: trackByMatch">
+                <!-- Main row -->
+                <tr class="match-row">
+                  <!-- Player (Avatar + Name) -->
+                  <td class="leader-cell">
+                    <div class="leader-info">
+                      <img 
+                        [src]="match.winningPlayerAvatar" 
+                        [alt]="match.winningPlayer"
+                        class="player-avatar"
+                        (error)="onImageError($event)"
+                        loading="lazy">
+                      <span class="player-name clickable" 
+                            (click)="onFilterByPlayer(match.winningPlayer)"
+                            [title]="'Click to filter by ' + match.winningPlayer">
+                        {{ match.winningPlayer }}
+                      </span>
+                    </div>
+                  </td>
+                  
+                  <!-- Match Date -->
+                  <td class="text-center match-date-cell">
+                    <span class="match-date">{{ formatDate(match.matchDate) | date:'dd MMMM yy, HH:mm' }}</span>
+                  </td>
+                  
+                  <!-- Map -->
+                  <td class="text-center map-cell">
+                    <span class="map-name clickable" 
+                          (click)="onFilterByMap(match.mapType)"
+                          [title]="'Click to filter by ' + formatMapName(match.mapType)">
+                      {{ formatMapName(match.mapType) }}
                     </span>
-                  </div>
-                </td>
+                  </td>
+                  
+                  <!-- Actions -->
+                  <td class="text-center actions-cell">
+                    <div class="action-buttons">
+                      <!-- If not cached, show analyze button -->
+                      <ng-container *ngIf="!isReplayCached(match)">
+                        <button 
+                          type="button" 
+                          class="btn btn-outline-primary btn-sm"
+                          [disabled]="isAnalyzingReplay"
+                          (click)="analyzeReplay(match)"
+                          [title]="'BUILD_ORDERS.REPLAY.ANALYZE_TOOLTIP' | translate">
+                          <span *ngIf="isMatchBeingAnalyzed(match.matchId)" class="spinner-border spinner-border-sm" role="status"></span>
+                          <i *ngIf="!isMatchBeingAnalyzed(match.matchId)" class="fas fa-chart-line"></i>
+                        </button>
+                      </ng-container>
+
+                      <!-- If cached, show action buttons based on success/error state -->
+                      <ng-container *ngIf="isReplayCached(match)">
+                        <!-- Download Replay File (always available) -->
+                        <button 
+                          type="button" 
+                          class="btn btn-outline-success btn-sm me-1"
+                          (click)="downloadReplayFile(match)"
+                          [title]="'BUILD_ORDERS.REPLAY.DOWNLOAD_REPLAY_TOOLTIP' | translate">
+                          <i class="fas fa-download"></i>
+                        </button>
+
+                        <!-- Download JSON (only if analysis was successful) -->
+                        <button 
+                          *ngIf="isReplayCacheSuccessful(match)"
+                          type="button" 
+                          class="btn btn-outline-info btn-sm me-1"
+                          (click)="downloadReplayJson(match)"
+                          [title]="'BUILD_ORDERS.REPLAY.DOWNLOAD_JSON_TOOLTIP' | translate">
+                          <i class="fas fa-file-code"></i>
+                        </button>
+
+                        <!-- Show/Hide Timeline (only if analysis was successful) -->
+                        <button 
+                          *ngIf="isReplayCacheSuccessful(match)"
+                          type="button" 
+                          class="btn btn-sm me-1"
+                          [class.btn-primary]="isRowExpanded(match)"
+                          [class.btn-outline-primary]="!isRowExpanded(match)"
+                          (click)="showCachedTimeline(match)"
+                          [title]="(isRowExpanded(match) ? 'BUILD_ORDERS.REPLAY.HIDE_TIMELINE_TOOLTIP' : 'BUILD_ORDERS.REPLAY.SHOW_TIMELINE_TOOLTIP') | translate">
+                          <i class="fas" [class.fa-chart-line]="!isRowExpanded(match)" [class.fa-times]="isRowExpanded(match)"></i>
+                        </button>
+
+                        <!-- Error indicator (only if analysis failed) -->
+                        <button 
+                          *ngIf="hasReplayCacheError(match)"
+                          type="button" 
+                          class="btn btn-outline-danger btn-sm"
+                          disabled
+                          [title]="'BUILD_ORDERS.REPLAY.ANALYSIS_FAILED' | translate">
+                          <i class="fas fa-exclamation-triangle"></i>
+                        </button>
+                      </ng-container>
+                    </div>
+                  </td>
+                </tr>
                 
-                <!-- Match Date -->
-                <td class="text-center match-date-cell">
-                  <span class="match-date">{{ formatDate(match.matchDate) | date:'dd MMMM yy, HH:mm' }}</span>
-                </td>
-                
-                <!-- Map -->
-                <td class="text-center map-cell">
-                  <span class="map-name clickable" 
-                        (click)="onFilterByMap(match.mapType)"
-                        [title]="'Click to filter by ' + formatMapName(match.mapType)">
-                    {{ formatMapName(match.mapType) }}
-                  </span>
-                </td>
-                
-                <!-- Actions -->
-                <td class="text-center actions-cell">
-                  <div class="action-buttons">
-                    <!-- If not cached, show analyze button -->
-                    <ng-container *ngIf="!isReplayCached(match)">
-                      <button 
-                        type="button" 
-                        class="btn btn-outline-primary btn-sm"
-                        [disabled]="isAnalyzingReplay"
-                        (click)="analyzeReplay(match)"
-                        [title]="'BUILD_ORDERS.REPLAY.ANALYZE_TOOLTIP' | translate">
-                        <span *ngIf="isMatchBeingAnalyzed(match.matchId)" class="spinner-border spinner-border-sm" role="status"></span>
-                        <i *ngIf="!isMatchBeingAnalyzed(match.matchId)" class="fas fa-chart-line"></i>
-                      </button>
-                    </ng-container>
-
-                    <!-- If cached, show action buttons based on success/error state -->
-                    <ng-container *ngIf="isReplayCached(match)">
-                      <!-- Download Replay File (always available) -->
-                      <button 
-                        type="button" 
-                        class="btn btn-outline-success btn-sm me-1"
-                        (click)="downloadReplayFile(match)"
-                        [title]="'BUILD_ORDERS.REPLAY.DOWNLOAD_REPLAY_TOOLTIP' | translate">
-                        <i class="fas fa-download"></i>
-                      </button>
-
-                      <!-- Download JSON (only if analysis was successful) -->
-                      <button 
-                        *ngIf="isReplayCacheSuccessful(match)"
-                        type="button" 
-                        class="btn btn-outline-info btn-sm me-1"
-                        (click)="downloadReplayJson(match)"
-                        [title]="'BUILD_ORDERS.REPLAY.DOWNLOAD_JSON_TOOLTIP' | translate">
-                        <i class="fas fa-file-code"></i>
-                      </button>
-
-                      <!-- Show Timeline (only if analysis was successful) -->
-                      <button 
-                        *ngIf="isReplayCacheSuccessful(match)"
-                        type="button" 
-                        class="btn btn-outline-primary btn-sm"
-                        (click)="showCachedTimeline(match)"
-                        [title]="'BUILD_ORDERS.REPLAY.SHOW_TIMELINE_TOOLTIP' | translate">
-                        <i class="fas fa-chart-line"></i>
-                      </button>
-
-                      <!-- Error indicator (only if analysis failed) -->
-                      <button 
-                        *ngIf="hasReplayCacheError(match)"
-                        type="button" 
-                        class="btn btn-outline-danger btn-sm"
-                        disabled
-                        [title]="'BUILD_ORDERS.REPLAY.ANALYSIS_FAILED' | translate">
-                        <i class="fas fa-exclamation-triangle"></i>
-                      </button>
-                    </ng-container>
-                  </div>
-                </td>
-              </tr>
+                <!-- Timeline expansion row -->
+                <tr *ngIf="isRowExpanded(match)" class="timeline-row">
+                  <td colspan="4" class="timeline-cell">
+                    <div class="timeline-container">
+                      <div class="timeline-header">
+                        <h6 class="mb-2">
+                          <i class="fas fa-chart-line me-2"></i>
+                          {{ 'BUILD_ORDERS.REPLAY.WINNER_TIMELINE' | translate }}
+                          <span class="text-muted ms-2">{{ getRowWinnerName(match) }}</span>
+                        </h6>
+                      </div>
+                      <div class="timeline-content">
+                        <app-timeline 
+                          [segments]="getRowTimelineData(match)"
+                          [playerName]="getRowWinnerName(match)"
+                          [playerColor]="getPlayerColorFromParsedData(match)"
+                          [compact]="true">
+                        </app-timeline>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- Timeline Analysis Section -->
-    <div *ngIf="showTimeline" class="timeline-analysis-section mt-4">
-      <div class="section-header">
-        <h3 class="section-title">{{ 'BUILD_ORDERS.REPLAY.WINNER_TIMELINE' | translate }}</h3>
-        <div class="d-flex align-items-center">
-          <small class="text-light me-3">
-            {{ winnerPlayerName }} - {{ 'COMMON.MATCH' | translate }} {{ analysisMatchId }}
-          </small>
-          <button 
-            type="button" 
-            class="btn btn-outline-light btn-sm"
-            (click)="closeTimeline()">
-            <i class="fas fa-times me-1"></i>
-            {{ 'BUILD_ORDERS.REPLAY.CLOSE_TIMELINE' | translate }}
-          </button>
-        </div>
-      </div>
-      
-      <app-glass-card cardClass="padded">
-        <app-timeline 
-          [segments]="timelineData"
-          [playerName]="winnerPlayerName"
-          [playerColor]="getPlayerColorForTimeline(1)"
-          [compact]="false">
-        </app-timeline>
-      </app-glass-card>
-    </div>
+
   </div>
 </app-page-container>
