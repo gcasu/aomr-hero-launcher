@@ -128,6 +128,22 @@
               color: var(--bs-light);
               font-weight: 500;
               @include noto-font;
+              
+              &.clickable {
+                cursor: pointer;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                
+                &:hover {
+                  color: #007bff;
+                  text-decoration: underline;
+                  transform: scale(1.02);
+                }
+                
+                &:active {
+                  transform: scale(0.98);
+                }
+              }
             }
           }
         }

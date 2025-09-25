@@ -486,6 +486,107 @@ class Main {
         };
       }
     });
+
+    // Handle file buffer writing
+    ipcMain.handle('file:writeBuffer', async (event, filePath: string, buffer: ArrayBuffer) => {
+      try {
+        await fs.promises.writeFile(filePath, Buffer.from(buffer));
+        console.log(`File buffer written successfully: ${filePath}`);
+      } catch (error) {
+        console.error('Error writing file buffer:', error);
+        throw error;
+      }
+    });
+
+    // Handle file buffer reading
+    ipcMain.handle('file:readBuffer', async (event, filePath: string) => {
+      try {
+        const buffer = await fs.promises.readFile(filePath);
+        console.log(`File buffer read successfully: ${filePath}`);
+        return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+      } catch (error) {
+        console.error('Error reading file buffer:', error);
+        throw error;
+      }
+    });
+
+    // Handle file deletion
+    ipcMain.handle('file:delete', async (event, filePath: string) => {
+      try {
+        await fs.promises.unlink(filePath);
+        console.log(`File deleted successfully: ${filePath}`);
+      } catch (error) {
+        console.error('Error deleting file:', error);
+        throw error;
+      }
+    });
+
+    // Handle command execution
+    ipcMain.handle('command:execute', async (event, command: string, args: string[]) => {
+      try {
+        console.log(`Executing command: ${command} with args:`, args);
+        
+        return new Promise((resolve) => {
+          const process = spawn(command, args, {
+            stdio: ['pipe', 'pipe', 'pipe'],
+            shell: false
+          });
+
+          let stdout = '';
+          let stderr = '';
+
+          process.stdout.on('data', (data: Buffer) => {
+            stdout += data.toString();
+          });
+
+          process.stderr.on('data', (data: Buffer) => {
+            stderr += data.toString();
+          });
+
+          process.on('close', (code: number) => {
+            console.log(`Command executed with exit code: ${code}`);
+            resolve({
+              success: code === 0,
+              stdout: stdout.trim(),
+              stderr: stderr.trim(),
+              error: code !== 0 ? `Process exited with code ${code}` : undefined
+            });
+          });
+
+          process.on('error', (error: Error) => {
+            console.error('Error executing command:', error);
+            resolve({
+              success: false,
+              stdout: '',
+              stderr: '',
+              error: error.message
+            });
+          });
+
+          // Set a timeout for long-running processes
+          setTimeout(() => {
+            if (!process.killed) {
+              process.kill();
+              resolve({
+                success: false,
+                stdout: stdout.trim(),
+                stderr: stderr.trim(),
+                error: 'Command execution timeout'
+              });
+            }
+          }, 60000); // 60 seconds timeout
+        });
+
+      } catch (error) {
+        console.error('Error in command execution handler:', error);
+        return {
+          success: false,
+          stdout: '',
+          stderr: '',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
+      }
+    });
   };
 
   private onWindowAllClosed = (): void => {

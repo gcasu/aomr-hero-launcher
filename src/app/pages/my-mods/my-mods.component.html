@@ -12,28 +12,6 @@
       (filterChange)="onFilterChange()"
       placeholder="MY_MODS.FILTER_PLACEHOLDER"
       inputId="filterInput">
-      <!-- Simdata Merger Toggle -->
-      <div class="col-auto">
-        <div class="form-check form-switch">
-          <input 
-            class="form-check-input" 
-            type="checkbox" 
-            role="switch" 
-            id="simdataMergerToggle"
-            [(ngModel)]="simdataMergerEnabled"
-            (change)="onSimdataMergerToggle()"
-            [attr.aria-label]="'MY_MODS.SIMDATA_MERGER.LABEL' | translate">
-          <label 
-            class="form-check-label text-light small" 
-            for="simdataMergerToggle"
-            [attr.data-bs-toggle]="'tooltip'"
-            [attr.data-bs-placement]="'top'"
-            [attr.data-bs-title]="'MY_MODS.SIMDATA_MERGER.TOOLTIP' | translate"
-            [title]="'MY_MODS.SIMDATA_MERGER.TOOLTIP' | translate">
-            {{ 'MY_MODS.SIMDATA_MERGER.LABEL' | translate }}
-          </label>
-        </div>
-      </div>
     </app-search-filter>
   </div>
 

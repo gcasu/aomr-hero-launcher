@@ -8,6 +8,7 @@
     "WARNING": "Warning",
     "INFO": "Information",
     "SEARCH_PLACEHOLDER": "Search...",
+    "MATCH": "Match",
     "PAGE": "Page"
   },
   "NAVIGATION": {
@@ -15,6 +16,7 @@
     "MODDING": "Modding",
     "MY_MODS": "My Mods",
     "RESOURCES": "Resources",
+    "REPLAY_PARSER": "Replay Parser",
     "CORE_DATA_GUIDE": "Data Guide",
     "COMPETITIVE": "Competitive",
     "LEADERBOARD": "Leaderboard",
@@ -52,6 +54,10 @@
         "TITLE": "Resources",
         "DESCRIPTION": "Access modding tools, community content, and other game resources easily"
       },
+      "REPLAY_PARSER": {
+        "TITLE": "Replay Parser",
+        "DESCRIPTION": "Parse Age of Mythology: Retold replay files into readable JSON format"
+      },
       "CORE_DATA_GUIDE": {
         "TITLE": "Data Guide",
         "DESCRIPTION": "Explore game data, statistics, and detailed information"
@@ -82,7 +88,7 @@
       }
     },
     "FEEDBACK": {
-      "TEXT_START": "AoM:R Hero Launcher v1.0 powered by <i>sliferdev</i>. Any feedback, bug report, or feature suggestion? Join my server on",
+      "TEXT_START": "AoM:R Hero Launcher v1.1.0 powered by <i>sliferdev</i>. Any feedback, bug report, or feature suggestion? Join my server on",
       "TEXT_MIDDLE": "or open an issue on"
     }
   },
@@ -102,14 +108,9 @@
       "TITLE": "No Mods Found",
       "DESCRIPTION": "No mods match your search criteria. Try adjusting your filter."
     },
-    "SIMDATA_MERGER": {
-      "LABEL": "Enable simdata merger (experimental)",
-      "TOOLTIP": "This experimental feature merges simdata files to improve mod compatibility. Use with caution as it may affect game stability."
-    },
     "MESSAGES": {
       "AUTO_SAVE_ERROR": "Failed to auto-save mod changes",
-      "UNKNOWN_DATE": "Unknown",
-      "SIMDATA_MERGER_TOGGLE_INFO": "This functionality is currently unavailable"
+      "UNKNOWN_DATE": "Unknown"
     },
     "SOURCE": {
       "LOCAL": "Local",
@@ -179,6 +180,11 @@
       "LOSSES": "Losses",
       "TOTAL_GAMES": "Total Games",
       "STREAK": "Streak"
+    },
+    "VIEW_PLAYER_STATS": "Click to view player's detailed stats",
+    "ERRORS": {
+      "PLAYER_PROFILE_NOT_AVAILABLE": "Player profile not available",
+      "FAILED_TO_LOAD_DATA": "Failed to load leaderboard data"
     }
   },
   "SETTINGS": {
@@ -215,13 +221,28 @@
       "WELCOME_SETUP": "Welcome! Please configure your game paths to get started with advanced features."
     },
     "CACHE": {
-      "TITLE": "Clear Application Cache",
-      "DESCRIPTION": "Remove all cached data, settings, and reload the application",
+      "TITLE": "Cache Management",
+      "DESCRIPTION": "Manage application cache and stored data",
       "CLEAR_BUTTON": "Clear Cache",
+      "CLEAR_SELECTED": "Clear Selected",
+      "CLEAR_ALL": "Clear All",
+      "SELECT_ALL": "Select All",
       "CLEARING": "Clearing...",
       "CLEAR_SUCCESS": "Application cache cleared successfully",
+      "CLEAR_SELECTED_SUCCESS": "Selected cache items cleared successfully",
       "CLEAR_ERROR": "Failed to clear application cache",
-      "RELOAD_MESSAGE": "Application will reload in 2 seconds..."
+      "RELOAD_MESSAGE": "Application will reload in 2 seconds...",
+      "NO_ITEMS": "No cache items found",
+      "TABLE": {
+        "CACHE_ENTRY": "Cache Entry",
+        "DESCRIPTION": "Description",
+        "SIZE": "Size"
+      },
+      "TYPES": {
+        "CONFIG": "Config",
+        "DATA": "Data",
+        "OTHER": "Other"
+      }
     },
     "USER_CONFIG": {
       "TITLE": "User Configuration Manager",
@@ -270,6 +291,8 @@
     "DESCRIPTION": "Explore all core game data for Age of Mythology: Retold",
     "LOADING": "Loading core data...",
     "SEARCH_PLACEHOLDER": "Search data sections...",
+    "SECTION_SEARCH_PLACEHOLDER": "Search sections and types...",
+    "ENTRY_SEARCH_PLACEHOLDER": "Search entries and descriptions...",
     "EXPAND_ALL": "Expand All",
     "COLLAPSE_ALL": "Collapse All",
     "SECTION": "Section",
@@ -321,8 +344,50 @@
     "TITLE": "Build Orders",
     "DESCRIPTION": "Learn and master strategic build orders for competitive play",
     "SELECT_MAJOR_GOD": "Select a Major God",
-    "EMPTY_STATE_TITLE": "No Build Orders Available",
-    "EMPTY_STATE_DESCRIPTION": "Build orders for the selected god are coming soon. Check back later for strategic guides and builds!"
+    "RECENT_MATCHES": "Recent Competitive Matches",
+    "SEARCH_PLACEHOLDER": "Search by player name or map...",
+    "NO_MATCHES_TITLE": "No Recent Matches",
+    "NO_MATCHES_DESCRIPTION": "No recent competitive matches found for this god. Check back later as new match data becomes available.",
+    "NO_RESULTS_TITLE": "No Matches Found",
+    "NO_RESULTS_DESCRIPTION": "No matches found for your search criteria. Try adjusting your search terms.",
+    "TABLE": {
+      "PLAYER": "Player",
+      "MATCH_DATE": "Match Date",
+      "MAP": "Map",
+      "ACTIONS": "Actions",
+      "VIEW_REPLAY": "View Replay",
+      "VIEW_STATS": "View Stats",
+      "ANALYZE_REPLAY": "Analyze Replay"
+    },
+    "REPLAY": {
+      "DOWNLOADING": "Downloading replay file...",
+      "PARSING": "Parsing replay data...",
+      "DOWNLOAD_SUCCESS": "Replay downloaded successfully",
+      "PARSE_SUCCESS": "Replay parsed successfully",
+      "CACHED_SUCCESS": "Replay loaded from cache",
+      "DOWNLOAD_ERROR": "Failed to download replay file",
+      "PARSE_ERROR": "Failed to parse replay file",
+      "REPLAY_NOT_FOUND": "Replay file not found on server",
+      "ACCESS_DENIED": "Access denied to replay file",
+      "SERVER_ERROR": "Server error while downloading replay",
+      "WINNER_TIMELINE": "Winner's Build Order Timeline",
+      "NO_WINNER_DATA": "No winner data available in replay",
+      "CLOSE_TIMELINE": "Close Timeline",
+      "ANALYZE": "Analyze",
+      "ANALYZE_TOOLTIP": "Download and analyze this replay",
+      "DOWNLOAD_REPLAY": "Replay",
+      "DOWNLOAD_REPLAY_TOOLTIP": "Download the original replay file",
+      "DOWNLOAD_JSON": "JSON",
+      "DOWNLOAD_JSON_TOOLTIP": "Download the parsed replay data as JSON",
+      "SHOW_TIMELINE": "Timeline",
+      "SHOW_TIMELINE_TOOLTIP": "Show the winner's build order timeline",
+      "HIDE_TIMELINE_TOOLTIP": "Hide the timeline",
+      "JSON_DOWNLOAD_SUCCESS": "Parsed JSON downloaded successfully",
+      "JSON_DOWNLOAD_ERROR": "Failed to download parsed JSON",
+      "TIMELINE_ERROR": "Failed to show timeline",
+      "CACHED_ERROR": "Analysis failed for cached replay",
+      "ANALYSIS_FAILED": "Replay analysis failed - only download available"
+    }
   },
   "TIERS": {
     "TITLE": "Tier Lists",
@@ -365,6 +430,91 @@
     "NO_RESULTS": {
       "TITLE": "No Channels Found",
       "DESCRIPTION": "No channels match your search criteria. Try adjusting your search terms."
+    }
+  },
+  "REPLAY_PARSER": {
+    "TITLE": "Replay Parser",
+    "DESCRIPTION": "Parse Age of Mythology: Retold replay files into human-readable JSON format",
+    "UPLOAD": {
+      "TITLE": "Drop or Click to Upload Replay",
+      "DESCRIPTION": "Drag and drop your replay file here or click to browse",
+      "FORMATS": "Supported formats: .mythrec, .gz, .zip",
+      "CLEAR": "Clear File"
+    },
+    "OPTIONS": {
+      "TITLE": "Parsing Options",
+      "SLIM_MODE": "Slim Mode",
+      "SLIM_MODE_DESC": "Exclude game commands from output for smaller file size",
+      "STATS_MODE": "Stats Mode",
+      "STATS_MODE_DESC": "Include additional statistics in the output (incompatible with slim mode)",
+      "PRETTY_PRINT": "Pretty Print",
+      "PRETTY_PRINT_DESC": "Format JSON output with indentation for better readability",
+      "GZIP_COMPRESSION": "GZIP Compression",
+      "GZIP_COMPRESSION_DESC": "Indicate if the input file is compressed with GZIP",
+      "VERBOSE_LOGGING": "Verbose Logging",
+      "VERBOSE_LOGGING_DESC": "Enable detailed logging during parsing process"
+    },
+    "BUTTONS": {
+      "PARSE": "Parse Replay",
+      "PROCESSING": "Processing...",
+      "DOWNLOAD": "Download JSON",
+      "DOWNLOAD_JSON": "Download JSON"
+    },
+    "MESSAGES": {
+      "PARSE_SUCCESS": "Replay parsed successfully!"
+    },
+    "ERRORS": {
+      "NO_FILE_SELECTED": "Please select a replay file first",
+      "INVALID_FILE_TYPE": "Invalid file type. Please select a .mythrec, .gz, or .zip file",
+      "PARSE_FAILED": "Failed to parse replay file"
+    },
+    "RESULTS": {
+      "SUCCESS_TITLE": "Parsing Completed Successfully",
+      "SUCCESS_MESSAGE": "Your replay has been parsed successfully. You can now download the JSON file.",
+      "ERROR_TITLE": "Parsing Failed",
+      "UNKNOWN_ERROR": "An unknown error occurred during parsing",
+      "RESULT_SIZE": "Result size",
+      "ANALYSIS_COMPLETE": "Replay Analysis Complete",
+      "ANALYSIS_DESCRIPTION": "Parsed replay data with detailed insights",
+      "GAME_OVERVIEW": "Game Overview",
+      "MAP": "Map",
+      "DURATION": "Duration",
+      "WINNER": "Winner",
+      "BUILD": "Build",
+      "UNKNOWN": "Unknown",
+      "PLAYERS": "Players",
+      "MINOR_GODS": "Minor Gods",
+      "WINNER_BADGE": "Winner",
+      "LOSER_BADGE": "Loser",
+      "EAPM": "EAPM",
+      "COLOR": "Color",
+      "LAST_AGE": "Last Age",
+      "PLAYER_STATISTICS": "Player Statistics",
+      "UNITS_CREATED": "Units Created",
+      "BUILDINGS_BUILT": "Buildings Built",
+      "TECHNOLOGIES": "Technologies",
+      "GOD_POWERS": "God Powers",
+      "GAME_TIMELINE": "Game Timeline (First 10 Minutes)",
+      "NO_ACTIVITY": "No activity",
+      "NO_TIMELINE_DATA": "No timeline data found."
+    },
+    "PROCESSING_MESSAGE": "Parsing replay file, please wait...",
+    "INFO": {
+      "ABOUT_TITLE": "About Replay Parser",
+      "ABOUT_DESCRIPTION": "This tool leverages the AoM:R Restoration project parser to convert Age of Mythology: Retold replay files (.mythrec, .gz, .zip) into human-readable JSON format, making replay data accessible for analysis and statistics.",
+      "SUPPORTED_FORMATS": "Supported Formats",
+      "FEATURES_TITLE": "Features & Capabilities",
+      "FEATURE_SLIM": "Slim mode for reduced file size",
+      "FEATURE_STATS": "Enhanced statistics extraction",
+      "FEATURE_PRETTY": "Pretty-printed JSON output",
+      "FEATURE_GZIP": "GZIP compression support",
+      "SLIM_MODE_TITLE": "Slim Mode",
+      "STATISTICS_TITLE": "Statistics",
+      "PRETTY_PRINT_TITLE": "Pretty Print"
+    },
+    "EMPTY": {
+      "TITLE": "Ready to Parse Replays",
+      "DESCRIPTION": "Upload a .mythrec, .gz, or .zip file to get started with parsing your replay data."
     }
   }
 }

@@ -14,6 +14,9 @@ try {
     // File operations
     readFile: (filePath) => ipcRenderer.invoke('file:read', filePath),
     writeFile: (filePath, content) => ipcRenderer.invoke('file:write', filePath, content),
+    writeFileBuffer: (filePath, buffer) => ipcRenderer.invoke('file:writeBuffer', filePath, buffer),
+    readFileBuffer: (filePath) => ipcRenderer.invoke('file:readBuffer', filePath),
+    deleteFile: (filePath) => ipcRenderer.invoke('file:delete', filePath),
     fileExists: (filePath) => ipcRenderer.invoke('file:exists', filePath),
     ensureDirectory: (dirPath) => ipcRenderer.invoke('file:ensureDirectory', dirPath),
     readDirectory: (dirPath) => ipcRenderer.invoke('file:readDirectory', dirPath),
@@ -32,6 +35,9 @@ try {
     
     // YouTube feed fetching
     fetchYouTubeFeed: (channelId) => ipcRenderer.invoke('youtube:fetchFeed', channelId),
+    
+    // Command execution
+    executeCommand: (command, args) => ipcRenderer.invoke('command:execute', command, args),
     
     // Test function to verify API is working
     test: () => 'Electron API is working!'

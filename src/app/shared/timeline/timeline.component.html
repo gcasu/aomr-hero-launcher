@@ -1,0 +1,54 @@
+<div class="timeline-component" [class.compact]="compact">
+  <!-- Player Header -->
+  <div class="timeline-header mb-3" *ngIf="playerName">
+    <h6 class="mb-0 text-light">{{ playerName }}</h6>
+  </div>
+
+  <!-- Timeline Segments -->
+  <div class="timeline-segments">
+    <div 
+      class="timeline-segment mb-3" 
+      *ngFor="let segment of segments" 
+      [class.has-events]="hasEvents(segment)"
+      [class.empty-segment]="!hasEvents(segment)">
+      
+      <!-- Show segment only if it has events OR if showEmptySegments is true -->
+      <div *ngIf="hasEvents(segment) || showEmptySegments">
+        <!-- Segment Time Header -->
+        <div class="segment-header mb-2" [class.compact-header]="compact">
+          <small class="text-secondary fw-bold">{{ getSegmentLabel(segment) }}</small>
+          <small class="text-secondary ms-2" *ngIf="!compact">({{ segment.startTime }}s - {{ segment.endTime }}s)</small>
+        </div>
+
+        <!-- Events List -->
+        <div class="events-list" *ngIf="hasEvents(segment)">
+          <div 
+            class="event-item d-flex align-items-start mb-1" 
+            *ngFor="let event of segment.events"
+            [class.compact-event]="compact">
+            <i 
+              [class]="getEventIcon(event)" 
+              [ngClass]="getEventIconColor(event)"
+              [ngStyle]="getEventIconStyle(event)"
+              class="me-2 mt-1 flex-shrink-0"
+              [class.small-icon]="compact"></i>
+            <span 
+              class="event-description" 
+              [class.small]="compact">{{ event.description }}</span>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-events text-secondary small" *ngIf="!hasEvents(segment) && showEmptySegments">
+          {{ 'REPLAY_PARSER.RESULTS.NO_ACTIVITY' | translate }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Data State -->
+  <div class="no-data-state text-center py-4" *ngIf="segments.length === 0">
+    <i class="fas fa-info-circle text-secondary mb-2"></i>
+    <p class="text-secondary small mb-0">{{ 'REPLAY_PARSER.RESULTS.NO_TIMELINE_DATA' | translate }}</p>
+  </div>
+</div>

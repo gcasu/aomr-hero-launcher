@@ -9,12 +9,22 @@ export interface YouTubeFeedResult {
   error?: string;
 }
 
+export interface ExecuteCommandResult {
+  success: boolean;
+  stdout?: string;
+  stderr?: string;
+  error?: string;
+}
+
 export interface ElectronAPI {
   openGameExeDialog: () => Promise<string | null>;
   openModsJsonDialog: () => Promise<string | null>;
   launchGame: (exePath: string) => Promise<LaunchResult>;
   readFile: (filePath: string) => Promise<string>;
   writeFile: (filePath: string, content: string) => Promise<void>;
+  writeFileBuffer: (filePath: string, buffer: ArrayBuffer) => Promise<void>;
+  readFileBuffer: (filePath: string) => Promise<ArrayBuffer>;
+  deleteFile: (filePath: string) => Promise<void>;
   openExternal: (url: string) => Promise<void>;
   fileExists: (filePath: string) => Promise<boolean>;
   ensureDirectory: (dirPath: string) => Promise<boolean>;
@@ -25,6 +35,7 @@ export interface ElectronAPI {
   restartApp: () => Promise<void>;
   reloadWindow: () => Promise<void>;
   fetchYouTubeFeed: (channelId: string) => Promise<YouTubeFeedResult>;
+  executeCommand: (command: string, args: string[]) => Promise<ExecuteCommandResult>;
 }
 
 declare global {

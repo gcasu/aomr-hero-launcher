@@ -1,0 +1,133 @@
+.timeline-component {
+  .timeline-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+  }
+
+  .timeline-segments {
+    padding-left: 3px;
+    max-height: 600px;
+    overflow-y: auto;
+    
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+    }
+  }
+
+  .timeline-segment {
+    border-left: 2px solid rgba(255, 255, 255, 0.2);
+    padding-left: 1rem;
+    position: relative;
+
+    &.has-events {
+      border-left-color: rgba(255, 255, 255, 0.4);
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 0.5rem;
+      width: 8px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+    }
+
+    &.has-events::before {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(255, 255, 255, 1);
+      box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  .segment-header {
+    margin-bottom: 0.5rem;
+    
+    &.compact-header {
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  .events-list {
+    margin-left: 0.5rem;
+  }
+
+  .event-item {
+    margin-bottom: 0.25rem;
+    word-wrap: break-word;
+    
+    &.compact-event {
+      margin-bottom: 0.125rem;
+    }
+
+    .small-icon {
+      font-size: 0.75rem;
+    }
+  }
+
+  .event-description {
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .empty-events {
+    margin-left: 0.5rem;
+    font-style: italic;
+  }
+
+  .no-data-state {
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  // Compact mode adjustments
+  &.compact {
+    .timeline-segment {
+      margin-bottom: 1rem;
+      padding-left: 0.75rem;
+    }
+
+    .events-list {
+      margin-left: 0.25rem;
+    }
+
+    .segment-header {
+      margin-bottom: 0.25rem;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .timeline-component {
+    .timeline-segments {
+      max-height: 400px;
+    }
+
+    .event-item {
+      font-size: 0.875rem;
+    }
+
+    .segment-header {
+      font-size: 0.75rem;
+    }
+  }
+}

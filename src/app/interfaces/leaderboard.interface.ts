@@ -43,3 +43,66 @@ export interface LeaderboardRequest {
   sortColumn: string;
   sortDirection: string;
 }
+
+export interface MatchListItem {
+  gameId: string | null;
+  matchId: string;
+  profileId: number;
+  userName: string | null;
+  avatarUrl: string | null;
+  dateTime: string;
+  matchLength: number;
+  playerCount: number;
+  victoryResultID: number;
+  mapType: string;
+  civilizationID: number;
+  civilization: string;
+  winLoss: string;
+}
+
+export interface MatchListResponse {
+  matchList: MatchListItem[];
+  totalMatches: number;
+}
+
+export interface MatchListRequest {
+  gamertag: string;
+  playerNumber: number;
+  game: string;
+  profileId: number;
+  sortColumn: string;
+  sortDirection: string;
+  page: number;
+  recordCount: number;
+  matchType: string;
+}
+
+export interface ProcessedMatch {
+  matchId: string;
+  winningPlayer: string;
+  winningPlayerAvatar: string;
+  matchDate: string;
+  civilization: string;
+  mapType: string;
+  profileId: number;
+}
+
+export interface MatchDataCache {
+  matches: ProcessedMatch[];
+  lastFetchDate: string;
+  totalMatches: number;
+  leaderboardSnapshot: LeaderboardSnapshot | null;
+  lastLeaderboardCheck: string;
+}
+
+export interface LeaderboardSnapshot {
+  players: LeaderboardPlayerSnapshot[];
+  fetchDate: string;
+}
+
+export interface LeaderboardPlayerSnapshot {
+  rlUserId: number;
+  userName: string;
+  elo: number;
+  rank: number;
+}

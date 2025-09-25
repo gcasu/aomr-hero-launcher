@@ -121,7 +121,11 @@
                     class="player-avatar"
                     (error)="onImageError($event)"
                     loading="lazy">
-                  <span class="player-name">{{ player.userName }}</span>
+                  <span class="player-name clickable" 
+                        (click)="openPlayerStats(player)"
+                        [title]="'LEADERBOARD.VIEW_PLAYER_STATS' | translate">
+                    {{ player.userName }}
+                  </span>
                 </div>
               </td>
               
