@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ReplayParserService, ParseOptions, ParseResult } from '../../services/replay-parser.service';
 import { ToastService } from '../../services/toast.service';
+import { PlayerColorService } from '../../services/player-color.service';
 
 // Import shared components
 import { PageContainerComponent } from '../../shared/page-container/page-container.component';
@@ -51,6 +52,7 @@ export class ReplayParserComponent implements OnInit {
   private timelineService = inject(TimelineService);
   private translateService = inject(TranslateService);
   private godIconService = inject(GodIconService);
+  private playerColorService = inject(PlayerColorService);
 
   ngOnInit(): void {
     // Component initialization
@@ -189,19 +191,14 @@ export class ReplayParserComponent implements OnInit {
   }
 
   getPlayerColor(colorIndex: number): string {
-    const colors = [
-      '#FF0000', '#0000FF', '#FFFF00', '#00FF00', 
-      '#00FFFF', '#FF00FF', '#808080', '#FFA500',
-      '#FFB6C1', '#800080', '#A52A2A', '#FFFFFF'
-    ];
-    return colors[colorIndex] || '#FFFFFF';
+    return this.playerColorService.getPlayerColor(colorIndex);
   }
 
   getPlayerColorForTimeline(playerNum: number): string {
-    if (!this.parseResult?.data?.Players) return '#FFFFFF';
+    if (!this.parseResult?.data?.Players) return this.playerColorService.getDefaultColor();
     
     const player = this.parseResult.data.Players.find((p: any) => p.PlayerNumber === playerNum);
-    return player ? this.getPlayerColor(player.Color) : '#FFFFFF';
+    return player ? this.getPlayerColor(player.Color) : this.playerColorService.getDefaultColor();
   }
 
   getPlayerStatsArray(): Array<{playerNum: string, stats: any}> {

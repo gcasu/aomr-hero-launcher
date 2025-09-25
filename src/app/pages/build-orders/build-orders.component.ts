@@ -10,6 +10,7 @@ import { ReplayCacheService } from '../../services/replay-cache.service';
 import { ReplayFileService } from '../../services/replay-file.service';
 import { ReplayParserService, ParseOptions, ParseResult } from '../../services/replay-parser.service';
 import { TimelineService } from '../../shared/timeline/timeline.service';
+import { PlayerColorService } from '../../services/player-color.service';
 import { MajorGod } from '../../interfaces/major-god.interface';
 import { ProcessedMatch } from '../../interfaces/leaderboard.interface';
 import { CachedReplay } from '../../interfaces/replay-cache.interface';
@@ -79,6 +80,7 @@ export class BuildOrdersComponent implements OnInit {
   private replayFileService = inject(ReplayFileService);
   private replayParserService = inject(ReplayParserService);
   private timelineService = inject(TimelineService);
+  private playerColorService = inject(PlayerColorService);
 
   ngOnInit(): void {
     this.loadMajorGods();
@@ -500,12 +502,7 @@ export class BuildOrdersComponent implements OnInit {
   }
 
   getPlayerColorForTimeline(playerNum: number): string {
-    const colors = [
-      '#FF0000', '#0000FF', '#FFFF00', '#00FF00', 
-      '#00FFFF', '#FF00FF', '#808080', '#FFA500',
-      '#FFB6C1', '#800080', '#A52A2A', '#FFFFFF'
-    ];
-    return colors[playerNum - 1] || '#FFFFFF';
+    return this.playerColorService.getPlayerColorForTimeline(playerNum);
   }
 
   // Row expansion methods
@@ -545,51 +542,7 @@ export class BuildOrdersComponent implements OnInit {
 
   getPlayerColorFromParsedData(match: ProcessedMatch): string {
     const parsedData = this.rowParsedData.get(this.getRowKey(match));
-    if (!parsedData || !parsedData.Players || !Array.isArray(parsedData.Players)) {
-      return '#FF0000'; // Default red color
-    }
-
-    // Find the winner and get their color
-    const winner = parsedData.Players.find((player: any) => player.Winner === true);
-    if (!winner) {
-      return '#FF0000'; // Default red color
-    }
-
-    // Try to extract color from different possible formats
-    if (winner.Color) {
-      // Format 1: Already a hex string
-      if (typeof winner.Color === 'string' && winner.Color.startsWith('#')) {
-        return winner.Color;
-      }
-      
-      // Format 2: RGB object with values 0-1
-      if (typeof winner.Color === 'object' && winner.Color.R !== undefined) {
-        const r = Math.round((winner.Color.R || 0) * 255);
-        const g = Math.round((winner.Color.G || 0) * 255);
-        const b = Math.round((winner.Color.B || 0) * 255);
-        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-      }
-      
-      // Format 3: RGB object with values 0-255
-      if (typeof winner.Color === 'object' && winner.Color.r !== undefined) {
-        const r = Math.round(winner.Color.r || 0);
-        const g = Math.round(winner.Color.g || 0);
-        const b = Math.round(winner.Color.b || 0);
-        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-      }
-      
-      // Format 4: Array [r, g, b]
-      if (Array.isArray(winner.Color) && winner.Color.length >= 3) {
-        const r = Math.round(winner.Color[0] * (winner.Color[0] <= 1 ? 255 : 1));
-        const g = Math.round(winner.Color[1] * (winner.Color[1] <= 1 ? 255 : 1));
-        const b = Math.round(winner.Color[2] * (winner.Color[2] <= 1 ? 255 : 1));
-        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-      }
-    }
-
-    // Fallback: Use player number to get color from predefined array
-    const playerNum = winner.PlayerNumber || winner.PlayerNum || 1;
-    return this.getPlayerColorForTimeline(playerNum);
+    return this.playerColorService.getPlayerColorFromParsedData(parsedData);
   }
 
 

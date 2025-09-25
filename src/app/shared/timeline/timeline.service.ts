@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { 
   TimelineEvent, 
   TimelineSegment, 
@@ -7,6 +7,7 @@ import {
   TimelinePlayerInfo 
 } from './timeline.interfaces';
 import { TimelineModels } from './timeline.models';
+import { PlayerColorService } from '../../services/player-color.service';
 
 /**
  * Service for processing and transforming data into timeline format
@@ -15,6 +16,7 @@ import { TimelineModels } from './timeline.models';
   providedIn: 'root'
 })
 export class TimelineService {
+  private playerColorService = inject(PlayerColorService);
 
   /**
    * Create timeline segments from replay data with proper event grouping
@@ -212,7 +214,7 @@ export class TimelineService {
     return {
       playerNumber: playerData.PlayerNumber || 0,
       name: playerData.Name || `Player ${playerData.PlayerNumber || 'Unknown'}`,
-      color: playerColors[playerData.Color] || '#FFFFFF',
+      color: playerColors[playerData.Color] || this.playerColorService.getDefaultColor(),
       civilization: playerData.Civilization,
       majorGod: playerData.God
     };
