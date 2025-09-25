@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ReplayParserService, ParseOptions, ParseResult } from '../../services/replay-parser.service';
+import { ReplayParserService, ParseOptions, ParseResult } from '../../services/replays/replay-parser.service';
 import { ToastService } from '../../services/toast.service';
 import { PlayerColorService } from '../../services/player-color.service';
 

@@ -18,6 +18,7 @@ export class MatchDataFetcherService {
   private readonly CACHE_TIMEOUT = 30 * 60 * 1000; // 30 minutes cache timeout
   private readonly REQUEST_DELAY = 100; // 100ms delay between requests
   private readonly MAX_MATCHES = 1000; // Maximum total matches to store
+  private readonly MAX_DAYS_OLD = 30; // Maximum age of matches in days
   
   // Configurable for dev/test - can be set via environment or config
   private topPlayersCount = 100; // Default to 100, can be reduced for testing
@@ -210,8 +211,15 @@ export class MatchDataFetcherService {
     const existingMatches = cachedData?.matches || [];
     const combinedMatches = this.mergeMatches(existingMatches, newMatches);
     
+    // Filter out games older than MAX_DAYS_OLD days
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - this.MAX_DAYS_OLD);
+    
+    const recentMatches = combinedMatches
+      .filter(match => new Date(match.matchDate).getTime() >= cutoffDate.getTime());
+    
     // Limit to MAX_MATCHES (keep most recent)
-    const finalMatches = combinedMatches
+    const finalMatches = recentMatches
       .sort((a, b) => new Date(b.matchDate).getTime() - new Date(a.matchDate).getTime())
       .slice(0, this.MAX_MATCHES);
 
@@ -225,7 +233,7 @@ export class MatchDataFetcherService {
     };
 
     this.saveCachedData(updatedCache);
-    console.log(`Saved ${finalMatches.length} total matches to cache with updated leaderboard snapshot`);
+    console.log(`Saved ${finalMatches.length} total matches to cache (filtered by ${this.MAX_DAYS_OLD}-day window and ${this.MAX_MATCHES} limit) with updated leaderboard snapshot`);
   }
 
   /**

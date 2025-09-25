@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { TimelineSegment } from '../shared/timeline/timeline.interfaces';
-import { CachedReplay, CacheIndexEntry, CacheIndex, ReplayCacheStats } from '../interfaces/replay-cache.interface';
-import { REPLAY_CACHE_CONFIG } from '../constants/replay-cache.constants';
+import { TimelineSegment } from '../../shared/timeline/timeline.interfaces';
+import { CachedReplay, CacheIndexEntry, CacheIndex, ReplayCacheStats } from '../../interfaces/replay-cache.interface';
+import { REPLAY_CACHE_CONFIG } from '../../constants/replay-cache.constants';
 
 @Injectable({
   providedIn: 'root'

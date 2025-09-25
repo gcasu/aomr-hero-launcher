@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ReplayParserService, ParseOptions } from './replay-parser.service';
-import { COMPRESSION_SIGNATURES, ZIP_COMPRESSION_METHODS } from '../constants/replay-cache.constants';
+import { COMPRESSION_SIGNATURES, ZIP_COMPRESSION_METHODS } from '../../constants/replay-cache.constants';
 
 @Injectable({
   providedIn: 'root'

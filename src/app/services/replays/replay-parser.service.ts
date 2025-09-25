@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ToastService } from './toast.service';
+import { ToastService } from '../toast.service';
 
 export interface ParseOptions {
   slim: boolean;
