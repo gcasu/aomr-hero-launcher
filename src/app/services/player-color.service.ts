@@ -20,13 +20,6 @@ export class PlayerColorService {
   }
 
   /**
-   * Get player color for timeline by player number
-   */
-  getPlayerColorForTimeline(playerNum: number): string {
-    return this.playerColors[playerNum - 1] || this.defaultColor;
-  }
-
-  /**
    * Get default fallback color
    */
   getDefaultColor(): string {
@@ -90,8 +83,7 @@ export class PlayerColorService {
       }
     }
 
-    // Fallback: Use player number to get color from predefined array
-    const playerNumber = targetPlayer.PlayerNumber || targetPlayer.PlayerNum || 1;
-    return this.getPlayerColorForTimeline(playerNumber);
+    // Fallback: Use default color
+    return this.defaultColor;
   }
 }

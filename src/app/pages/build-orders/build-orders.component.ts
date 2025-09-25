@@ -501,10 +501,6 @@ export class BuildOrdersComponent implements OnInit {
     return this.isAnalyzingReplay && this.currentAnalyzingMatchId === matchId;
   }
 
-  getPlayerColorForTimeline(playerNum: number): string {
-    return this.playerColorService.getPlayerColorForTimeline(playerNum);
-  }
-
   // Row expansion methods
   getRowKey(match: ProcessedMatch): string {
     return `${match.matchId}_${match.profileId}`;
@@ -541,13 +537,10 @@ export class BuildOrdersComponent implements OnInit {
   }
 
   getPlayerColorFromParsedData(match: ProcessedMatch): string {
-    const parsedData = this.rowParsedData.get(this.getRowKey(match));
-    return this.playerColorService.getPlayerColorFromParsedData(parsedData);
+    // const parsedData = this.rowParsedData.get(this.getRowKey(match));
+    // return this.playerColorService.getPlayerColorFromParsedData(parsedData);
+    return this.playerColorService.getDefaultColor();
   }
-
-
-
-
 
   // Cache utility methods
   isReplayCached(match: ProcessedMatch): boolean {
