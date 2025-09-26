@@ -1,6 +1,10 @@
 {
   "channels": [
     {
+      "channelId": "UCHVucqEgCO2EW8qO4wQpDzA",
+      "channelTitle": "Deities of Death"
+    },
+    {
       "channelId": "UCDkpiNXiZdzGgvZcGHtGV2A",
       "channelTitle": "Boit T.V"
     },    
@@ -17,8 +21,8 @@
       "channelTitle": "TheRapl"
     },
     {
-      "channelId": "UCHVucqEgCO2EW8qO4wQpDzA",
-      "channelTitle": "Deities of Death"
+      "channelId": "UC8MBMFTMniVHVO5n42OHPXQ",
+      "channelTitle": "ChoniclerVI"
     }
   ]
 }

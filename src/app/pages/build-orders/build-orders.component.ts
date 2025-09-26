@@ -304,7 +304,7 @@ export class BuildOrdersComponent implements OnInit {
     // Check if replay is already cached
     const cachedReplay = this.replayCacheService.getCachedReplay(match.matchId, match.profileId);
     if (cachedReplay) {
-      this.displayCachedReplay(cachedReplay, match.matchId);
+      this.displayCachedReplay(cachedReplay, match);
       return;
     }
 
@@ -392,6 +392,9 @@ export class BuildOrdersComponent implements OnInit {
         console.warn('Failed to cache replay:', cacheError);
       }
 
+      // Step 5: Automatically expand the timeline for this row
+      this.expandedRows.add(rowKey);
+
       this.toastService.showSuccess(
         this.translateService.instant('BUILD_ORDERS.REPLAY.PARSE_SUCCESS')
       );
@@ -439,7 +442,7 @@ export class BuildOrdersComponent implements OnInit {
     }
   }
 
-  private displayCachedReplay(cachedReplay: CachedReplay, matchId: string): void {
+  private displayCachedReplay(cachedReplay: CachedReplay, match: ProcessedMatch): void {
     if (cachedReplay.hasError) {
       // Show error message for failed cached replays
       this.toastService.showError(
@@ -448,7 +451,17 @@ export class BuildOrdersComponent implements OnInit {
       return;
     }
 
-    // No longer needed since we use row-based timeline display
+    // Store cached data in row-specific data (if not already done)
+    const rowKey = this.getRowKey(match);
+    if (!this.rowTimelineData.has(rowKey)) {
+      this.rowTimelineData.set(rowKey, cachedReplay.timelineData || []);
+      this.rowWinnerNames.set(rowKey, cachedReplay.winnerPlayerName || '');
+      this.rowParsedData.set(rowKey, cachedReplay.parsedData);
+    }
+
+    // Automatically expand the timeline for this row
+    this.expandedRows.add(rowKey);
+
     this.toastService.showSuccess(
       this.translateService.instant('BUILD_ORDERS.REPLAY.CACHED_SUCCESS')
     );
