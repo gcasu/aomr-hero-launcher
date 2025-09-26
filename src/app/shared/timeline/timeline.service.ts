@@ -8,6 +8,7 @@ import {
 } from './timeline.interfaces';
 import { TimelineModels } from './timeline.models';
 import { PlayerColorService } from '../../services/player-color.service';
+import { GameIconService } from '../../services/game-icon.service';
 
 /**
  * Service for processing and transforming data into timeline format
@@ -17,6 +18,7 @@ import { PlayerColorService } from '../../services/player-color.service';
 })
 export class TimelineService {
   private playerColorService = inject(PlayerColorService);
+  private gameIconService = inject(GameIconService);
 
   /**
    * Create timeline segments from replay data with proper event grouping
@@ -200,6 +202,12 @@ export class TimelineService {
     // Only add iconColor if it has a meaningful value
     if (iconColor && iconColor.trim() !== '') {
       eventResult.iconColor = iconColor;
+    }
+
+    // Get game icons for this command (use sync version for timeline performance)
+    const gameIcons = this.gameIconService.getGameIconsForCommandSync(command);
+    if (gameIcons.length > 0) {
+      eventResult.gameIcons = gameIcons;
     }
 
     return eventResult;

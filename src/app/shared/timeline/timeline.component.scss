@@ -87,6 +87,32 @@
     flex: 1;
   }
 
+  .game-icons {
+    flex-shrink: 0;
+    margin-right: 8px;
+    
+    .game-icon {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      border-radius: 2px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+      
+      &:hover {
+        transform: scale(1.1);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+      
+      &.small-game-icon {
+        width: 22px;
+        height: 22px;
+      }
+    }
+  }
+
   .empty-events {
     margin-left: 0.5rem;
     font-style: italic;

@@ -14,6 +14,8 @@ export interface TimelineEvent {
   iconColor?: string;
   /** Event type for categorization (optional) */
   type?: TimelineEventType;
+  /** Game icons related to this event (optional) */
+  gameIcons?: string[];
   /** Additional metadata for the event (optional) */
   metadata?: any;
 }

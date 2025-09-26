@@ -23,18 +23,30 @@
         <!-- Events List -->
         <div class="events-list" *ngIf="hasEvents(segment)">
           <div 
-            class="event-item d-flex align-items-start mb-1" 
+            class="event-item d-flex align-items-start justify-content-between mb-1" 
             *ngFor="let event of segment.events"
             [class.compact-event]="compact">
-            <i 
-              [class]="getEventIcon(event)" 
-              [ngClass]="getEventIconColor(event)"
-              [ngStyle]="getEventIconStyle(event)"
-              class="me-2 mt-1 flex-shrink-0"
-              [class.small-icon]="compact"></i>
-            <span 
-              class="event-description" 
-              [class.small]="compact">{{ event.description }}</span>
+            <div class="event-content d-flex align-items-start">
+              <i 
+                [class]="getEventIcon(event)" 
+                [ngClass]="getEventIconColor(event)"
+                [ngStyle]="getEventIconStyle(event)"
+                class="me-2 mt-1 flex-shrink-0"
+                [class.small-icon]="compact"></i>
+              <span 
+                class="event-description" 
+                [class.small]="compact">{{ event.description }}</span>
+            </div>
+            <div class="game-icons d-flex align-items-center ms-2" *ngIf="event.gameIcons && event.gameIcons.length > 0">
+              <img 
+                *ngFor="let gameIcon of event.gameIcons; let i = index"
+                [src]="getGameIconPath(gameIcon)"
+                [alt]="gameIcon"
+                [title]="gameIcon"
+                class="game-icon"
+                [class.small-game-icon]="compact"
+                [class.me-1]="i < event.gameIcons.length - 1">
+            </div>
           </div>
         </div>
 

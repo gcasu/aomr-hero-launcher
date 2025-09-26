@@ -10,6 +10,7 @@ import { NavigationItem, NavItem, NavGroup } from './models/navigation.model';
 import { NavigationService } from './services/navigation.service';
 import { ScrollService } from './services/scroll.service';
 import { MatchDataFetcherService } from './services/match-data-fetcher.service';
+import { GameIconService } from './services/game-icon.service';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +35,7 @@ export class AppComponent implements OnInit {
   navigationService = inject(NavigationService);
   private scrollService = inject(ScrollService); // Initialize scroll service
   private matchDataFetcher = inject(MatchDataFetcherService); // Initialize match data fetcher
+  private gameIconService = inject(GameIconService); // Initialize game icon service
 
   // Navigation structure from config
   navigationItems: NavigationItem[] = this.navigationService.getNavigationItems();
@@ -85,6 +87,9 @@ export class AppComponent implements OnInit {
     try {
       // Set top players count for development/testing (can be configured)
       // this.matchDataFetcher.setTopPlayersCount(10); // Uncomment for testing with fewer players
+      
+      // Initialize game icon service (load available icons)
+      await this.gameIconService.loadAvailableIcons();
       
       // Start background match data fetching
       await this.matchDataFetcher.fetchMatchDataIfNeeded();

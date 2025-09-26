@@ -1,9 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { TimelineEvent, TimelineSegment, TimelineConfig } from './timeline.interfaces';
 import { TimelineService } from './timeline.service';
 import { TimelineModels } from './timeline.models';
+import { GameIconService } from '../../services/game-icon.service';
 
 @Component({
   selector: 'app-timeline',
@@ -29,6 +30,7 @@ export class TimelineComponent implements OnInit {
   @Input() compact: boolean = false;
 
   private timelineConfig: TimelineConfig = TimelineModels.DEFAULT_CONFIG;
+  private gameIconService = inject(GameIconService);
 
   constructor(private timelineService: TimelineService) {}
 
@@ -77,5 +79,9 @@ export class TimelineComponent implements OnInit {
     
     // Return inline style if hex color, otherwise empty
     return color.startsWith('#') ? { color } : {};
+  }
+
+  getGameIconPath(iconName: string): string {
+    return this.gameIconService.getIconPath(iconName);
   }
 }
