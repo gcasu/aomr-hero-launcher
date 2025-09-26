@@ -27,198 +27,239 @@
       </div>
     </div>
 
-    <!-- Match History Table -->
-    <div id="match-history-section" class="match-history-section" *ngIf="selectedGodId">
-      <div class="section-header">
-        <h3 class="section-title">{{ getSelectedGodMatchTitle() }}</h3>
-        <div *ngIf="hasGodMatches()" class="match-count-text">
-          <small class="text-light">
-            {{ getMatchCountText() }}
-          </small>
-        </div>
+    <!-- Tab Buttons View Start -->
+    <div class="custom-tabs-section" *ngIf="selectedGodId">
+      <div class="tab-headers">
+        <button 
+          class="tab-button" 
+          [class.active]="activeTabId === 'top-rank-matches'"
+          (click)="activeTabId = 'top-rank-matches'">
+          {{ 'BUILD_ORDERS.TABS.TOP_RANK_MATCHES' | translate }}
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTabId === 'dod-clan-build-orders'"
+          (click)="activeTabId = 'dod-clan-build-orders'">
+          {{ 'BUILD_ORDERS.TABS.DOD_CLAN_BUILD_ORDERS' | translate }}
+        </button>
       </div>
-      
-      <!-- Search Bar (only visible if there are matches for the god) -->
-      <div *ngIf="hasGodMatches()">
-        <app-search-filter 
-          [placeholder]="'BUILD_ORDERS.SEARCH_PLACEHOLDER'"
-          [fullWidth]="false"
-          [(ngModel)]="searchTerm"
-          (filterChange)="onSearchChange()">
-        </app-search-filter>
-      </div>
-      
-      <div class="match-history-table-container">
-        <!-- Empty State for no matches for this god -->
-        <div *ngIf="!hasGodMatches()">
-          <app-empty-state 
-            [title]="'BUILD_ORDERS.NO_MATCHES_TITLE' | translate"
-            [description]="'BUILD_ORDERS.NO_MATCHES_DESCRIPTION' | translate"
-            icon="fas fa-history">
-          </app-empty-state>
-        </div>
+    </div>
+    <!-- Tab Buttons View End -->
 
-        <!-- Empty State for no search results -->
-        <div *ngIf="isSearchFiltered()">
-          <app-empty-state 
-            [title]="'BUILD_ORDERS.NO_RESULTS_TITLE' | translate"
-            [description]="'BUILD_ORDERS.NO_RESULTS_DESCRIPTION' | translate"
-            icon="fas fa-search">
-          </app-empty-state>
+    <!-- Match History Table Start -->
+    <div *ngIf="activeTabId === 'top-rank-matches' && selectedGodId" class="tab-panel">
+      <div id="match-history-section" class="match-history-section">
+        <div class="section-header">
+          <h3 class="section-title">{{ getSelectedGodMatchTitle() }}</h3>
+          <div *ngIf="hasGodMatches()" class="match-count-text">
+            <small class="text-light">
+              {{ getMatchCountText() }}
+            </small>
+          </div>
         </div>
+        
+        <!-- Search Bar (only visible if there are matches for the god) -->
+        <div *ngIf="hasGodMatches()">
+          <app-search-filter 
+            [placeholder]="'BUILD_ORDERS.SEARCH_PLACEHOLDER'"
+            [fullWidth]="false"
+            [(ngModel)]="searchTerm"
+            (filterChange)="onSearchChange()">
+          </app-search-filter>
+        </div>
+        
+        <div class="match-history-table-container">
+          <!-- Empty State for no matches for this god -->
+          <div *ngIf="!hasGodMatches()">
+            <app-empty-state 
+              [title]="'BUILD_ORDERS.NO_MATCHES_TITLE' | translate"
+              [description]="'BUILD_ORDERS.NO_MATCHES_DESCRIPTION' | translate"
+              icon="fas fa-history">
+            </app-empty-state>
+          </div>
 
-        <!-- Matches Table -->
-        <div *ngIf="filteredMatches.length > 0" class="table-responsive">
-          <table class="table table-dark table-striped table-hover">
-            <thead class="table-dark">
-              <tr>
-                <th scope="col" class="sortable-header" 
-                    (click)="onSort('winningPlayer')"
-                    [class.sorted]="isSortedBy('winningPlayer')">
-                  {{ 'BUILD_ORDERS.TABLE.PLAYER' | translate }}
-                  <i [class]="getSortIcon('winningPlayer')" class="ms-1"></i>
-                </th>
-                <th scope="col" class="text-center sortable-header" 
-                    (click)="onSort('matchDate')"
-                    [class.sorted]="isSortedBy('matchDate')">
-                  {{ 'BUILD_ORDERS.TABLE.MATCH_DATE' | translate }}
-                  <i [class]="getSortIcon('matchDate')" class="ms-1"></i>
-                </th>
-                <th scope="col" class="text-center sortable-header" 
-                    (click)="onSort('mapType')"
-                    [class.sorted]="isSortedBy('mapType')">
-                  {{ 'BUILD_ORDERS.TABLE.MAP' | translate }}
-                  <i [class]="getSortIcon('mapType')" class="ms-1"></i>
-                </th>
-                <th scope="col" class="text-center">{{ 'BUILD_ORDERS.TABLE.ACTIONS' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <ng-container *ngFor="let match of filteredMatches; trackBy: trackByMatch">
-                <!-- Main row -->
-                <tr class="match-row">
-                  <!-- Player (Avatar + Name) -->
-                  <td class="leader-cell">
-                    <div class="leader-info">
-                      <img 
-                        [src]="match.winningPlayerAvatar" 
-                        [alt]="match.winningPlayer"
-                        class="player-avatar"
-                        (error)="onImageError($event)"
-                        loading="lazy">
-                      <span class="player-name clickable" 
-                            (click)="onFilterByPlayer(match.winningPlayer)"
-                            [title]="'Click to filter by ' + match.winningPlayer">
-                        {{ match.winningPlayer }}
+          <!-- Empty State for no search results -->
+          <div *ngIf="isSearchFiltered()">
+            <app-empty-state 
+              [title]="'BUILD_ORDERS.NO_RESULTS_TITLE' | translate"
+              [description]="'BUILD_ORDERS.NO_RESULTS_DESCRIPTION' | translate"
+              icon="fas fa-search">
+            </app-empty-state>
+          </div>
+
+          <!-- Matches Table -->
+          <div *ngIf="filteredMatches.length > 0" class="table-responsive">
+            <table class="table table-dark table-striped table-hover">
+              <thead class="table-dark">
+                <tr>
+                  <th scope="col" class="sortable-header" 
+                      (click)="onSort('winningPlayer')"
+                      [class.sorted]="isSortedBy('winningPlayer')">
+                    {{ 'BUILD_ORDERS.TABLE.PLAYER' | translate }}
+                    <i [class]="getSortIcon('winningPlayer')" class="ms-1"></i>
+                  </th>
+                  <th scope="col" class="text-center sortable-header" 
+                      (click)="onSort('matchDate')"
+                      [class.sorted]="isSortedBy('matchDate')">
+                    {{ 'BUILD_ORDERS.TABLE.MATCH_DATE' | translate }}
+                    <i [class]="getSortIcon('matchDate')" class="ms-1"></i>
+                  </th>
+                  <th scope="col" class="text-center sortable-header" 
+                      (click)="onSort('mapType')"
+                      [class.sorted]="isSortedBy('mapType')">
+                    {{ 'BUILD_ORDERS.TABLE.MAP' | translate }}
+                    <i [class]="getSortIcon('mapType')" class="ms-1"></i>
+                  </th>
+                  <th scope="col" class="text-center">{{ 'BUILD_ORDERS.TABLE.ACTIONS' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let match of filteredMatches; trackBy: trackByMatch">
+                  <!-- Main row -->
+                  <tr class="match-row">
+                    <!-- Player (Avatar + Name) -->
+                    <td class="leader-cell">
+                      <div class="leader-info">
+                        <img 
+                          [src]="match.winningPlayerAvatar" 
+                          [alt]="match.winningPlayer"
+                          class="player-avatar"
+                          (error)="onImageError($event)"
+                          loading="lazy">
+                        <span class="player-name clickable" 
+                              (click)="onFilterByPlayer(match.winningPlayer)"
+                              [title]="'Click to filter by ' + match.winningPlayer">
+                          {{ match.winningPlayer }}
+                        </span>
+                      </div>
+                    </td>
+                    
+                    <!-- Match Date -->
+                    <td class="text-center match-date-cell">
+                      <span class="match-date">{{ formatDate(match.matchDate) | date:'dd MMMM yy, HH:mm' }}</span>
+                    </td>
+                    
+                    <!-- Map -->
+                    <td class="text-center map-cell">
+                      <span class="map-name clickable" 
+                            (click)="onFilterByMap(match.mapType)"
+                            [title]="'Click to filter by ' + formatMapName(match.mapType)">
+                        {{ formatMapName(match.mapType) }}
                       </span>
-                    </div>
-                  </td>
-                  
-                  <!-- Match Date -->
-                  <td class="text-center match-date-cell">
-                    <span class="match-date">{{ formatDate(match.matchDate) | date:'dd MMMM yy, HH:mm' }}</span>
-                  </td>
-                  
-                  <!-- Map -->
-                  <td class="text-center map-cell">
-                    <span class="map-name clickable" 
-                          (click)="onFilterByMap(match.mapType)"
-                          [title]="'Click to filter by ' + formatMapName(match.mapType)">
-                      {{ formatMapName(match.mapType) }}
-                    </span>
-                  </td>
-                  
-                  <!-- Actions -->
-                  <td class="text-center actions-cell">
-                    <div class="action-buttons">
-                      <!-- If not cached, show analyze button -->
-                      <ng-container *ngIf="!isReplayCached(match)">
-                        <button 
-                          type="button" 
-                          class="btn btn-outline-primary btn-sm"
-                          [disabled]="isAnalyzingReplay"
-                          (click)="analyzeReplay(match)"
-                          [title]="'BUILD_ORDERS.REPLAY.ANALYZE_TOOLTIP' | translate">
-                          <span *ngIf="isMatchBeingAnalyzed(match.matchId)" class="spinner-border spinner-border-sm" role="status"></span>
-                          <i *ngIf="!isMatchBeingAnalyzed(match.matchId)" class="fas fa-chart-line"></i>
-                        </button>
-                      </ng-container>
+                    </td>
+                    
+                    <!-- Actions -->
+                    <td class="text-center actions-cell">
+                      <div class="action-buttons">
+                        <!-- If not cached, show analyze button -->
+                        <ng-container *ngIf="!isReplayCached(match)">
+                          <button 
+                            type="button" 
+                            class="btn btn-outline-primary btn-sm"
+                            [disabled]="isAnalyzingReplay"
+                            (click)="analyzeReplay(match)"
+                            [title]="'BUILD_ORDERS.REPLAY.ANALYZE_TOOLTIP' | translate">
+                            <span *ngIf="isMatchBeingAnalyzed(match.matchId)" class="spinner-border spinner-border-sm" role="status"></span>
+                            <i *ngIf="!isMatchBeingAnalyzed(match.matchId)" class="fas fa-chart-line"></i>
+                          </button>
+                        </ng-container>
 
-                      <!-- If cached, show action buttons based on success/error state -->
-                      <ng-container *ngIf="isReplayCached(match)">
-                        <!-- Download Replay File (always available) -->
-                        <button 
-                          type="button" 
-                          class="btn btn-outline-success btn-sm me-1"
-                          (click)="downloadReplayFile(match)"
-                          [title]="'BUILD_ORDERS.REPLAY.DOWNLOAD_REPLAY_TOOLTIP' | translate">
-                          <i class="fas fa-download"></i>
-                        </button>
+                        <!-- If cached, show action buttons based on success/error state -->
+                        <ng-container *ngIf="isReplayCached(match)">
+                          <!-- Download Replay File (always available) -->
+                          <button 
+                            type="button" 
+                            class="btn btn-outline-success btn-sm me-1"
+                            (click)="downloadReplayFile(match)"
+                            [title]="'BUILD_ORDERS.REPLAY.DOWNLOAD_REPLAY_TOOLTIP' | translate">
+                            <i class="fas fa-download"></i>
+                          </button>
 
-                        <!-- Download JSON (only if analysis was successful) -->
-                        <button 
-                          *ngIf="isReplayCacheSuccessful(match)"
-                          type="button" 
-                          class="btn btn-outline-info btn-sm me-1"
-                          (click)="downloadReplayJson(match)"
-                          [title]="'BUILD_ORDERS.REPLAY.DOWNLOAD_JSON_TOOLTIP' | translate">
-                          <i class="fas fa-file-code"></i>
-                        </button>
+                          <!-- Download JSON (only if analysis was successful) -->
+                          <button 
+                            *ngIf="isReplayCacheSuccessful(match)"
+                            type="button" 
+                            class="btn btn-outline-info btn-sm me-1"
+                            (click)="downloadReplayJson(match)"
+                            [title]="'BUILD_ORDERS.REPLAY.DOWNLOAD_JSON_TOOLTIP' | translate">
+                            <i class="fas fa-file-code"></i>
+                          </button>
 
-                        <!-- Show/Hide Timeline (only if analysis was successful) -->
-                        <button 
-                          *ngIf="isReplayCacheSuccessful(match)"
-                          type="button" 
-                          class="btn btn-sm me-1"
-                          [class.btn-primary]="isRowExpanded(match)"
-                          [class.btn-outline-primary]="!isRowExpanded(match)"
-                          (click)="showCachedTimeline(match)"
-                          [title]="(isRowExpanded(match) ? 'BUILD_ORDERS.REPLAY.HIDE_TIMELINE_TOOLTIP' : 'BUILD_ORDERS.REPLAY.SHOW_TIMELINE_TOOLTIP') | translate">
-                          <i class="fas" [class.fa-chart-line]="!isRowExpanded(match)" [class.fa-eye-slash]="isRowExpanded(match)"></i>
-                        </button>
+                          <!-- Show/Hide Timeline (only if analysis was successful) -->
+                          <button 
+                            *ngIf="isReplayCacheSuccessful(match)"
+                            type="button" 
+                            class="btn btn-sm me-1"
+                            [class.btn-primary]="isRowExpanded(match)"
+                            [class.btn-outline-primary]="!isRowExpanded(match)"
+                            (click)="showCachedTimeline(match)"
+                            [title]="(isRowExpanded(match) ? 'BUILD_ORDERS.REPLAY.HIDE_TIMELINE_TOOLTIP' : 'BUILD_ORDERS.REPLAY.SHOW_TIMELINE_TOOLTIP') | translate">
+                            <i class="fas" [class.fa-chart-line]="!isRowExpanded(match)" [class.fa-eye-slash]="isRowExpanded(match)"></i>
+                          </button>
 
-                        <!-- Error indicator (only if analysis failed) -->
-                        <button 
-                          *ngIf="hasReplayCacheError(match)"
-                          type="button" 
-                          class="btn btn-outline-danger btn-sm"
-                          disabled
-                          [title]="'BUILD_ORDERS.REPLAY.ANALYSIS_FAILED' | translate">
-                          <i class="fas fa-exclamation-triangle"></i>
-                        </button>
-                      </ng-container>
-                    </div>
-                  </td>
-                </tr>
-                
-                <!-- Timeline expansion row -->
-                <tr *ngIf="isRowExpanded(match)" class="timeline-row">
-                  <td colspan="4" class="timeline-cell">
-                    <div class="timeline-container">
-                      <div class="timeline-header">
-                        <h5 class="mb-2">
-                          <i class="fas fa-chart-line me-2"></i>
-                          {{ 'BUILD_ORDERS.REPLAY.WINNER_TIMELINE' | translate }}
-                        </h5>
+                          <!-- Error indicator (only if analysis failed) -->
+                          <button 
+                            *ngIf="hasReplayCacheError(match)"
+                            type="button" 
+                            class="btn btn-outline-danger btn-sm"
+                            disabled
+                            [title]="'BUILD_ORDERS.REPLAY.ANALYSIS_FAILED' | translate">
+                            <i class="fas fa-exclamation-triangle"></i>
+                          </button>
+                        </ng-container>
                       </div>
-                      <div class="timeline-content">
-                        <app-timeline 
-                          [segments]="getRowTimelineData(match)"
-                          [playerName]="getRowWinnerName(match)"
-                          [playerColor]="getPlayerColorFromParsedData(match)"
-                          [compact]="true">
-                        </app-timeline>
+                    </td>
+                  </tr>
+                  
+                  <!-- Timeline expansion row -->
+                  <tr *ngIf="isRowExpanded(match)" class="timeline-row">
+                    <td colspan="4" class="timeline-cell">
+                      <div class="timeline-container">
+                        <div class="timeline-header">
+                          <h5 class="mb-2">
+                            <i class="fas fa-chart-line me-2"></i>
+                            {{ 'BUILD_ORDERS.REPLAY.WINNER_TIMELINE' | translate }}
+                          </h5>
+                        </div>
+                        <div class="timeline-content">
+                          <app-timeline 
+                            [segments]="getRowTimelineData(match)"
+                            [playerName]="getRowWinnerName(match)"
+                            [playerColor]="getPlayerColorFromParsedData(match)"
+                            [compact]="true">
+                          </app-timeline>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-              </ng-container>
-            </tbody>
-          </table>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
+    <!-- Match History Table End -->
 
+    <!-- DoD Clan Build Orders Start -->
+    <div *ngIf="activeTabId === 'dod-clan-build-orders' && selectedGodId" class="tab-panel">
+
+      <div class="match-history-section">
+        <div class="section-header">
+          <h3 class="section-title">{{ 'BUILD_ORDERS.DOD_CLAN.TITLE' | translate }}</h3>
+        </div>
+        
+        <div class="dod-clan-content">
+          <!-- Placeholder content for DoD Clan Build Orders -->
+          <app-empty-state 
+            [title]="'BUILD_ORDERS.DOD_CLAN.COMING_SOON_TITLE' | translate"
+            [description]="'BUILD_ORDERS.DOD_CLAN.COMING_SOON_DESCRIPTION' | translate"
+            icon="fas fa-tools">
+          </app-empty-state>
+        </div>
+      </div>
+    </div>
+    <!-- DoD Clan Build Orders End -->
 
   </div>
 </app-page-container>

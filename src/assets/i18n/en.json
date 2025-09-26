@@ -387,6 +387,15 @@
       "TIMELINE_ERROR": "Failed to show timeline",
       "CACHED_ERROR": "Analysis failed for cached replay",
       "ANALYSIS_FAILED": "Replay analysis failed - only download available"
+    },
+    "TABS": {
+      "TOP_RANK_MATCHES": "Top Rank Matches Build Orders",
+      "DOD_CLAN_BUILD_ORDERS": "DoD Clan Build Orders"
+    },
+    "DOD_CLAN": {
+      "TITLE": "DoD Clan Build Orders",
+      "COMING_SOON_TITLE": "Coming Soon",
+      "COMING_SOON_DESCRIPTION": "DoD Clan build orders will be available in a future update. Stay tuned for curated professional build orders from top players!"
     }
   },
   "TIERS": {

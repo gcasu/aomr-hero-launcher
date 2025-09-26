@@ -24,7 +24,8 @@ import { EmptyStateComponent } from '../../shared/empty-state/empty-state.compon
 import { LoadingStateComponent } from '../../shared/loading-state/loading-state.component';
 import { SearchFilterComponent } from '../../shared/search-filter/search-filter.component';
 import { TimelineComponent } from '../../shared/timeline/timeline.component';
-import { GlassCardComponent } from '../../shared/glass-card/glass-card.component';
+
+
 
 @Component({
   selector: 'app-build-orders',
@@ -41,8 +42,7 @@ import { GlassCardComponent } from '../../shared/glass-card/glass-card.component
     EmptyStateComponent,
     LoadingStateComponent,
     SearchFilterComponent,
-    TimelineComponent,
-    GlassCardComponent
+    TimelineComponent
   ]
 })
 export class BuildOrdersComponent implements OnInit {
@@ -53,6 +53,9 @@ export class BuildOrdersComponent implements OnInit {
   filteredMatches: ProcessedMatch[] = [];
   godMatches: ProcessedMatch[] = []; // Matches for the selected god (before search filter)
   searchTerm = '';
+
+  // Tab state
+  activeTabId = 'top-rank-matches';
 
   // Sorting state
   sortColumn = 'matchDate';
@@ -117,6 +120,22 @@ export class BuildOrdersComponent implements OnInit {
     
     // Smooth scroll to match history section
     this.scrollToMatchHistory();
+  }
+
+  onTabChange(tabId: string): void {
+    this.activeTabId = tabId;
+    // Reset search when tab changes
+    this.searchTerm = '';
+    
+    // You can add different logic based on the active tab
+    if (tabId === 'top-rank-matches') {
+      // Logic for top rank matches tab
+      this.filterMatchesByGod();
+    } else if (tabId === 'dod-clan-build-orders') {
+      // Logic for DoD clan build orders tab (to be implemented)
+      // For now, just clear the filtered matches
+      this.filteredMatches = [];
+    }
   }
 
   private scrollToMatchHistory(): void {

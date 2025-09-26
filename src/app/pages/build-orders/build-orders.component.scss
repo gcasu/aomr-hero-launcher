@@ -443,3 +443,53 @@
     }
   }
 }
+
+// Custom Tab Styles
+.custom-tabs-section {
+  margin-top: 2rem;
+
+  .tab-headers {
+    display: flex;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1.5rem;
+
+    .tab-button {
+      flex-grow: 1;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      padding: 12px 24px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      &.active {
+        color: #ffffff;
+        border-bottom-color: #0d6efd;
+        background: rgba(13, 110, 253, 0.1);
+      }
+
+      &:first-child {
+        border-top-left-radius: 6px;
+      }
+
+      &:last-child {
+        border-top-right-radius: 6px;
+      }
+    }
+  }
+
+  .tab-content-container {
+    .tab-panel {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+  }
+}
