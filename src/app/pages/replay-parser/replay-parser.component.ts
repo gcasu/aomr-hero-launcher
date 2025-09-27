@@ -223,8 +223,6 @@ export class ReplayParserComponent implements OnInit {
     return player.MinorGods.filter((g: string) => g && g.trim() !== '');
   }
 
-
-
   getMinorGodIcon(godName: string): string | null {
     return this.godIconService.getMinorGodIcon(godName);
   }

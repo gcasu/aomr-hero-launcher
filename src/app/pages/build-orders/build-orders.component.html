@@ -33,13 +33,13 @@
         <button 
           class="tab-button" 
           [class.active]="activeTabId === 'top-rank-matches'"
-          (click)="activeTabId = 'top-rank-matches'">
+          (click)="onTabChange('top-rank-matches')">
           {{ 'BUILD_ORDERS.TABS.TOP_RANK_MATCHES' | translate }}
         </button>
         <button 
           class="tab-button" 
           [class.active]="activeTabId === 'dod-clan-build-orders'"
-          (click)="activeTabId = 'dod-clan-build-orders'">
+          (click)="onTabChange('dod-clan-build-orders')">
           {{ 'BUILD_ORDERS.TABS.DOD_CLAN_BUILD_ORDERS' | translate }}
         </button>
       </div>
@@ -247,15 +247,146 @@
       <div class="match-history-section">
         <div class="section-header">
           <h3 class="section-title">{{ 'BUILD_ORDERS.DOD_CLAN.TITLE' | translate }}</h3>
+          <p class="section-description">{{ 'BUILD_ORDERS.DOD_CLAN.DESCRIPTION' | translate }}</p>
         </div>
         
         <div class="dod-clan-content">
-          <!-- Placeholder content for DoD Clan Build Orders -->
+          <!-- Loading State -->
+          <app-loading-state 
+            *ngIf="isDodLoading"
+            [message]="'BUILD_ORDERS.DOD_CLAN.LOADING' | translate">
+          </app-loading-state>
+
+          <!-- Error State -->
           <app-empty-state 
-            [title]="'BUILD_ORDERS.DOD_CLAN.COMING_SOON_TITLE' | translate"
-            [description]="'BUILD_ORDERS.DOD_CLAN.COMING_SOON_DESCRIPTION' | translate"
-            icon="fas fa-tools">
+            *ngIf="!isDodLoading && dodError"
+            [title]="'BUILD_ORDERS.DOD_CLAN.ERROR_TITLE' | translate"
+            [description]="dodError"
+            icon="fas fa-exclamation-triangle">
+            <div class="empty-state-actions">
+              <button 
+                class="btn btn-primary"
+                (click)="loadDodBuildOrders()"
+                [disabled]="isDodLoading">
+                <i class="fas fa-refresh me-2"></i>
+                {{ 'BUILD_ORDERS.DOD_CLAN.RETRY' | translate }}
+              </button>
+            </div>
           </app-empty-state>
+
+          <!-- Not Available State -->
+          <app-empty-state 
+            *ngIf="!isDodLoading && !dodError && !isDodGodAvailable()"
+            [title]="'BUILD_ORDERS.DOD_CLAN.NOT_AVAILABLE_TITLE' | translate"
+            [description]="'BUILD_ORDERS.DOD_CLAN.NOT_AVAILABLE_DESCRIPTION' | translate"
+            icon="fas fa-info-circle">
+            <div class="empty-state-actions">
+              <p class="text-muted mb-3">{{ 'BUILD_ORDERS.DOD_CLAN.AVAILABLE_GODS' | translate }}</p>
+              <div class="available-gods">
+                <span 
+                  *ngFor="let god of getAvailableDodGods(); let last = last"
+                  class="badge badge-secondary me-1 mb-1">
+                  {{ god }}{{ !last ? ',' : '' }}
+                </span>
+              </div>
+            </div>
+          </app-empty-state>
+
+          <!-- Build Orders Content -->
+          <div 
+            *ngIf="!isDodLoading && !dodError && isDodGodAvailable() && dodBuildOrders.length > 0"
+            class="dod-build-orders">
+            
+            <div class="build-orders-list">
+              <div *ngFor="let buildOrder of dodBuildOrders" class="build-order-card">
+                <div class="card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                      <i class="fas fa-file-excel me-2 text-success"></i>
+                      {{ buildOrder.godName }} {{ 'BUILD_ORDERS.DOD_CLAN.BUILD_ORDER' | translate }}
+                    </h5>
+                    <span class="badge badge-info">
+                      {{ formatFileSize(buildOrder.size || 0) }}
+                    </span>
+                  </div>
+                  
+                  <div class="card-body">
+                    <div class="build-order-info">
+                      <div class="info-row">
+                        <span class="info-label">{{ 'BUILD_ORDERS.DOD_CLAN.FILE_NAME' | translate }}:</span>
+                        <span class="info-value">{{ buildOrder.fileName }}</span>
+                      </div>
+                      
+                      <div class="info-row" *ngIf="buildOrder.lastFetched">
+                        <span class="info-label">{{ 'BUILD_ORDERS.DOD_CLAN.LAST_UPDATED' | translate }}:</span>
+                        <span class="info-value">{{ buildOrder.lastFetched | date:'medium' }}</span>
+                      </div>
+                      
+                      <div class="info-row" *ngIf="buildOrder.cached">
+                        <span class="info-label">{{ 'BUILD_ORDERS.DOD_CLAN.STATUS' | translate }}:</span>
+                        <span class="badge badge-success">
+                          <i class="fas fa-check me-1"></i>
+                          {{ 'BUILD_ORDERS.DOD_CLAN.CACHED' | translate }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="build-order-actions mt-3">
+                      <button 
+                        class="btn btn-primary me-2"
+                        (click)="downloadDodBuildOrder(buildOrder)"
+                        [disabled]="!buildOrder.data">
+                        <i class="fas fa-download me-2"></i>
+                        {{ 'BUILD_ORDERS.DOD_CLAN.DOWNLOAD' | translate }}
+                      </button>
+                      
+                      <button 
+                        class="btn btn-outline-secondary"
+                        (click)="loadDodBuildOrders()"
+                        [disabled]="isDodLoading">
+                        <i class="fas fa-refresh me-2"></i>
+                        {{ 'BUILD_ORDERS.DOD_CLAN.REFRESH' | translate }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cache Management -->
+            <div class="cache-management mt-4">
+              <div class="card">
+                <div class="card-header">
+                  <h6 class="card-title mb-0">
+                    <i class="fas fa-database me-2"></i>
+                    {{ 'BUILD_ORDERS.DOD_CLAN.CACHE_MANAGEMENT' | translate }}
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <p class="text-muted mb-3">{{ 'BUILD_ORDERS.DOD_CLAN.CACHE_INFO' | translate }}</p>
+                  <button 
+                    class="btn btn-outline-warning"
+                    (click)="clearDodCache()">
+                    <i class="fas fa-trash me-2"></i>
+                    {{ 'BUILD_ORDERS.DOD_CLAN.CLEAR_CACHE' | translate }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State for Available God -->
+          <div 
+            *ngIf="!isDodLoading && !dodError && isDodGodAvailable() && dodBuildOrders.length === 0"
+            class="empty-content">
+            <button 
+              class="btn btn-primary"
+              (click)="loadDodBuildOrders()"
+              [disabled]="isDodLoading">
+              <i class="fas fa-download me-2"></i>
+              {{ 'BUILD_ORDERS.DOD_CLAN.LOAD_BUILD_ORDERS' | translate }}
+            </button>
+          </div>
         </div>
       </div>
     </div>

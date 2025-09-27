@@ -34,12 +34,19 @@ export class CacheDescriptionService {
       const tierListName = key.replace('tierlist_', '');
       return `Tier list configuration for ${tierListName}`;
     }
+    // Handle DoD build orders cache keys
+    if (key.startsWith('dodBuildOrders_')) {
+      const godName = key.replace('dodBuildOrders_', '');
+      return `DoD Clan build orders for ${godName}`;
+    }
     return this.descriptions[key] || 'Application data';
   }
 
   getCacheItemType(key: string): 'config' | 'data' | 'other' {
     // Handle dynamic tier list keys
     if (key.startsWith('tierlist_')) return 'data';
+    // Handle DoD build orders cache keys
+    if (key.startsWith('dodBuildOrders_')) return 'data';
     
     if (this.configKeys.includes(key)) return 'config';
     if (this.dataKeys.includes(key)) return 'data';

@@ -11,6 +11,7 @@ import { ReplayFileService } from '../../services/replays/replay-file.service';
 import { ReplayParserService, ParseOptions, ParseResult } from '../../services/replays/replay-parser.service';
 import { TimelineService } from '../../shared/timeline/timeline.service';
 import { PlayerColorService } from '../../services/player-color.service';
+import { DodBuildOrdersService, DodBuildOrder } from '../../services/dod-build-orders.service';
 import { MajorGod } from '../../interfaces/major-god.interface';
 import { ProcessedMatch } from '../../interfaces/leaderboard.interface';
 import { CachedReplay } from '../../interfaces/replay-cache.interface';
@@ -75,6 +76,11 @@ export class BuildOrdersComponent implements OnInit {
   rowWinnerNames: Map<string, string> = new Map(); // Store winner names per row
   rowParsedData: Map<string, any> = new Map(); // Store parsed data per row for color extraction
 
+  // DoD Clan Build Orders state
+  dodBuildOrders: DodBuildOrder[] = [];
+  isDodLoading = false;
+  dodError: string | null = null;
+
   private toastService = inject(ToastService);
   private matchDataFetcher = inject(MatchDataFetcherService);
   private translateService = inject(TranslateService);
@@ -84,6 +90,7 @@ export class BuildOrdersComponent implements OnInit {
   private replayParserService = inject(ReplayParserService);
   private timelineService = inject(TimelineService);
   private playerColorService = inject(PlayerColorService);
+  private dodBuildOrdersService = inject(DodBuildOrdersService);
 
   ngOnInit(): void {
     this.loadMajorGods();
@@ -118,6 +125,18 @@ export class BuildOrdersComponent implements OnInit {
     this.saveSelectedGod(god.id);
     this.filterMatchesByGod();
     
+    // If DoD build orders tab is active, trigger file fetch for the new god
+    if (this.activeTabId === 'dod-clan-build-orders') {
+      // Clear previous DoD data
+      this.dodBuildOrders = [];
+      this.dodError = null;
+      
+      // Load build orders for the newly selected god
+      if (this.isDodGodAvailable()) {
+        this.loadDodBuildOrders();
+      }
+    }
+    
     // Smooth scroll to match history section
     this.scrollToMatchHistory();
   }
@@ -132,9 +151,11 @@ export class BuildOrdersComponent implements OnInit {
       // Logic for top rank matches tab
       this.filterMatchesByGod();
     } else if (tabId === 'dod-clan-build-orders') {
-      // Logic for DoD clan build orders tab (to be implemented)
-      // For now, just clear the filtered matches
+      // Logic for DoD clan build orders tab
       this.filteredMatches = [];
+      if (this.isDodGodAvailable()) {
+        this.loadDodBuildOrders();
+      }
     }
   }
 
@@ -687,5 +708,117 @@ export class BuildOrdersComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
+  // DoD Clan Build Orders Methods
+
+  /**
+   * Load DoD build orders for the currently selected god
+   */
+  loadDodBuildOrders(): void {
+    if (!this.selectedGodId) return;
+
+    const selectedGod = this.majorGods.find(god => god.id === this.selectedGodId);
+    if (!selectedGod) return;
+
+    // Check if god is available on DoD clan website
+    if (!this.dodBuildOrdersService.isGodAvailable(selectedGod.name)) {
+      this.dodError = this.translateService.instant('BUILD_ORDERS.DOD_CLAN.NOT_AVAILABLE', { godName: selectedGod.name });
+      return;
+    }
+
+    this.isDodLoading = true;
+    this.dodError = null;
+
+    this.dodBuildOrdersService.getBuildOrder(selectedGod.name).subscribe({
+      next: (buildOrder: DodBuildOrder) => {
+        this.dodBuildOrders = [buildOrder];
+        this.isDodLoading = false;
+        this.showSuccessMessage(
+          this.translateService.instant('BUILD_ORDERS.DOD_CLAN.LOADED_SUCCESS', { godName: selectedGod.name })
+        );
+      },
+      error: (error) => {
+        console.error('Error loading DoD build orders:', error);
+        this.dodError = this.translateService.instant('BUILD_ORDERS.DOD_CLAN.LOAD_ERROR', { 
+          godName: selectedGod.name, 
+          error: error.message || 'Unknown error' 
+        });
+        this.isDodLoading = false;
+        this.showErrorMessage(this.dodError || 'Unknown error');
+      }
+    });
+  }
+
+  /**
+   * Download DoD build order Excel file
+   */
+  downloadDodBuildOrder(buildOrder: DodBuildOrder): void {
+    if (!buildOrder.data) {
+      this.showErrorMessage(this.translateService.instant('BUILD_ORDERS.DOD_CLAN.NO_DATA'));
+      return;
+    }
+
+    try {
+      const blob = new Blob([buildOrder.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      this.downloadBlob(blob, buildOrder.fileName);
+      this.showSuccessMessage(
+        this.translateService.instant('BUILD_ORDERS.DOD_CLAN.DOWNLOAD_SUCCESS', { fileName: buildOrder.fileName })
+      );
+    } catch (error) {
+      console.error('Error downloading build order:', error);
+      this.showErrorMessage(this.translateService.instant('BUILD_ORDERS.DOD_CLAN.DOWNLOAD_ERROR'));
+    }
+  }
+
+  /**
+   * Get all cached god names for DoD build orders
+   */
+  getAvailableDodGods(): string[] {
+    return this.dodBuildOrdersService.getCachedGodNames();
+  }
+
+  /**
+   * Check if current god has DoD build orders available
+   */
+  isDodGodAvailable(): boolean {
+    if (!this.selectedGodId) return false;
+    const selectedGod = this.majorGods.find(god => god.id === this.selectedGodId);
+    return selectedGod ? this.dodBuildOrdersService.isGodAvailable(selectedGod.name) : false;
+  }
+
+  /**
+   * Format file size for display
+   */
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  /**
+   * Clear DoD build orders cache
+   */
+  clearDodCache(): void {
+    this.dodBuildOrdersService.clearAllCache();
+    this.dodBuildOrders = [];
+    this.showSuccessMessage(this.translateService.instant('BUILD_ORDERS.DOD_CLAN.CACHE_CLEARED'));
+  }
+
+  /**
+   * Show success message via toast
+   */
+  private showSuccessMessage(message: string): void {
+    this.toastService.showSuccess(message);
+  }
+
+  /**
+   * Show error message via toast
+   */
+  private showErrorMessage(message: string): void {
+    this.toastService.showError(message);
+  }
 
 }

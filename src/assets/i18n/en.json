@@ -394,8 +394,31 @@
     },
     "DOD_CLAN": {
       "TITLE": "DoD Clan Build Orders",
-      "COMING_SOON_TITLE": "Coming Soon",
-      "COMING_SOON_DESCRIPTION": "DoD Clan build orders will be available in a future update. Stay tuned for curated professional build orders from top players!"
+      "DESCRIPTION": "Access professional build orders from The DoD Clan website for strategic gameplay improvement",
+      "LOADING": "Loading build orders...",
+      "ERROR_TITLE": "Failed to Load Build Orders",
+      "RETRY": "Retry",
+      "NOT_AVAILABLE_TITLE": "Build Orders Not Available",
+      "NOT_AVAILABLE_DESCRIPTION": "Build orders are not available for this god on the DoD Clan website.",
+      "AVAILABLE_GODS": "Available Gods:",
+      "BUILD_ORDER": "Build Orders",
+      "FILE_NAME": "File Name",
+      "LAST_UPDATED": "Last Updated",
+      "STATUS": "Status",
+      "CACHED": "Cached",
+      "DOWNLOAD": "Download",
+      "REFRESH": "Refresh",
+      "LOAD_BUILD_ORDERS": "Load Build Orders",
+      "CACHE_MANAGEMENT": "Cache Management",
+      "CACHE_INFO": "Manage cached build order files to free up storage space.",
+      "CLEAR_CACHE": "Clear Cache",
+      "NOT_AVAILABLE": "Build orders not available for {godName}",
+      "LOADED_SUCCESS": "Build orders for {godName} loaded successfully",
+      "LOAD_ERROR": "Failed to load build orders for {godName}: {error}",
+      "NO_DATA": "No build order data available",
+      "DOWNLOAD_SUCCESS": "Downloaded {fileName} successfully",
+      "DOWNLOAD_ERROR": "Failed to download build order file",
+      "CACHE_CLEARED": "Build orders cache cleared successfully"
     }
   },
   "TIERS": {
