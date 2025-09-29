@@ -1,10 +1,6 @@
 {
   "channels": [
     {
-      "channelId": "UCHVucqEgCO2EW8qO4wQpDzA",
-      "channelTitle": "Deities of Death"
-    },
-    {
       "channelId": "UCDkpiNXiZdzGgvZcGHtGV2A",
       "channelTitle": "Boit T.V"
     },    
@@ -19,6 +15,10 @@
     {
       "channelId": "UChF-l47k0ri60LCsuUW8cOg",
       "channelTitle": "TheRapl"
+    },
+    {
+      "channelId": "UCHVucqEgCO2EW8qO4wQpDzA",
+      "channelTitle": "Deities of Death"
     },
     {
       "channelId": "UC8MBMFTMniVHVO5n42OHPXQ",

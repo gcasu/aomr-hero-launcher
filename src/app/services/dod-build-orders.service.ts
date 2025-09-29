@@ -1,303 +1,244 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
-export interface DodBuildOrder {
-  godName: string;
-  fileName: string;
-  fileUrl: string;
-  cached: boolean;
-  cacheKey: string;
-  size?: number;
-  lastFetched?: Date;
-  data?: ArrayBuffer;
-  error?: string;
+export interface WorkerAllocation {
+  total: number;
+  food: number;
+  wood: number;
+  gold: number;
+  favor: number;
 }
 
-export interface DodBuildOrdersCache {
-  [godName: string]: {
-    data: ArrayBuffer;
-    lastFetched: Date;
-    size: number;
-    fileName: string;
-    fileUrl: string;
-  };
+export interface ResourceDelta {
+  food: number;
+  wood: number;
+  gold: number;
+  favor: number;
+}
+
+export interface BuildOrderAction {
+  description: string;
+  timing?: string | null;
+  workers: WorkerAllocation;
+  delta?: ResourceDelta;
+}
+
+export interface BuildOrderStep {
+  name: string; // "Archaic", "Classical", "Advance to Heroic", etc.
+  timing?: string | null;
+  actions: BuildOrderAction[];
+}
+
+export interface OpponentInfo {
+  civ: 'Greek' | 'Norse' | 'Egyptian' | 'Atlantean' | 'Chinese' | 'Japanese' | null;
+  majorGod: 'Zeus' | 'Poseidon' | 'Hades' | 'Ra' | 'Isis' | 'Set' | 'Odin' | 'Thor' | 'Loki' | 'Freyr' | 'Kronos' | 'Oranos' | 'Gaia' | 'Fu Xi' | 'Nu Wa' | 'Shennong' | null;
+  confidence: number;
+  evidence: string[];
+}
+
+export interface MapInfo {
+  name: 'Anatolia' | 'Mediterranean' | 'Islands' | 'Oasis' | 'Savanna' | 'Alfheim' | 'Marsh' | 'Watering Hole' | 'Black Sea' | null;
+  type: 'Water' | 'Land' | 'Hybrid' | null;
+  confidence: number;
+  evidence: string[];
+}
+
+export interface BuildOrder {
+  godName: string;
+  buildOrder: string;
+  author?: string | null;
+  notes: string[];
+  source?: string | null;
+  opponent: OpponentInfo;
+  map: MapInfo;
+  tags: string[];
+  steps: BuildOrderStep[];
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class DodBuildOrdersService {
-  private readonly DOD_BASE_URL = 'https://thedodclan.com/assets/BOs';
-  private readonly CACHE_KEY_PREFIX = 'dodBuildOrders';
-  private readonly CACHE_TIMEOUT = 120 * 60 * 60 * 1000; // 120 hours cache timeout
+  private readonly BUILD_ORDERS_URL = 'assets/data/build-orders.json';
+  private buildOrdersData: BuildOrder[] | null = null;
 
   constructor(private http: HttpClient) {}
 
   /**
-   * Get all cached build order god names
-   * Returns gods that currently have cached build orders
+   * Load build orders data from JSON file
    */
-  getCachedGodNames(): string[] {
-    const cachedGods: string[] = [];
-    
-    // Scan localStorage for DoD build order cache keys
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(this.CACHE_KEY_PREFIX + '_')) {
-        const godName = key.replace(this.CACHE_KEY_PREFIX + '_', '');
-        cachedGods.push(godName);
-      }
-    }
-    
-    return cachedGods;
-  }
-
-  /**
-   * Get build order for a specific god
-   */
-  getBuildOrder(godName: string): Observable<DodBuildOrder> {
-    const normalizedGodName = this.normalizeGodName(godName);
-    
-    if (!this.isGodAvailable(normalizedGodName)) {
-      return throwError(() => new Error(`Build orders not available for god: ${godName}`));
-    }
-
-    const cacheKey = this.getCacheKey(normalizedGodName);
-    const cached = this.getCachedBuildOrder(cacheKey);
-    
-    if (cached && this.isCacheValid(cached.lastFetched)) {
-      return of({
-        godName: normalizedGodName,
-        fileName: cached.fileName,
-        fileUrl: cached.fileUrl,
-        cached: true,
-        cacheKey,
-        size: cached.size,
-        lastFetched: cached.lastFetched,
-        data: cached.data
+  private loadBuildOrders(): Observable<BuildOrder[]> {
+    if (this.buildOrdersData) {
+      return new Observable(observer => {
+        observer.next(this.buildOrdersData!);
+        observer.complete();
       });
     }
 
-    // Fetch from DoD clan website
-    return this.fetchBuildOrderFromWeb(normalizedGodName);
-  }
-
-  /**
-   * Get all cached build orders
-   */
-  getAllCachedBuildOrders(): DodBuildOrder[] {
-    const cached: DodBuildOrder[] = [];
-    const cachedGodNames = this.getCachedGodNames();
-    
-    cachedGodNames.forEach(godName => {
-      const cacheKey = this.getCacheKey(godName);
-      const cachedData = this.getCachedBuildOrder(cacheKey);
-      
-      if (cachedData) {
-        cached.push({
-          godName,
-          fileName: cachedData.fileName,
-          fileUrl: cachedData.fileUrl,
-          cached: true,
-          cacheKey,
-          size: cachedData.size,
-          lastFetched: cachedData.lastFetched,
-          data: cachedData.data
-        });
-      }
-    });
-    
-    return cached;
-  }
-
-  /**
-   * Clear all cached build orders
-   */
-  clearAllCache(): void {
-    const cachedGodNames = this.getCachedGodNames();
-    cachedGodNames.forEach(godName => {
-      const cacheKey = this.getCacheKey(godName);
-      localStorage.removeItem(cacheKey);
-    });
-  }
-
-  /**
-   * Clear cache for specific god
-   */
-  clearGodCache(godName: string): void {
-    const normalizedGodName = this.normalizeGodName(godName);
-    const cacheKey = this.getCacheKey(normalizedGodName);
-    localStorage.removeItem(cacheKey);
-  }
-
-  /**
-   * Get cache size in bytes for all build orders
-   */
-  getCacheSize(): number {
-    let totalSize = 0;
-    const cachedGodNames = this.getCachedGodNames();
-    
-    cachedGodNames.forEach(godName => {
-      const cacheKey = this.getCacheKey(godName);
-      const cached = this.getCachedBuildOrder(cacheKey);
-      if (cached) {
-        totalSize += cached.size;
-      }
-    });
-    
-    return totalSize;
-  }
-
-  /**
-   * Get cache info for settings display
-   */
-  getCacheInfo(): { count: number; size: number; lastUpdated?: Date } {
-    const cached = this.getAllCachedBuildOrders();
-    let totalSize = 0;
-    let lastUpdated: Date | undefined;
-    
-    cached.forEach(item => {
-      totalSize += item.size || 0;
-      if (item.lastFetched && (!lastUpdated || item.lastFetched > lastUpdated)) {
-        lastUpdated = item.lastFetched;
-      }
-    });
-    
-    return {
-      count: cached.length,
-      size: totalSize,
-      lastUpdated
-    };
-  }
-
-  /**
-   * Check if build orders are available for a god
-   * This now simply allows any god name - availability will be determined by the actual HTTP request
-   */
-  isGodAvailable(godName: string): boolean {
-    return Boolean(godName && godName.trim().length > 0);
-  }
-
-  /**
-   * Fetch build order from DoD clan website
-   */
-  private fetchBuildOrderFromWeb(godName: string): Observable<DodBuildOrder> {
-    const fileName = `${godName}.xlsx`;
-    const fileUrl = `${this.DOD_BASE_URL}/${fileName}`;
-    const cacheKey = this.getCacheKey(godName);
-    
-    return this.http.get(fileUrl, { responseType: 'arraybuffer' }).pipe(
-      map((data: ArrayBuffer) => {
-        const buildOrder: DodBuildOrder = {
-          godName,
-          fileName,
-          fileUrl,
-          cached: false,
-          cacheKey,
-          size: data.byteLength,
-          lastFetched: new Date(),
-          data
-        };
-        
-        // Cache the data
-        this.cacheBuildOrder(cacheKey, {
-          data,
-          lastFetched: buildOrder.lastFetched!,
-          size: data.byteLength,
-          fileName,
-          fileUrl
-        });
-        
-        return buildOrder;
+    return this.http.get<BuildOrder[]>(this.BUILD_ORDERS_URL).pipe(
+      map(data => {
+        this.buildOrdersData = data;
+        return data;
       }),
-      catchError((error) => {
-        console.error(`Failed to fetch build order for ${godName}:`, error);
-        return throwError(() => ({
-          godName,
-          fileName,
-          fileUrl,
-          cached: false,
-          cacheKey,
-          error: `Failed to fetch build order: ${error.message || 'Unknown error'}`
-        }));
+      catchError(error => {
+        console.error('Failed to load build orders data:', error);
+        return throwError(() => error);
       })
     );
   }
 
   /**
-   * Get cached build order data
+   * Get all available god names
    */
-  private getCachedBuildOrder(cacheKey: string): DodBuildOrdersCache[string] | null {
-    try {
-      const cached = localStorage.getItem(cacheKey);
-      if (!cached) return null;
-      
-      const parsed = JSON.parse(cached);
-      
-      // Convert base64 back to ArrayBuffer
-      if (parsed.data && typeof parsed.data === 'string') {
-        const binaryString = atob(parsed.data);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        parsed.data = bytes.buffer;
-      }
-      
-      // Convert date string back to Date object
-      if (parsed.lastFetched) {
-        parsed.lastFetched = new Date(parsed.lastFetched);
-      }
-      
-      return parsed;
-    } catch (error) {
-      console.error('Error reading cached build order:', error);
-      return null;
-    }
+  getAvailableGods(): Observable<string[]> {
+    return this.loadBuildOrders().pipe(
+      map(data => {
+        const uniqueGods = [...new Set(data.map(buildOrder => buildOrder.godName))];
+        return uniqueGods.sort();
+      })
+    );
   }
 
   /**
-   * Cache build order data
+   * Get build orders for a specific god
    */
-  private cacheBuildOrder(cacheKey: string, data: DodBuildOrdersCache[string]): void {
-    try {
-      // Convert ArrayBuffer to base64 for JSON storage
-      const bytes = new Uint8Array(data.data);
-      const binaryString = Array.from(bytes, byte => String.fromCharCode(byte)).join('');
-      const base64Data = btoa(binaryString);
-      
-      const cacheData = {
-        ...data,
-        data: base64Data
-      };
-      
-      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-    } catch (error) {
-      console.error('Error caching build order:', error);
-    }
+  getBuildOrdersForGod(godName: string): Observable<BuildOrder[]> {
+    return this.loadBuildOrders().pipe(
+      map(data => {
+        return data.filter(buildOrder => 
+          buildOrder.godName.toLowerCase() === godName.toLowerCase()
+        );
+      }),
+      catchError(error => {
+        console.error(`Failed to get build orders for ${godName}:`, error);
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
-   * Check if cached data is still valid
+   * Get all build orders data
    */
-  private isCacheValid(lastFetched: Date): boolean {
-    const now = new Date();
-    return (now.getTime() - lastFetched.getTime()) < this.CACHE_TIMEOUT;
+  getAllBuildOrders(): Observable<BuildOrder[]> {
+    return this.loadBuildOrders();
   }
 
   /**
-   * Generate cache key for a god
+   * Check if build orders are available for a god
    */
-  private getCacheKey(godName: string): string {
-    return `${this.CACHE_KEY_PREFIX}_${this.normalizeGodName(godName)}`;
+  isGodAvailable(godName: string): Observable<boolean> {
+    return this.getAvailableGods().pipe(
+      map(gods => gods.some(god => god.toLowerCase() === godName.toLowerCase()))
+    );
   }
 
   /**
-   * Normalize god name for consistent usage
+   * Get build orders filtered by tags
    */
-  private normalizeGodName(godName: string): string {
-    return godName.charAt(0).toUpperCase() + godName.slice(1).toLowerCase();
+  getBuildOrdersByTags(tags: string[]): Observable<BuildOrder[]> {
+    return this.loadBuildOrders().pipe(
+      map(data => {
+        return data.filter(buildOrder => 
+          tags.some(tag => buildOrder.tags.includes(tag))
+        );
+      })
+    );
+  }
+
+  /**
+   * Get build orders filtered by opponent civilization
+   */
+  getBuildOrdersByOpponentCiv(civ: string): Observable<BuildOrder[]> {
+    return this.loadBuildOrders().pipe(
+      map(data => {
+        return data.filter(buildOrder => 
+          buildOrder.opponent.civ === civ
+        );
+      })
+    );
+  }
+
+  /**
+   * Get build orders filtered by map type
+   */
+  getBuildOrdersByMapType(mapType: 'Water' | 'Land' | 'Hybrid'): Observable<BuildOrder[]> {
+    return this.loadBuildOrders().pipe(
+      map(data => {
+        return data.filter(buildOrder => 
+          buildOrder.map.type === mapType
+        );
+      })
+    );
+  }
+
+  /**
+   * Search build orders by text in name, notes, or actions
+   */
+  searchBuildOrders(searchText: string): Observable<BuildOrder[]> {
+    return this.loadBuildOrders().pipe(
+      map(data => {
+        const searchLower = searchText.toLowerCase();
+        return data.filter(buildOrder => {
+          // Search in build order name
+          if (buildOrder.buildOrder.toLowerCase().includes(searchLower)) {
+            return true;
+          }
+          
+          // Search in notes
+          if (buildOrder.notes.some(note => note.toLowerCase().includes(searchLower))) {
+            return true;
+          }
+          
+          // Search in action descriptions
+          return buildOrder.steps.some(step => 
+            step.actions.some(action => 
+              action.description.toLowerCase().includes(searchLower)
+            )
+          );
+        });
+      })
+    );
+  }
+
+  /**
+   * Get all unique tags from all build orders
+   */
+  getAllTags(): Observable<string[]> {
+    return this.loadBuildOrders().pipe(
+      map(data => {
+        const allTags = data.flatMap(buildOrder => buildOrder.tags);
+        return [...new Set(allTags)].sort();
+      })
+    );
+  }
+
+  /**
+   * Get all unique civilizations from opponent data
+   */
+  getOpponentCivilizations(): Observable<string[]> {
+    return this.loadBuildOrders().pipe(
+      map(data => {
+        const civs = data
+          .map(buildOrder => buildOrder.opponent.civ)
+          .filter(civ => civ !== null) as string[];
+        return [...new Set(civs)].sort();
+      })
+    );
+  }
+
+  /**
+   * Get all unique maps from build orders
+   */
+  getMaps(): Observable<string[]> {
+    return this.loadBuildOrders().pipe(
+      map(data => {
+        const maps = data
+          .map(buildOrder => buildOrder.map.name)
+          .filter(map => map !== null) as string[];
+        return [...new Set(maps)].sort();
+      })
+    );
   }
 }

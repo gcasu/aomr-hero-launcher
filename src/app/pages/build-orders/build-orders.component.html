@@ -281,7 +281,7 @@
             [description]="'BUILD_ORDERS.DOD_CLAN.NOT_AVAILABLE_DESCRIPTION' | translate"
             icon="fas fa-info-circle">
             <div class="empty-state-actions">
-              <p class="text-muted mb-3">{{ 'BUILD_ORDERS.DOD_CLAN.AVAILABLE_GODS' | translate }}</p>
+              <p class="text-light opacity-75 mb-3">{{ 'BUILD_ORDERS.DOD_CLAN.AVAILABLE_GODS' | translate }}</p>
               <div class="available-gods">
                 <span 
                   *ngFor="let god of getAvailableDodGods(); let last = last"
@@ -295,102 +295,152 @@
           <!-- Build Orders Content -->
           <div 
             *ngIf="!isDodLoading && !dodError && isDodGodAvailable() && dodBuildOrders.length > 0"
-            class="dod-build-orders">
-            
-            <div class="build-orders-list">
-              <div *ngFor="let buildOrder of dodBuildOrders" class="build-order-card">
-                <div class="card">
-                  <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                      <i class="fas fa-file-excel me-2 text-success"></i>
-                      {{ buildOrder.godName }} {{ 'BUILD_ORDERS.DOD_CLAN.BUILD_ORDER' | translate }}
-                    </h5>
-                    <span class="badge badge-info">
-                      {{ formatFileSize(buildOrder.size || 0) }}
-                    </span>
-                  </div>
-                  
-                  <div class="card-body">
-                    <div class="build-order-info">
-                      <div class="info-row">
-                        <span class="info-label">{{ 'BUILD_ORDERS.DOD_CLAN.FILE_NAME' | translate }}:</span>
-                        <span class="info-value">{{ buildOrder.fileName }}</span>
-                      </div>
+            class="match-history-table-container">
+            <!-- Build Orders Table -->
+            <div class="table-responsive">
+              <table class="table table-dark table-striped table-hover glassed-table">
+                <thead class="table-dark">
+                  <tr>
+                    <th scope="col" class="sortable-header" 
+                        (click)="onSort('buildOrder')"
+                        [class.sorted]="isSortedBy('buildOrder')">
+                      {{ 'BUILD_ORDERS.DOD_CLAN.BUILD_ORDER' | translate }}
+                      <i [class]="getSortIcon('buildOrder')" class="ms-1"></i>
+                    </th>
+                    <th scope="col" class="text-center sortable-header" 
+                        (click)="onSort('author')"
+                        [class.sorted]="isSortedBy('author')">
+                      {{ 'BUILD_ORDERS.DOD_CLAN.AUTHOR' | translate }}
+                      <i [class]="getSortIcon('author')" class="ms-1"></i>
+                    </th>
+                    <th scope="col" class="text-center sortable-header" 
+                        (click)="onSort('steps')"
+                        [class.sorted]="isSortedBy('steps')">
+                      {{ 'BUILD_ORDERS.DOD_CLAN.STEPS' | translate }}
+                      <i [class]="getSortIcon('steps')" class="ms-1"></i>
+                    </th>
+                    <th scope="col" class="text-center sortable-header" 
+                        (click)="onSort('opponent')"
+                        [class.sorted]="isSortedBy('opponent')">
+                      {{ 'BUILD_ORDERS.DOD_CLAN.OPPONENT' | translate }}
+                      <i [class]="getSortIcon('opponent')" class="ms-1"></i>
+                    </th>
+                    <th scope="col" class="text-center">{{ 'BUILD_ORDERS.TABLE.ACTIONS' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngFor="let buildOrder of dodBuildOrders; let i = index; trackBy: trackByBuildOrder">
+                    <!-- Main build order row -->
+                    <tr class="match-row">
+                      <!-- Build Order Name -->
+                      <td class="leader-cell">
+                        <div class="leader-info">
+                          <span class="player-name clickable" 
+                                (click)="toggleBuildOrderExpansion(i)"
+                                [title]="'Click to expand timeline for ' + buildOrder.buildOrder">
+                            {{ buildOrder.buildOrder }}
+                          </span>
+                          <div *ngIf="buildOrder.tags && buildOrder.tags.length > 0" class="build-order-tags mt-1">
+                            <span *ngFor="let tag of buildOrder.tags.slice(0, 2)" 
+                                  class="badge bg-secondary me-1 small">{{ tag }}</span>
+                            <span *ngIf="buildOrder.tags.length > 2" 
+                                  class="badge bg-outline-secondary small">+{{ buildOrder.tags.length - 2 }}</span>
+                          </div>
+                          <div *ngIf="buildOrder.map && buildOrder.map.name" class="build-order-map mt-1">
+                            <small class="text-light">
+                              <i class="fas fa-map me-1"></i>{{ buildOrder.map.name }}
+                            </small>
+                          </div>
+                        </div>
+                      </td>
                       
-                      <div class="info-row" *ngIf="buildOrder.lastFetched">
-                        <span class="info-label">{{ 'BUILD_ORDERS.DOD_CLAN.LAST_UPDATED' | translate }}:</span>
-                        <span class="info-value">{{ buildOrder.lastFetched | date:'medium' }}</span>
-                      </div>
+                      <!-- Author -->
+                      <td class="text-center match-date-cell">
+                        <span class="match-date">{{ buildOrder.author || 'Unknown' }}</span>
+                      </td>
                       
-                      <div class="info-row" *ngIf="buildOrder.cached">
-                        <span class="info-label">{{ 'BUILD_ORDERS.DOD_CLAN.STATUS' | translate }}:</span>
-                        <span class="badge badge-success">
-                          <i class="fas fa-check me-1"></i>
-                          {{ 'BUILD_ORDERS.DOD_CLAN.CACHED' | translate }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div class="build-order-actions mt-3">
-                      <button 
-                        class="btn btn-primary me-2"
-                        (click)="downloadDodBuildOrder(buildOrder)"
-                        [disabled]="!buildOrder.data">
-                        <i class="fas fa-download me-2"></i>
-                        {{ 'BUILD_ORDERS.DOD_CLAN.DOWNLOAD' | translate }}
-                      </button>
+                      <!-- Steps Count -->
+                      <td class="text-center map-cell">
+                        <span class="map-name">{{ buildOrder.steps.length }}</span>
+                        <small class="text-light d-block">{{ getTotalActions(buildOrder) }} actions</small>
+                      </td>
                       
-                      <button 
-                        class="btn btn-outline-secondary"
-                        (click)="loadDodBuildOrders()"
-                        [disabled]="isDodLoading">
-                        <i class="fas fa-refresh me-2"></i>
-                        {{ 'BUILD_ORDERS.DOD_CLAN.REFRESH' | translate }}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                      <!-- Opponent -->
+                      <td class="text-center map-cell">
+                        <span *ngIf="buildOrder.opponent && buildOrder.opponent.civ" 
+                              class="map-name">{{ buildOrder.opponent.civ }}</span>
+                        <span *ngIf="buildOrder.opponent && buildOrder.opponent.majorGod"
+                              class="d-block small text-light">{{ buildOrder.opponent.majorGod }}</span>
+                        <span *ngIf="!buildOrder.opponent || !buildOrder.opponent.civ" 
+                              class="text-light">Any</span>
+                      </td>
+                      
+                      <!-- Actions -->
+                      <td class="text-center actions-cell">
+                        <div class="action-buttons">
+                          <button 
+                            type="button"
+                            class="btn btn-sm me-1"
+                            [class.btn-primary]="isBuildOrderExpanded(i)"
+                            [class.btn-outline-primary]="!isBuildOrderExpanded(i)"
+                            (click)="toggleBuildOrderExpansion(i)"
+                            [title]="(isBuildOrderExpanded(i) ? 'BUILD_ORDERS.REPLAY.HIDE_TIMELINE_TOOLTIP' : 'BUILD_ORDERS.REPLAY.SHOW_TIMELINE_TOOLTIP') | translate">
+                            <i class="fas" 
+                               [class.fa-chart-line]="!isBuildOrderExpanded(i)" 
+                               [class.fa-eye-slash]="isBuildOrderExpanded(i)"></i>
+                          </button>
+                          <button 
+                            type="button"
+                            class="btn btn-outline-secondary btn-sm" 
+                            (click)="downloadDodBuildOrder(buildOrder)"
+                            [title]="'BUILD_ORDERS.DOD_CLAN.DOWNLOAD' | translate">
+                            <i class="fas fa-download"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    
+                    <!-- Timeline expansion row -->
+                    <tr *ngIf="isBuildOrderExpanded(i)" class="timeline-row">
+                      <td colspan="5" class="timeline-cell">
+                        <div class="timeline-container">
+                          <div class="timeline-header">
+                            <h5 class="mb-2">
+                              <i class="fas fa-chart-line me-2"></i>
+                              {{ 'BUILD_ORDERS.DOD_CLAN.TIMELINE' | translate }}: {{ buildOrder.buildOrder }}
+                            </h5>
+                            <div *ngIf="buildOrder.notes && buildOrder.notes.length > 0" class="timeline-notes mb-2">
+                              <small class="text-light">
+                                <i class="fas fa-sticky-note me-1"></i>
+                                {{ buildOrder.notes.join('. ') }}
+                              </small>
+                            </div>
+                          </div>
+                          <div class="timeline-content">
+                            <app-timeline 
+                              [segments]="convertBuildOrderToTimeline(buildOrder)"
+                              [playerName]="buildOrder.author || buildOrder.godName"
+                              [config]="{
+                                compact: false,
+                                showEmptySegments: false,
+                                primaryColor: 'text-primary',
+                                segmentDuration: 60,
+                                maxSegments: 50
+                              }">
+                            </app-timeline>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
             </div>
-
-            <!-- Cache Management -->
-            <div class="cache-management mt-4">
-              <div class="card">
-                <div class="card-header">
-                  <h6 class="card-title mb-0">
-                    <i class="fas fa-database me-2"></i>
-                    {{ 'BUILD_ORDERS.DOD_CLAN.CACHE_MANAGEMENT' | translate }}
-                  </h6>
-                </div>
-                <div class="card-body">
-                  <p class="text-muted mb-3">{{ 'BUILD_ORDERS.DOD_CLAN.CACHE_INFO' | translate }}</p>
-                  <button 
-                    class="btn btn-outline-warning"
-                    (click)="clearDodCache()">
-                    <i class="fas fa-trash me-2"></i>
-                    {{ 'BUILD_ORDERS.DOD_CLAN.CLEAR_CACHE' | translate }}
-                  </button>
-                </div>
               </div>
             </div>
           </div>
+      <!-- DoD Clan Build Orders End -->
 
-          <!-- Empty State for Available God -->
-          <div 
-            *ngIf="!isDodLoading && !dodError && isDodGodAvailable() && dodBuildOrders.length === 0"
-            class="empty-content">
-            <button 
-              class="btn btn-primary"
-              (click)="loadDodBuildOrders()"
-              [disabled]="isDodLoading">
-              <i class="fas fa-download me-2"></i>
-              {{ 'BUILD_ORDERS.DOD_CLAN.LOAD_BUILD_ORDERS' | translate }}
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
-    <!-- DoD Clan Build Orders End -->
-
   </div>
 </app-page-container>

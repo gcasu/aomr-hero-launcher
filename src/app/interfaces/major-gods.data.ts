@@ -1,4 +1,4 @@
-import { MajorGod } from '../interfaces/major-god.interface';
+import { MajorGod } from './major-god.interface';
 
 export const MAJOR_GODS_DATA: MajorGod[] = [
   // Greek Gods

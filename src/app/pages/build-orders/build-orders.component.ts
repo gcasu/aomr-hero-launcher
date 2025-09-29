@@ -11,12 +11,12 @@ import { ReplayFileService } from '../../services/replays/replay-file.service';
 import { ReplayParserService, ParseOptions, ParseResult } from '../../services/replays/replay-parser.service';
 import { TimelineService } from '../../shared/timeline/timeline.service';
 import { PlayerColorService } from '../../services/player-color.service';
-import { DodBuildOrdersService, DodBuildOrder } from '../../services/dod-build-orders.service';
+import { DodBuildOrdersService, BuildOrder } from '../../services/dod-build-orders.service';
 import { MajorGod } from '../../interfaces/major-god.interface';
 import { ProcessedMatch } from '../../interfaces/leaderboard.interface';
 import { CachedReplay } from '../../interfaces/replay-cache.interface';
-import { TimelineSegment } from '../../shared/timeline/timeline.interfaces';
-import { MAJOR_GODS_DATA, DEFAULT_SELECTED_GOD_ID } from '../../data/major-gods.data';
+import { TimelineSegment, TimelineEventType } from '../../shared/timeline/timeline.interfaces';
+import { MAJOR_GODS_DATA, DEFAULT_SELECTED_GOD_ID } from '../../interfaces/major-gods.data';
 
 // Import shared components
 import { PageContainerComponent } from '../../shared/page-container/page-container.component';
@@ -77,9 +77,11 @@ export class BuildOrdersComponent implements OnInit {
   rowParsedData: Map<string, any> = new Map(); // Store parsed data per row for color extraction
 
   // DoD Clan Build Orders state
-  dodBuildOrders: DodBuildOrder[] = [];
+  dodBuildOrders: BuildOrder[] = [];
   isDodLoading = false;
   dodError: string | null = null;
+  expandedBuildOrderIndex: number = -1;
+  expandedBuildOrderData: BuildOrder | null = null;
 
   private toastService = inject(ToastService);
   private matchDataFetcher = inject(MatchDataFetcherService);
@@ -277,7 +279,7 @@ export class BuildOrdersComponent implements OnInit {
     return `${total} matches`;
   }
 
-  // Sorting methods
+  // Sorting methods (supports both matches and DoD build orders)
   onSort(column: string): void {
     if (this.sortColumn === column) {
       // Toggle direction if same column
@@ -288,7 +290,12 @@ export class BuildOrdersComponent implements OnInit {
       this.sortDirection = column === 'matchDate' ? 'desc' : 'asc';
     }
     
-    this.sortMatches();
+    // Sort appropriate data based on current tab/view
+    if (this.dodBuildOrders.length > 0) {
+      this.sortDodBuildOrders();
+    } else {
+      this.sortMatches();
+    }
   }
 
   getSortIcon(column: string): string {
@@ -319,6 +326,43 @@ export class BuildOrdersComponent implements OnInit {
         case 'mapType':
           valueA = this.formatMapName(a.mapType).toLowerCase();
           valueB = this.formatMapName(b.mapType).toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      let comparison = 0;
+      if (valueA < valueB) {
+        comparison = -1;
+      } else if (valueA > valueB) {
+        comparison = 1;
+      }
+
+      return this.sortDirection === 'desc' ? comparison * -1 : comparison;
+    });
+  }
+
+  private sortDodBuildOrders(): void {
+    this.dodBuildOrders.sort((a, b) => {
+      let valueA: any;
+      let valueB: any;
+
+      switch (this.sortColumn) {
+        case 'buildOrder':
+          valueA = a.buildOrder.toLowerCase();
+          valueB = b.buildOrder.toLowerCase();
+          break;
+        case 'author':
+          valueA = (a.author || 'Unknown').toLowerCase();
+          valueB = (b.author || 'Unknown').toLowerCase();
+          break;
+        case 'steps':
+          valueA = a.steps.length;
+          valueB = b.steps.length;
+          break;
+        case 'opponent':
+          valueA = (a.opponent?.civ || 'Any').toLowerCase();
+          valueB = (b.opponent?.civ || 'Any').toLowerCase();
           break;
         default:
           return 0;
@@ -719,24 +763,18 @@ export class BuildOrdersComponent implements OnInit {
     const selectedGod = this.majorGods.find(god => god.id === this.selectedGodId);
     if (!selectedGod) return;
 
-    // Check if god is available on DoD clan website
-    if (!this.dodBuildOrdersService.isGodAvailable(selectedGod.name)) {
-      this.dodError = this.translateService.instant('BUILD_ORDERS.DOD_CLAN.NOT_AVAILABLE', { godName: selectedGod.name });
-      return;
-    }
-
     this.isDodLoading = true;
     this.dodError = null;
 
-    this.dodBuildOrdersService.getBuildOrder(selectedGod.name).subscribe({
-      next: (buildOrder: DodBuildOrder) => {
-        this.dodBuildOrders = [buildOrder];
+    this.dodBuildOrdersService.getBuildOrdersForGod(selectedGod.name).subscribe({
+      next: (buildOrders: BuildOrder[]) => {
+        this.dodBuildOrders = buildOrders;
         this.isDodLoading = false;
         this.showSuccessMessage(
           this.translateService.instant('BUILD_ORDERS.DOD_CLAN.LOADED_SUCCESS', { godName: selectedGod.name })
         );
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading DoD build orders:', error);
         this.dodError = this.translateService.instant('BUILD_ORDERS.DOD_CLAN.LOAD_ERROR', { 
           godName: selectedGod.name, 
@@ -749,21 +787,16 @@ export class BuildOrdersComponent implements OnInit {
   }
 
   /**
-   * Download DoD build order Excel file
+   * Export build order as JSON
    */
-  downloadDodBuildOrder(buildOrder: DodBuildOrder): void {
-    if (!buildOrder.data) {
-      this.showErrorMessage(this.translateService.instant('BUILD_ORDERS.DOD_CLAN.NO_DATA'));
-      return;
-    }
-
+  downloadDodBuildOrder(buildOrder: BuildOrder): void {
     try {
-      const blob = new Blob([buildOrder.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-      });
-      this.downloadBlob(blob, buildOrder.fileName);
+      const jsonData = JSON.stringify(buildOrder, null, 2);
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const fileName = `${buildOrder.godName}_${buildOrder.buildOrder.replace(/[^a-zA-Z0-9]/g, '_')}.json`;
+      this.downloadBlob(blob, fileName);
       this.showSuccessMessage(
-        this.translateService.instant('BUILD_ORDERS.DOD_CLAN.DOWNLOAD_SUCCESS', { fileName: buildOrder.fileName })
+        this.translateService.instant('BUILD_ORDERS.DOD_CLAN.DOWNLOAD_SUCCESS', { fileName })
       );
     } catch (error) {
       console.error('Error downloading build order:', error);
@@ -772,10 +805,14 @@ export class BuildOrdersComponent implements OnInit {
   }
 
   /**
-   * Get all cached god names for DoD build orders
+   * Get all available god names for DoD build orders
    */
   getAvailableDodGods(): string[] {
-    return this.dodBuildOrdersService.getCachedGodNames();
+    // Since this is now async, we'll return empty array and load async
+    this.dodBuildOrdersService.getAvailableGods().subscribe(gods => {
+      // This could be used to populate a dropdown or similar
+    });
+    return [];
   }
 
   /**
@@ -784,7 +821,11 @@ export class BuildOrdersComponent implements OnInit {
   isDodGodAvailable(): boolean {
     if (!this.selectedGodId) return false;
     const selectedGod = this.majorGods.find(god => god.id === this.selectedGodId);
-    return selectedGod ? this.dodBuildOrdersService.isGodAvailable(selectedGod.name) : false;
+    if (!selectedGod) return false;
+    
+    // Since isGodAvailable is now async, we need to handle this differently
+    // For now, we'll assume availability and let the actual fetch handle errors
+    return true;
   }
 
   /**
@@ -799,10 +840,9 @@ export class BuildOrdersComponent implements OnInit {
   }
 
   /**
-   * Clear DoD build orders cache
+   * Clear DoD build orders from memory (no cache to clear in new implementation)
    */
   clearDodCache(): void {
-    this.dodBuildOrdersService.clearAllCache();
     this.dodBuildOrders = [];
     this.showSuccessMessage(this.translateService.instant('BUILD_ORDERS.DOD_CLAN.CACHE_CLEARED'));
   }
@@ -819,6 +859,144 @@ export class BuildOrdersComponent implements OnInit {
    */
   private showErrorMessage(message: string): void {
     this.toastService.showError(message);
+  }
+
+  /**
+   * Get the latest DoD build order for the selected god
+   */
+  getLatestDodBuildOrder() {
+    return this.dodBuildOrders.length > 0 ? this.dodBuildOrders[0] : null;
+  }
+
+  /**
+   * Get the selected god name
+   */
+  getSelectedGodName(): string {
+    if (!this.selectedGodId) return '';
+    const selectedGod = this.majorGods.find(god => god.id === this.selectedGodId);
+    return selectedGod ? selectedGod.name : '';
+  }
+
+  /**
+   * Toggle build order expansion (table row style)
+   */
+  toggleBuildOrderExpansion(index: number): void {
+    this.expandedBuildOrderIndex = this.expandedBuildOrderIndex === index ? -1 : index;
+    this.expandedBuildOrderData = this.expandedBuildOrderIndex === index ? this.dodBuildOrders[index] : null;
+  }
+
+  /**
+   * Check if build order is expanded
+   */
+  isBuildOrderExpanded(index: number): boolean {
+    return this.expandedBuildOrderIndex === index;
+  }
+
+  /**
+   * Track by function for build order table
+   */
+  trackByBuildOrder(index: number, buildOrder: BuildOrder): string {
+    return `${buildOrder.godName}-${buildOrder.buildOrder}-${index}`;
+  }
+
+  /**
+   * Get total number of actions across all steps in a build order
+   */
+  getTotalActions(buildOrder: BuildOrder): number {
+    return buildOrder.steps.reduce((total, step) => total + step.actions.length, 0);
+  }
+
+  /**
+   * Convert build order to timeline segments
+   */
+  convertBuildOrderToTimeline(buildOrder: BuildOrder): TimelineSegment[] {
+    const segments: TimelineSegment[] = [];
+    let currentTime = 0;
+    
+    buildOrder.steps.forEach((step, stepIndex) => {
+      // Parse timing or use estimated time
+      const stepTime = this.parseTimingToSeconds(step.timing) || (stepIndex * 60); // Default 1 minute per step
+      
+      const events = step.actions.map(action => ({
+        description: action.description,
+        icon: this.getActionIcon(action.description),
+        iconColor: 'text-primary',
+        type: this.getActionEventType(action.description),
+        metadata: {
+          workers: action.workers,
+          delta: action.delta,
+          timing: action.timing
+        }
+      }));
+      
+      segments.push({
+        startTime: currentTime,
+        endTime: stepTime,
+        events: events,
+        label: step.name
+      });
+      
+      currentTime = stepTime;
+    });
+    
+    return segments;
+  }
+
+  /**
+   * Parse timing string to seconds
+   */
+  private parseTimingToSeconds(timing: string | null | undefined): number | null {
+    if (!timing) return null;
+    
+    const timeMatch = timing.match(/(\d+):(\d+)/);
+    if (timeMatch) {
+      return parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]);
+    }
+    
+    const minuteMatch = timing.match(/(\d+)\s*min/);
+    if (minuteMatch) {
+      return parseInt(minuteMatch[1]) * 60;
+    }
+    
+    return null;
+  }
+
+  /**
+   * Get appropriate icon for action description
+   */
+  private getActionIcon(description: string): string {
+    const desc = description.toLowerCase();
+    
+    if (desc.includes('villager') || desc.includes('worker')) return 'fas fa-user';
+    if (desc.includes('house') || desc.includes('build')) return 'fas fa-home';
+    if (desc.includes('advance') || desc.includes('age')) return 'fas fa-arrow-up';
+    if (desc.includes('military') || desc.includes('soldier')) return 'fas fa-shield-alt';
+    if (desc.includes('temple') || desc.includes('god')) return 'fas fa-place-of-worship';
+    if (desc.includes('research') || desc.includes('technology')) return 'fas fa-flask';
+    if (desc.includes('food') || desc.includes('hunt')) return 'fas fa-apple-alt';
+    if (desc.includes('wood') || desc.includes('lumber')) return 'fas fa-tree';
+    if (desc.includes('gold') || desc.includes('mine')) return 'fas fa-coins';
+    if (desc.includes('favor')) return 'fas fa-star';
+    
+    return 'fas fa-play';
+  }
+
+  /**
+   * Get appropriate event type for action description
+   */
+  private getActionEventType(description: string): TimelineEventType {
+    const desc = description.toLowerCase();
+    
+    if (desc.includes('villager') || desc.includes('worker')) return TimelineEventType.TRAIN;
+    if (desc.includes('house') || desc.includes('build')) return TimelineEventType.BUILD;
+    if (desc.includes('advance') || desc.includes('age')) return TimelineEventType.ADVANCEMENT;
+    if (desc.includes('military') || desc.includes('soldier')) return TimelineEventType.MILITARY;
+    if (desc.includes('temple') || desc.includes('god')) return TimelineEventType.GOD_POWER;
+    if (desc.includes('research') || desc.includes('technology')) return TimelineEventType.RESEARCH;
+    if (desc.includes('food') || desc.includes('wood') || desc.includes('gold') || desc.includes('favor')) return TimelineEventType.ECONOMIC;
+    if (desc.includes('tribute') || desc.includes('trade')) return TimelineEventType.TRADE;
+    
+    return TimelineEventType.OTHER;
   }
 
 }
